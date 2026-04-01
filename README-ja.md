@@ -1,7 +1,7 @@
 <h1 align="center">
   <img src="docs/icon.png" alt="shoechoo" width="128">
   <br>
-  SHOE CHOO
+  集中 (Shoe Choo)
   <br>
   <br>
 </h1>
