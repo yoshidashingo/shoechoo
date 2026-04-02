@@ -1,0 +1,302 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775004307889,
+  "projectRoot": "/Users/shingo/Documents/GitHub/shoechoo",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {},
+  "hotPaths": [
+    {
+      "path": "aidlc-docs/inception/requirements/requirements-questions.md",
+      "accessCount": 20,
+      "lastAccessed": 1775021573316,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/aidlc-state.md",
+      "accessCount": 13,
+      "lastAccessed": 1775091218904,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/plans/story-generation-plan.md",
+      "accessCount": 8,
+      "lastAccessed": 1775024574725,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 7,
+      "lastAccessed": 1775020148712,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/plans/application-design-plan.md",
+      "accessCount": 6,
+      "lastAccessed": 1775026899102,
+      "type": "file"
+    },
+    {
+      "path": "README-ja.md",
+      "accessCount": 4,
+      "lastAccessed": 1775014592742,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/construction/plans/unit-1-functional-design-plan.md",
+      "accessCount": 4,
+      "lastAccessed": 1775092153844,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1775020152132,
+      "type": "directory"
+    },
+    {
+      "path": "aidlc-docs/audit.md",
+      "accessCount": 2,
+      "lastAccessed": 1775021665468,
+      "type": "file"
+    },
+    {
+      "path": "docs/CNAME",
+      "accessCount": 1,
+      "lastAccessed": 1775017410888,
+      "type": "file"
+    },
+    {
+      "path": "docs/index.html",
+      "accessCount": 1,
+      "lastAccessed": 1775017540911,
+      "type": "file"
+    },
+    {
+      "path": "docs/ja.html",
+      "accessCount": 1,
+      "lastAccessed": 1775017695832,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/common/process-overview.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020162322,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/workspace-detection.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020162413,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rules/core-workflow.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020162565,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/common/welcome-message.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020174914,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/common/question-format-guide.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020175213,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/common/content-validation.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020176312,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/common/session-continuity.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020176559,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/vision.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020227851,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/technical-environment.md",
+      "accessCount": 1,
+      "lastAccessed": 1775020250984,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/requirements-analysis.md",
+      "accessCount": 1,
+      "lastAccessed": 1775021585179,
+      "type": "file"
+    },
+    {
+      "path": ".steering/extensions/security/baseline/security-baseline.md",
+      "accessCount": 1,
+      "lastAccessed": 1775021586492,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/requirements/requirements.md",
+      "accessCount": 1,
+      "lastAccessed": 1775021648030,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/user-stories.md",
+      "accessCount": 1,
+      "lastAccessed": 1775021713908,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/plans/user-stories-assessment.md",
+      "accessCount": 1,
+      "lastAccessed": 1775021729444,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/user-stories/personas.md",
+      "accessCount": 1,
+      "lastAccessed": 1775024492123,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/user-stories/stories.md",
+      "accessCount": 1,
+      "lastAccessed": 1775024556686,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/workflow-planning.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026276507,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/plans/execution-plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026316239,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/application-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026379854,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/components.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026796622,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/component-methods.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026816163,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/services.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026835899,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/component-dependency.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026856513,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/application-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1775026885727,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/inception/units-generation.md",
+      "accessCount": 1,
+      "lastAccessed": 1775091152095,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/unit-of-work.md",
+      "accessCount": 1,
+      "lastAccessed": 1775091191171,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/unit-of-work-dependency.md",
+      "accessCount": 1,
+      "lastAccessed": 1775091202279,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/inception/application-design/unit-of-work-story-map.md",
+      "accessCount": 1,
+      "lastAccessed": 1775091212192,
+      "type": "file"
+    },
+    {
+      "path": ".steering/aws-aidlc-rule-details/construction/functional-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1775091724651,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/domain-entities.md",
+      "accessCount": 1,
+      "lastAccessed": 1775092203919,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/business-logic-model.md",
+      "accessCount": 1,
+      "lastAccessed": 1775092241340,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/business-rules.md",
+      "accessCount": 1,
+      "lastAccessed": 1775092275590,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"gh api repos/yoshidashingo/shoechoo/pages -X PUT --input - <<< '{\\\"https_enforced\\\":true}' 2>&1\",\"description\":\"Enable HTTPS for GitHub Pages\"}",
+  "error": "Exit code 1\n{\"message\":\"Unavailable for your site because a certificate has not yet been issued for your domain\",\"documentation_url\":\"https://docs.github.com/rest/pages/pages#update-information-about-a-apiname-pages-site\",\"status\":\"404\"}gh: Unavailable for your site because a certificate has not yet been issued for your domain (HTTP 404)",
+  "timestamp": "2026-04-01T04:58:42.063Z",
+  "retry_count": 1
+}
