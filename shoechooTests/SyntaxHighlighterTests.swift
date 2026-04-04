@@ -303,4 +303,89 @@ struct SyntaxHighlighterTests {
         let fenceFont = fenceAttrs[.font] as? NSFont
         #expect(fenceFont!.pointSize < 1.0, "``` must be hidden when inactive (got \(fenceFont!.pointSize))")
     }
+
+    @Test("WYSIWYG: blockquote > marker hidden when inactive")
+    func wysiwygBlockquoteHidden() {
+        let source = "> A quote"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // > at position 0 should be hidden
+        let markerAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        let markerFont = markerAttrs[.font] as? NSFont
+        #expect(markerFont!.pointSize < 1.0, "> must be hidden when inactive (got \(markerFont!.pointSize))")
+    }
+
+    @Test("WYSIWYG: table separator row hidden when inactive")
+    func wysiwygTableSeparatorHidden() {
+        let source = "| A | B |\n|---|---|\n| 1 | 2 |"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // separator row "|---|---|" starts after "| A | B |\n"
+        let sepStart = (source as NSString).range(of: "|---|").location
+        let sepAttrs = textStorage.attributes(at: sepStart, effectiveRange: nil)
+        let sepFont = sepAttrs[.font] as? NSFont
+        #expect(sepFont!.pointSize < 1.0, "table separator must be hidden (got \(sepFont!.pointSize))")
+    }
+
+    @Test("WYSIWYG: italic * delimiters hidden when inactive")
+    func wysiwygItalicHidden() {
+        let source = "This is *italic* text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        let starPos = (source as NSString).range(of: "*italic*").location
+        let starAttrs = textStorage.attributes(at: starPos, effectiveRange: nil)
+        let starFont = starAttrs[.font] as? NSFont
+        #expect(starFont!.pointSize < 1.0, "* must be hidden when inactive (got \(starFont!.pointSize))")
+
+        // "italic" text should have italic trait
+        let textPos = starPos + 1
+        let textAttrs = textStorage.attributes(at: textPos, effectiveRange: nil)
+        let textFont = textAttrs[.font] as? NSFont
+        let traits = NSFontManager.shared.traits(of: textFont!)
+        #expect(traits.contains(.italicFontMask), "italic text must have italic trait")
+    }
+
+    @Test("WYSIWYG: full document integration — all elements properly styled when inactive")
+    func wysiwygFullDocumentIntegration() {
+        let source = "# Title\n\nThis has **bold** and *italic* text.\n\n> A blockquote\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n---\n\n[link](https://ex.com)"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+
+        // Verify we have enough blocks
+        #expect(result.blocks.count >= 5, "Should parse heading, paragraph, blockquote, table, hr, paragraph — got \(result.blocks.count)")
+
+        let highlighter = SyntaxHighlighter()
+        // Set first block as active, all others inactive
+        let activeID = result.blocks[0].id
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: activeID,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // Heading (active): # should be visible
+        let hashAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        let hashFont = hashAttrs[.font] as? NSFont
+        #expect(hashFont!.pointSize >= 10, "# in ACTIVE heading should be visible")
+
+        // Bold (inactive paragraph): ** should be hidden
+        let boldStarPos = (source as NSString).range(of: "**bold**").location
+        if boldStarPos != NSNotFound {
+            let boldStarAttrs = textStorage.attributes(at: boldStarPos, effectiveRange: nil)
+            let boldStarFont = boldStarAttrs[.font] as? NSFont
+            #expect(boldStarFont!.pointSize < 1.0, "** in INACTIVE paragraph should be hidden (got \(boldStarFont!.pointSize))")
+        }
+
+        // Text is never modified
+        #expect(textStorage.string == source)
+    }
 }

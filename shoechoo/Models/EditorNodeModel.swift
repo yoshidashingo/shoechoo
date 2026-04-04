@@ -52,9 +52,21 @@ final class EditorNodeModel: @unchecked Sendable {
             }
         }
 
-        // If cursor is past all blocks (e.g. at document end), use the last block
-        if candidate == nil, let last = blocks.last {
-            candidate = last.id
+        // If cursor is in a gap between blocks, find the nearest block (#43)
+        if candidate == nil && !blocks.isEmpty {
+            var bestBlock = blocks[0]
+            var bestDistance = Int.max
+            for block in blocks {
+                let blockEnd = block.sourceRange.location + block.sourceRange.length
+                let distToStart = abs(cursorOffset - block.sourceRange.location)
+                let distToEnd = abs(cursorOffset - blockEnd)
+                let dist = min(distToStart, distToEnd)
+                if dist < bestDistance {
+                    bestDistance = dist
+                    bestBlock = block
+                }
+            }
+            candidate = bestBlock.id
         }
 
         return candidate

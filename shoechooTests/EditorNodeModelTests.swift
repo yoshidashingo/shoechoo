@@ -130,6 +130,28 @@ struct EditorNodeModelTests {
         #expect(blockID == nil)
     }
 
+    @Test("Resolve active block finds nearest block when cursor is in gap between blocks")
+    func resolveActiveBlockInGap() {
+        // "# Title\n\n**bold**" — gap at position 8-9 (the \n\n)
+        let source = "# Title\n\n**bold**"
+        let model = modelWithSource(source)
+        #expect(model.blocks.count >= 2, "Must have at least 2 blocks")
+
+        // Cursor at position 8 (in the gap between heading and paragraph)
+        let gapID = model.resolveActiveBlock(cursorOffset: 8)
+        #expect(gapID != nil, "Must resolve to a block even in gap")
+    }
+
+    @Test("Resolve active block finds last block when cursor is past document end")
+    func resolveActiveBlockPastEnd() {
+        let source = "# Hello"
+        let model = modelWithSource(source)
+        let pastEnd = (source as NSString).length + 5
+        let blockID = model.resolveActiveBlock(cursorOffset: pastEnd)
+        #expect(blockID != nil, "Must find block even past document end")
+        #expect(blockID == model.blocks.last?.id)
+    }
+
     // MARK: - Set Active Block
 
     @Test("Set active block updates isActive flags")

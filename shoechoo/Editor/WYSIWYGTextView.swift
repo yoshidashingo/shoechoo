@@ -62,10 +62,25 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
         // Sync text from viewModel → textView if out of sync
         // (handles async document load where sourceText arrives after makeNSView)
-        guard let textView = scrollView.documentView as? NSTextView else { return }
-        if !viewModel.sourceText.isEmpty && textView.string != viewModel.sourceText {
-            textView.string = viewModel.sourceText
-            context.coordinator.scheduleHighlight()
+        guard let textView = scrollView.documentView as? ShoechooTextView else { return }
+        let viewModelText = viewModel.sourceText
+        let textViewText = textView.string
+        if !viewModelText.isEmpty && textViewText != viewModelText {
+            // Disable delegate to prevent textDidChange → sourceText loop (#42)
+            let savedDelegate = textView.delegate
+            textView.delegate = nil
+            textView.string = viewModelText
+            textView.delegate = savedDelegate
+            // Highlight synchronously — not via timer — to ensure it runs (#41)
+            context.coordinator.applyHighlightNow()
+        } else if viewModelText.isEmpty && !textViewText.isEmpty {
+            // textView has content but viewModel doesn't — sync from textView to viewModel
+            // This happens when macOS window restoration loads text into textView directly
+            viewModel.sourceText = textViewText
+            context.coordinator.applyHighlightNow()
+        } else if !textViewText.isEmpty && context.coordinator.nodeModel.blocks.isEmpty {
+            // Text is present but never parsed — trigger highlight
+            context.coordinator.applyHighlightNow()
         }
     }
 
@@ -80,7 +95,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         var parent: WYSIWYGTextView
         weak var textView: ShoechooTextView?
         weak var scrollView: NSScrollView?
-        private let nodeModel = EditorNodeModel()
+        let nodeModel = EditorNodeModel()
         private var isApplyingHighlight = false
         nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var autoSaveTimer: Timer?

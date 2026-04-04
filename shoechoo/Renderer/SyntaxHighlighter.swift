@@ -40,7 +40,7 @@ struct SyntaxHighlighter {
                        to: textStorage, totalLength: totalLength,
                        baseFont: baseFont, settings: settings, theme: theme)
         }
-        // Debug logging removed
+        // Logging removed
 
         textStorage.endEditing()
     }
