@@ -4,6 +4,7 @@ import AppKit
 struct WYSIWYGTextView: NSViewRepresentable {
     @Bindable var viewModel: EditorViewModel
     var settings: EditorSettings
+    var themeRegistry: ThemeRegistry
     weak var document: MarkdownDocument?
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -93,20 +94,26 @@ struct WYSIWYGTextView: NSViewRepresentable {
         func applyAppearance(settings: EditorSettings) {
             guard let textView, let scrollView else { return }
 
-            switch settings.appearanceOverride {
-            case .light: scrollView.appearance = NSAppearance(named: .aqua)
-            case .dark: scrollView.appearance = NSAppearance(named: .darkAqua)
-            case .system: scrollView.appearance = nil
+            let theme = parent.themeRegistry.activeTheme
+
+            // Set appearance based on theme darkness
+            if theme.isDark {
+                scrollView.appearance = NSAppearance(named: .darkAqua)
+            } else {
+                switch settings.appearanceOverride {
+                case .light: scrollView.appearance = NSAppearance(named: .aqua)
+                case .dark: scrollView.appearance = NSAppearance(named: .darkAqua)
+                case .system: scrollView.appearance = nil
+                }
             }
 
-            let isDark = textView.effectiveAppearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
-            let bgColor: NSColor = isDark ? NSColor(red: 0.118, green: 0.118, blue: 0.141, alpha: 1.0) : .white
-            let fgColor: NSColor = isDark ? .white : .black
+            let bgColor = theme.backgroundColor.nsColor
+            let fgColor = theme.textColor.nsColor
 
             textView.drawsBackground = true
             textView.backgroundColor = bgColor
             scrollView.backgroundColor = bgColor
-            textView.insertionPointColor = fgColor
+            textView.insertionPointColor = theme.cursorColor.nsColor
 
             let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
                 ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
@@ -145,7 +152,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
             let savedSelection = textView.selectedRange()
             let highlighter = SyntaxHighlighter()
-            let theme = ThemeRegistry(settings: parent.settings).activeTheme
+            let theme = parent.themeRegistry.activeTheme
             highlighter.apply(to: ts, blocks: nodeModel.blocks, settings: parent.settings, theme: theme)
 
             // Apply focus mode dimming after highlight so it overlays correctly

@@ -5,6 +5,7 @@ struct EditorView: View {
     var fileURL: URL?
 
     @Environment(EditorSettings.self) private var settings
+    @Environment(ThemeRegistry.self) private var themeRegistry
     @State private var isExporting = false
     @State private var showSidebar = true
 
@@ -19,7 +20,7 @@ struct EditorView: View {
             }
 
             VStack(spacing: 0) {
-                WYSIWYGTextView(viewModel: document.viewModel, settings: settings, document: document)
+                WYSIWYGTextView(viewModel: document.viewModel, settings: settings, themeRegistry: themeRegistry, document: document)
                     .focusedSceneValue(\.editorViewModel, document.viewModel)
                     .frame(minWidth: 400, minHeight: 300)
 
