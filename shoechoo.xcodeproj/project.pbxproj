@@ -34,6 +34,8 @@
 		C44A596026B9FD35D93D45C3 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B927C007304B710CF72A62CC /* MarkdownDocument.swift */; };
 		D5EFC03F7891A3FCF4CD2C3F /* EditorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */; };
 		D9EA47C95A44873CFD029DA1 /* WYSIWYGTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C5231565A66836003C4D34 /* WYSIWYGTextView.swift */; };
+		F1E2D3C4B5A6071829304152 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304152 /* Assets.xcassets */; };
+		C3D4E5F6A7B8091A30415263 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7081930415263 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +69,7 @@
 		93A569063F6AAD6A3452627F /* ParseResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseResult.swift; sourceTree = "<group>"; };
 		961EEF569A27FC490BE114A8 /* shoechoo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shoechoo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4ADA997C3135E2C51F089EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B2C3D4E5F6A7081930415263 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		B927C007304B710CF72A62CC /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
 		BEF43DC42FD2ACB63CF324B4 /* shoechoo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shoechoo.entitlements; sourceTree = "<group>"; };
@@ -76,6 +79,7 @@
 		CD0E58284466C1BAB9821A11 /* FileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileService.swift; sourceTree = "<group>"; };
 		E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304152 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +98,7 @@
 		1006F2338841AAFD435ACDD6 /* shoechoo */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F6071829304152 /* Assets.xcassets */,
 				13FEC8E60B3033B50FD10D8F /* App */,
 				F8A9E7A5440B61073777DD29 /* Editor */,
 				B9AFFC25A4D5D8FEE7681E53 /* Extensions */,
@@ -119,6 +124,7 @@
 		22BA511340637ACCF6AA2A9B /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B2C3D4E5F6A7081930415263 /* AppIcon.icns */,
 				A4ADA997C3135E2C51F089EA /* Info.plist */,
 				BEF43DC42FD2ACB63CF324B4 /* shoechoo.entitlements */,
 			);
@@ -249,6 +255,7 @@
 			buildPhases = (
 				B79460662905A0CD7C7F8AE2 /* Sources */,
 				78D6A89162B9422235A4521B /* Frameworks */,
+				E1F2A3B4C5D6071829304152 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -297,6 +304,18 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E1F2A3B4C5D6071829304152 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1E2D3C4B5A6071829304152 /* Assets.xcassets in Resources */,
+				C3D4E5F6A7B8091A30415263 /* AppIcon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		86BE2E07DBB808DC00DA418B /* Sources */ = {
