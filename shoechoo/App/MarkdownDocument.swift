@@ -9,7 +9,7 @@ extension UTType {
 final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     typealias Snapshot = String
 
-    nonisolated(unsafe) var viewModel: EditorViewModel!
+    nonisolated(unsafe) var viewModel: EditorViewModel
 
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
@@ -18,18 +18,7 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     nonisolated(unsafe) private var _snapshotText: String = ""
 
     init() {
-        if Thread.isMainThread {
-            self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
-        } else {
-            // NSDocumentController can call init from background thread (#81)
-            // viewModel stays nil; updateNSView will initialize it on main thread
-            self.viewModel = nil
-            DispatchQueue.main.async { [self] in
-                MainActor.assumeIsolated {
-                    self.viewModel = EditorViewModel()
-                }
-            }
-        }
+        self.viewModel = EditorViewModel()
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -38,22 +27,9 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         _snapshotText = text
-        if Thread.isMainThread {
-            let vm = MainActor.assumeIsolated { EditorViewModel() }
-            self.viewModel = vm
-            MainActor.assumeIsolated { vm.sourceText = text }
-        } else {
-            // NSDocumentController can call init(configuration:) from background thread (#81)
-            self.viewModel = nil
-            let savedText = text
-            DispatchQueue.main.async { [self] in
-                MainActor.assumeIsolated {
-                    let vm = EditorViewModel()
-                    vm.sourceText = savedText
-                    self.viewModel = vm
-                }
-            }
-        }
+        let vm = EditorViewModel()
+        vm.sourceText = text
+        self.viewModel = vm
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> String {

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-04T12:14:05.250Z",
+  "updatedAt": "2026-04-04T22:33:13.804Z",
   "missions": [
     {
       "id": "session:85b03e99-611d-4b4c-8a33-6a2bcb689217:none",
@@ -363,14 +363,14 @@
       "name": "none",
       "objective": "Session mission",
       "createdAt": "2026-04-04T12:11:23.297Z",
-      "updatedAt": "2026-04-04T12:14:05.250Z",
-      "status": "done",
-      "workerCount": 3,
+      "updatedAt": "2026-04-04T22:33:13.804Z",
+      "status": "running",
+      "workerCount": 5,
       "taskCounts": {
-        "total": 3,
+        "total": 5,
         "pending": 0,
         "blocked": 0,
-        "inProgress": 0,
+        "inProgress": 2,
         "completed": 3,
         "failed": 0
       },
@@ -404,49 +404,29 @@
           "latestUpdate": "completed",
           "completedSummary": null,
           "updatedAt": "2026-04-04T12:13:49.743Z"
+        },
+        {
+          "name": "architect:ad96006",
+          "role": "architect",
+          "ownership": "ad960065c83a4e8f7",
+          "status": "running",
+          "currentStep": null,
+          "latestUpdate": null,
+          "completedSummary": null,
+          "updatedAt": "2026-04-04T22:33:00.680Z"
+        },
+        {
+          "name": "architect:af1ed36",
+          "role": "architect",
+          "ownership": "af1ed362eae4215ff",
+          "status": "running",
+          "currentStep": null,
+          "latestUpdate": null,
+          "completedSummary": null,
+          "updatedAt": "2026-04-04T22:33:13.804Z"
         }
       ],
       "timeline": [
-        {
-          "id": "session-start:a68747e4ebbfd13f4:2026-04-04T12:11:23.297Z",
-          "at": "2026-04-04T12:11:23.297Z",
-          "kind": "update",
-          "agent": "architect:a68747e",
-          "detail": "started architect:a68747e",
-          "sourceKey": "session-start:a68747e4ebbfd13f4"
-        },
-        {
-          "id": "session-start:a305b2afbd010f553:2026-04-04T12:11:42.664Z",
-          "at": "2026-04-04T12:11:42.664Z",
-          "kind": "update",
-          "agent": "architect:a305b2a",
-          "detail": "started architect:a305b2a",
-          "sourceKey": "session-start:a305b2afbd010f553"
-        },
-        {
-          "id": "session-start:a190f968416cf3c01:2026-04-04T12:12:02.430Z",
-          "at": "2026-04-04T12:12:02.430Z",
-          "kind": "update",
-          "agent": "architect:a190f96",
-          "detail": "started architect:a190f96",
-          "sourceKey": "session-start:a190f968416cf3c01"
-        },
-        {
-          "id": "session-stop:a68747e4ebbfd13f4:2026-04-04T12:13:02.855Z",
-          "at": "2026-04-04T12:13:02.855Z",
-          "kind": "completion",
-          "agent": "architect:a68747e",
-          "detail": "completed",
-          "sourceKey": "session-stop:a68747e4ebbfd13f4"
-        },
-        {
-          "id": "session-stop:a190f968416cf3c01:2026-04-04T12:13:49.743Z",
-          "at": "2026-04-04T12:13:49.743Z",
-          "kind": "completion",
-          "agent": "architect:a190f96",
-          "detail": "completed",
-          "sourceKey": "session-stop:a190f968416cf3c01"
-        },
         {
           "id": "session-stop:a305b2afbd010f553:2026-04-04T12:14:05.250Z",
           "at": "2026-04-04T12:14:05.250Z",
@@ -454,6 +434,22 @@
           "agent": "architect:a305b2a",
           "detail": "completed",
           "sourceKey": "session-stop:a305b2afbd010f553"
+        },
+        {
+          "id": "session-start:ad960065c83a4e8f7:2026-04-04T22:33:00.680Z",
+          "at": "2026-04-04T22:33:00.680Z",
+          "kind": "update",
+          "agent": "architect:ad96006",
+          "detail": "started architect:ad96006",
+          "sourceKey": "session-start:ad960065c83a4e8f7"
+        },
+        {
+          "id": "session-start:af1ed362eae4215ff:2026-04-04T22:33:13.804Z",
+          "at": "2026-04-04T22:33:13.804Z",
+          "kind": "update",
+          "agent": "architect:af1ed36",
+          "detail": "started architect:af1ed36",
+          "sourceKey": "session-start:af1ed362eae4215ff"
         }
       ]
     }

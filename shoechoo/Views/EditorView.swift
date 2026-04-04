@@ -10,16 +10,7 @@ struct EditorView: View {
     @State private var showSidebar = true
 
     var body: some View {
-        if let vm = document.viewModel {
-            editorBody(vm: vm)
-        } else {
-            ProgressView("Loading...")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-    }
-
-    @ViewBuilder
-    private func editorBody(vm: EditorViewModel) -> some View {
+        let vm = document.viewModel
         HSplitView {
             if showSidebar {
                 SidebarContainerView(
@@ -104,8 +95,7 @@ struct EditorView: View {
     }
 
     private func exportHTML() async {
-        guard let vm = document.viewModel else { return }
-        let html = await vm.exportHTML()
+        let html = await document.viewModel.exportHTML()
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.html]
         panel.nameFieldStringValue = "Export.html"

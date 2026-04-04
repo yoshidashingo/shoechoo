@@ -7,8 +7,7 @@ enum AppearanceMode: String, CaseIterable, Sendable {
 }
 
 @Observable
-@MainActor
-final class EditorSettings {
+final class EditorSettings: @unchecked Sendable {
     var fontFamily: String {
         didSet { UserDefaults.standard.set(fontFamily, forKey: "fontFamily") }
     }

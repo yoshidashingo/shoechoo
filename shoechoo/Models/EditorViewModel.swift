@@ -8,8 +8,7 @@ struct HeadingItem: Identifiable, Sendable {
 }
 
 @Observable
-@MainActor
-final class EditorViewModel {
+final class EditorViewModel: @unchecked Sendable {
     var sourceText: String = ""
     var cursorPosition: Int = 0
     var isFocusModeEnabled: Bool
