@@ -163,7 +163,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         private func performAutoSave() {
             guard let textView else { return }
             guard let doc = textView.window?.windowController?.document as? NSDocument else { return }
-            doc.save(withDelegate: nil, didSave: nil, contextInfo: nil)
+            doc.autosave(withImplicitCancellability: false) { _ in }
         }
 
         // MARK: - Delegate

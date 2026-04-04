@@ -1,5 +1,12 @@
 import AppKit
 
+struct HeadingItem: Identifiable, Sendable {
+    let id = UUID()
+    let level: Int
+    let title: String
+    let position: Int  // UTF-16 offset in sourceText
+}
+
 @Observable
 @MainActor
 final class EditorViewModel {
@@ -46,6 +53,31 @@ final class EditorViewModel {
 
     func toggleTypewriterScroll() {
         isTypewriterScrollEnabled.toggle()
+    }
+
+    // MARK: - Outline
+
+    var headings: [HeadingItem] {
+        var result: [HeadingItem] = []
+        let lines = sourceText.components(separatedBy: "\n")
+        var offset = 0
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("#") {
+                var level = 0
+                for ch in trimmed {
+                    if ch == "#" { level += 1 } else { break }
+                }
+                if level >= 1 && level <= 6 {
+                    let title = String(trimmed.dropFirst(level)).trimmingCharacters(in: .whitespaces)
+                    if !title.isEmpty {
+                        result.append(HeadingItem(level: level, title: title, position: offset))
+                    }
+                }
+            }
+            offset += (line as NSString).length + 1  // +1 for \n
+        }
+        return result
     }
 
     // MARK: - Statistics
@@ -134,4 +166,5 @@ extension Notification.Name {
     static let insertFormattedText = Notification.Name("shoechoo.insertFormattedText")
     static let setLinePrefix = Notification.Name("shoechoo.setLinePrefix")
     static let insertImageMarkdown = Notification.Name("shoechoo.insertImageMarkdown")
+    static let scrollToPosition = Notification.Name("shoechoo.scrollToPosition")
 }

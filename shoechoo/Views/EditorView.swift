@@ -5,31 +5,47 @@ struct EditorView: View {
 
     @Environment(EditorSettings.self) private var settings
     @State private var isExporting = false
+    @State private var showOutline = true
 
     var body: some View {
-        VStack(spacing: 0) {
-            WYSIWYGTextView(viewModel: document.viewModel, settings: settings)
-                .focusedSceneValue(\.editorViewModel, document.viewModel)
-                .frame(minWidth: 400, minHeight: 300)
-
-            Divider()
-
-            HStack(spacing: 4) {
-                Text("\(document.viewModel.wordCount) words")
-                Text("·")
-                Text("\(document.viewModel.characterCount) characters")
-                Text("·")
-                Text("\(document.viewModel.lineCount) lines")
-                Spacer()
+        HSplitView {
+            if showOutline {
+                OutlineView(viewModel: document.viewModel)
+                    .frame(minWidth: 150, idealWidth: 200, maxWidth: 300)
             }
-            .font(.system(size: 11))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .background(.bar)
+
+            VStack(spacing: 0) {
+                WYSIWYGTextView(viewModel: document.viewModel, settings: settings)
+                    .focusedSceneValue(\.editorViewModel, document.viewModel)
+                    .frame(minWidth: 400, minHeight: 300)
+
+                Divider()
+
+                HStack(spacing: 4) {
+                    Text("\(document.viewModel.wordCount) words")
+                    Text("·")
+                    Text("\(document.viewModel.characterCount) characters")
+                    Text("·")
+                    Text("\(document.viewModel.lineCount) lines")
+                    Spacer()
+                }
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(.bar)
+            }
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: { withAnimation { showOutline.toggle() } }) {
+                    Image(systemName: showOutline ? "sidebar.left" : "sidebar.left")
+                        .symbolVariant(showOutline ? .fill : .none)
+                }
+                .help("Toggle Outline (⌃⌘S)")
+
+                Divider()
+
                 Button(action: { document.viewModel.toggleBold() }) {
                     Image(systemName: "bold")
                 }
