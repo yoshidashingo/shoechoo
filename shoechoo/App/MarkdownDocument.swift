@@ -9,7 +9,7 @@ extension UTType {
 final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     typealias Snapshot = String
 
-    @MainActor var viewModel: EditorViewModel!
+    nonisolated(unsafe) var viewModel: EditorViewModel!
 
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
@@ -18,7 +18,13 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     private var _snapshotText: String = ""
 
     init() {
-        self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        if Thread.isMainThread {
+            self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        } else {
+            self.viewModel = DispatchQueue.main.sync {
+                MainActor.assumeIsolated { EditorViewModel() }
+            }
+        }
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -27,11 +33,22 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         _snapshotText = text
-        let vm = MainActor.assumeIsolated { EditorViewModel() }
-        self.viewModel = vm
-        Task { @MainActor in
-            vm.sourceText = text
-            vm.textDidChange(text, editedRange: NSRange(location: 0, length: text.count))
+        if Thread.isMainThread {
+            let vm = MainActor.assumeIsolated { EditorViewModel() }
+            self.viewModel = vm
+            MainActor.assumeIsolated {
+                vm.sourceText = text
+                vm.textDidChange(text, editedRange: NSRange(location: 0, length: text.count))
+            }
+        } else {
+            let vm = DispatchQueue.main.sync {
+                MainActor.assumeIsolated { EditorViewModel() }
+            }
+            self.viewModel = vm
+            Task { @MainActor in
+                vm.sourceText = text
+                vm.textDidChange(text, editedRange: NSRange(location: 0, length: text.count))
+            }
         }
     }
 
