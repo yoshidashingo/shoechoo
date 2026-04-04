@@ -40,9 +40,9 @@ Shoechoo (集中) is a distraction-free Markdown editor for macOS. It provides a
 │                                       │                  │
 │  cursorPosition ──► resolveActiveBlock ┘                  │
 │                                                          │
-│  attributedStringForDisplay() ◄── MarkdownRenderer       │
-│                                   + RenderCache          │
-│                                                          │
+│  applyHighlightNow() ──► MarkdownParser.parse()          │
+│                      └─► SyntaxHighlighter.apply()       │
+│                          (attributes only, no text edit) │
 │  exportHTML / exportPDF ──► ExportService                 │
 │  handleImageDrop ──────────► ImageService                 │
 └──────────────────┬───────────────────────────────────────┘
@@ -71,21 +71,22 @@ shoechoo/
 │   ├── EditorNode.swift           # BlockKind, InlineType, EditorNode value type
 │   ├── EditorNodeModel.swift      # Block list with diff/merge and active-block tracking
 │   ├── EditorSettings.swift       # UserDefaults-backed @Observable settings
-│   ├── EditorViewModel.swift      # Central coordinator: parse, render, format, export
-│   ├── ParseResult.swift          # Parser output container
-│   ├── RenderCache.swift          # ID-keyed NSAttributedString cache
-│   └── RenderResult.swift         # Single block render output
+│   ├── EditorViewModel.swift      # Central coordinator: parse, highlight, format, export
+│   └── ParseResult.swift          # Parser output container
 ├── Parser/
 │   └── MarkdownParser.swift       # swift-markdown AST → EditorNode tree
-├── Renderer/
-│   └── MarkdownRenderer.swift     # EditorNode → NSAttributedString (active/inactive)
+├── Highlighter/
+│   └── SyntaxHighlighter.swift    # EditorNode → NSTextStorage attributes (active/inactive)
 ├── Editor/
 │   ├── ShoechooTextView.swift     # NSTextView subclass: focus dimming, typewriter, D&D
 │   └── WYSIWYGTextView.swift      # NSViewRepresentable bridge + Coordinator
 ├── Views/
 │   ├── EditorView.swift           # Main editor scene with toolbar
+│   ├── OutlineView.swift          # Document outline / heading navigator
 │   ├── SidebarView.swift          # Recent files list
 │   └── PreferencesView.swift      # Settings UI (font, appearance)
+├── Theme/
+│   └── EditorTheme.swift          # Color/font token definitions
 ├── Services/
 │   ├── ExportService.swift        # HTML generation (MarkupWalker) + PDF via WKWebView
 │   ├── FileService.swift          # Atomic file writes, directory creation
@@ -106,14 +107,14 @@ shoechoo/
 
 `MarkdownParser` is a `Sendable` struct that wraps `swift-markdown`'s `Document(parsing:)`. It converts the AST into a flat array of `EditorNode` values, each tagged with a `BlockKind` (heading, paragraph, code block, list, table, etc.) and carrying `InlineRun` spans for bold, italic, links, and other inline formatting. Source ranges map back to the original text for cursor-aware editing.
 
-### Renderer
+### Highlighter
 
-`MarkdownRenderer` converts `EditorNode` blocks into `NSAttributedString` via two paths:
+`SyntaxHighlighter` applies `NSTextStorage` attributes to `EditorNode` blocks via two paths:
 
-- **Inactive blocks**: styled output where Markdown syntax is stripped and visual formatting is applied (bold fonts, heading sizes, syntax-highlighted code via Highlightr, colored links).
+- **Inactive blocks**: styled output where Markdown syntax delimiters are hidden (font size 0.01, foreground color matches background) and visual formatting is applied (bold fonts, heading sizes, syntax-highlighted code via Highlightr, colored links).
 - **Active blocks**: raw Markdown source with subtle syntax coloring on delimiters (`**`, `` ` ``, `#`, etc.) so the user can edit the source directly.
 
-A `RenderCache` (keyed by `EditorNode.ID`) avoids redundant rendering. The cache is selectively invalidated when blocks change or the active block shifts.
+All changes are attribute-only — the underlying text content in `NSTextStorage` is never modified. Attribute updates are wrapped in `textStorage.beginEditing()`/`endEditing()` to prevent undo registration.
 
 ### Editor
 
@@ -137,7 +138,7 @@ Coordinator.textDidChange()
         ▼
 EditorViewModel.textDidChange()
         │  stores sourceText
-        │  schedules parse (50ms debounce)
+        │  schedules parse (150ms debounce)
         ▼
 MarkdownParser.parse()              ← runs after debounce
         │  swift-markdown Document → [EditorNode]
@@ -145,18 +146,11 @@ MarkdownParser.parse()              ← runs after debounce
 EditorNodeModel.applyParseResult()  ← position-based diff preserves stable IDs
         │
         ▼
-RenderCache.invalidateAll()
-        │
+SyntaxHighlighter.apply()          ← attributes only, no text replacement
+        │  active block → colored delimiters
+        │  inactive blocks → hidden delimiters + styled output
         ▼
-WYSIWYGTextView.updateNSView()     ← triggered by @Observable changes
-        │
-        ▼
-EditorViewModel.attributedStringForDisplay()
-        │  per-block: cached or freshly rendered
-        │  active block → raw source with colored delimiters
-        │  inactive blocks → styled output
-        ▼
-NSTextStorage.setAttributedString() ← cursor position preserved
+NSTextStorage (attributes updated) ← cursor position preserved
 ```
 
 Cursor movement follows a parallel path: `textViewDidChangeSelection` updates `cursorPosition`, which resolves the active block via `EditorNodeModel.resolveActiveBlock()`. Changed block IDs trigger selective cache invalidation and re-render.
@@ -174,7 +168,7 @@ Cursor movement follows a parallel path: `textViewDidChangeSelection` updates `c
 | `FileService` | `actor` | File system operations serialized to avoid races |
 | `ImageService` | `actor` | Image import delegates to `FileService` |
 
-Parse scheduling uses `Task` with a 50ms sleep for debouncing. Each new keystroke cancels the previous parse task via `Task.isCancelled` checks, ensuring only the latest revision is applied.
+Parse scheduling uses `Task` with a 150ms sleep for debouncing. Each new keystroke cancels the previous parse task via `Task.isCancelled` checks, ensuring only the latest revision is applied.
 
 ## Design Decisions
 
@@ -192,7 +186,7 @@ The document is parsed into a flat list of `EditorNode` blocks rather than maint
 
 ### Debounced parsing
 
-A 50ms debounce (`Task.sleep`) prevents excessive re-parsing during fast typing. The revision counter ensures stale parse results are discarded. This keeps the editor responsive even for large documents.
+A 150ms debounce (`Task.sleep`) prevents excessive re-parsing during fast typing. The revision counter ensures stale parse results are discarded. This keeps the editor responsive even for large documents.
 
 ### NotificationCenter for formatting commands
 
