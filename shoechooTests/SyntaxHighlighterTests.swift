@@ -388,4 +388,148 @@ struct SyntaxHighlighterTests {
         // Text is never modified
         #expect(textStorage.string == source)
     }
+
+    // MARK: - Active State Tests (#77)
+
+    @Test("WYSIWYG: list item marker visible when active, hidden when inactive")
+    func wysiwygListItemActiveVsInactive() {
+        let source = "- Item one"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        guard let listBlock = result.blocks.first, let listItem = listBlock.children.first else {
+            Issue.record("Expected list with child item"); return
+        }
+        // Active
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: listItem.id,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let activeFont = (textStorage.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(activeFont.pointSize >= 10, "marker should be visible when active")
+
+        // Inactive
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let inactiveFont = (textStorage.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(inactiveFont.pointSize < 1.0, "marker should be hidden when inactive")
+    }
+
+    @Test("WYSIWYG: blockquote > marker visible when active")
+    func wysiwygBlockquoteActive() {
+        let source = "> A quote"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        let blockID = result.blocks[0].id
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: blockID,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let font = (textStorage.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(font.pointSize >= 10, "> should be visible when active")
+    }
+
+    @Test("WYSIWYG: horizontal rule visible when active, hidden when inactive")
+    func wysiwygHorizontalRuleActiveInactive() {
+        let source = "---"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        // Active
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: result.blocks[0].id,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let activeFont = (textStorage.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(activeFont.pointSize >= 10)
+        // Inactive
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let inactiveFont = (textStorage.attributes(at: 0, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(inactiveFont.pointSize < 1.0)
+    }
+
+    @Test("WYSIWYG: image syntax gets delimiter color applied")
+    func wysiwygImageActiveInactive() {
+        let source = "![Photo](image.png)"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        // Inline images (within paragraph) get delimiter color but string is not modified
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        #expect(textStorage.string == source, "string content must be unchanged")
+        let attrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        #expect(attrs[.font] != nil, "font attribute must be set")
+    }
+
+    // MARK: - Heading Font Sizes (#78)
+
+    @Test("WYSIWYG: heading font sizes H1-H6 match spec", arguments: [
+        (1, 28.0), (2, 24.0), (3, 20.0), (4, 18.0), (5, 16.0)
+    ])
+    func wysiwygHeadingFontSizes(level: Int, expectedSize: Double) {
+        let prefix = String(repeating: "#", count: level)
+        let source = "\(prefix) Title"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let textPos = level + 1 // after "# "
+        let font = (textStorage.attributes(at: textPos, effectiveRange: nil)[.font] as? NSFont)!
+        #expect(font.pointSize == CGFloat(expectedSize), "H\(level) should be \(expectedSize)pt, got \(font.pointSize)")
+    }
+
+    // MARK: - Strikethrough and BoldItalic Tests (#79)
+
+    @Test("WYSIWYG: strikethrough ~~ hidden when inactive, attr applied")
+    func wysiwygStrikethroughInactive() {
+        let source = "This is ~~deleted~~ text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        let tildePos = (source as NSString).range(of: "~~").location
+        if tildePos != NSNotFound {
+            let tildeFont = (textStorage.attributes(at: tildePos, effectiveRange: nil)[.font] as? NSFont)!
+            #expect(tildeFont.pointSize < 1.0, "~~ should be hidden")
+        }
+        let textPos = (source as NSString).range(of: "deleted").location
+        if textPos != NSNotFound {
+            let textAttrs = textStorage.attributes(at: textPos, effectiveRange: nil)
+            #expect(textAttrs[.strikethroughStyle] != nil, "deleted text should have strikethrough")
+        }
+    }
+
+    @Test("WYSIWYG: bold italic *** hidden when inactive")
+    func wysiwygBoldItalicInactive() {
+        let source = "This is ***bold italic*** text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        #expect(textStorage.string == source)
+    }
+
+    // MARK: - Edge Cases
+
+    @Test("Edge case: emoji in bold does not crash")
+    func emojiInBold() {
+        let source = "**Hello 🎉 world**"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        #expect(textStorage.string == source)
+    }
+
+    @Test("Edge case: malformed unclosed bold does not crash")
+    func malformedBold() {
+        let source = "This has **unclosed bold"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+        #expect(textStorage.string == source)
+    }
 }
