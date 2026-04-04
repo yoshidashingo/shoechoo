@@ -38,6 +38,7 @@
 		D5EFC03F7891A3FCF4CD2C3F /* EditorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */; };
 		D9EA47C95A44873CFD029DA1 /* WYSIWYGTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C5231565A66836003C4D34 /* WYSIWYGTextView.swift */; };
 		E2E60335A6BA076151B4D6FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB4FF6DB7DC47DA67B8836D8 /* Assets.xcassets */; };
+		B9360A4E23084EC6A289E394 /* WYSIWYGVerificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB58B9E1EFE4CFD895196E4 /* WYSIWYGVerificationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +85,7 @@
 		D5C16C9C22F89126AE1647EE /* ThemeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeRegistry.swift; sourceTree = "<group>"; };
 		E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
+		9AB58B9E1EFE4CFD895196E4 /* WYSIWYGVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WYSIWYGVerificationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +197,7 @@
 				25DE2380BF9D55E84ACC3537 /* HTMLConverterTests.swift */,
 				153925F175F3248589356ABC /* MarkdownParserTests.swift */,
 				01756AEAD6E53132CDB55768 /* SyntaxHighlighterTests.swift */,
+				9AB58B9E1EFE4CFD895196E4 /* WYSIWYGVerificationTests.swift */,
 				D37E21639D40B6CE15866999 /* ThemeTests.swift */,
 			);
 			path = shoechooTests;
@@ -333,6 +336,7 @@
 				B6DBCF50C6C7BC806FDF86CC /* HTMLConverterTests.swift in Sources */,
 				8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */,
 				6F4AA4EF2ED08D514F0999BA /* SyntaxHighlighterTests.swift in Sources */,
+				B9360A4E23084EC6A289E394 /* WYSIWYGVerificationTests.swift in Sources */,
 				57330963820445BBDC92C7A4 /* ThemeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
