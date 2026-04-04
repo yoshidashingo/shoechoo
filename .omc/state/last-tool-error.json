@@ -1,7 +1,7 @@
 {
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/shingo/.claude/projects/-Users-shingo-Documents-GitHub-shoechoo/memory/MEMORY.md\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/shingo/Documents/GitHub/shoechoo.",
-  "timestamp": "2026-04-04T12:10:45.296Z",
-  "retry_count": 1
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"GIT_EDITOR=true git rebase --continue\",\"description\":\"Continue rebase\"}",
+  "error": "Exit code 1\nYou must edit all merge conflicts and then\nmark them as resolved using git add",
+  "timestamp": "2026-04-04T22:24:42.066Z",
+  "retry_count": 3
 }

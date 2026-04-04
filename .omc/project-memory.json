@@ -239,6 +239,12 @@
       "type": "file"
     },
     {
+      "path": "README.md",
+      "accessCount": 5,
+      "lastAccessed": 1775316800919,
+      "type": "file"
+    },
+    {
       "path": "shoechoo/Models/RenderResult.swift",
       "accessCount": 3,
       "lastAccessed": 1775288790318,
@@ -248,12 +254,6 @@
       "path": "shoechooTests/HTMLConverterTests.swift",
       "accessCount": 3,
       "lastAccessed": 1775289016957,
-      "type": "file"
-    },
-    {
-      "path": "README.md",
-      "accessCount": 3,
-      "lastAccessed": 1775289076770,
       "type": "file"
     },
     {
@@ -272,6 +272,12 @@
       "path": "shoechoo/Views/SidebarView.swift",
       "accessCount": 3,
       "lastAccessed": 1775304733368,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1775316812118,
       "type": "file"
     },
     {

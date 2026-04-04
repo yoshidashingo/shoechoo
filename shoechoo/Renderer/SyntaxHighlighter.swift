@@ -240,8 +240,8 @@ struct SyntaxHighlighter {
             if isActive {
                 ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: markerRange)
             } else {
-                // Show a bullet/number instead: just dim the raw marker
-                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor.withAlphaComponent(0.5), range: markerRange)
+                // Hide the marker when inactive (#45)
+                hideRange(markerRange, in: ts, bgColor: theme.backgroundColor.nsColor)
             }
         }
 
@@ -358,8 +358,8 @@ struct SyntaxHighlighter {
         if isActive {
             ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
         } else {
-            // Hide the --- text and show a strikethrough line
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor.withAlphaComponent(0.3), range: r)
+            // Hide the --- text and show a strikethrough line (#48)
+            hideRange(r, in: ts, bgColor: theme.backgroundColor.nsColor)
             ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.thick.rawValue, range: r)
             ts.addAttribute(.strikethroughColor, value: theme.delimiterColor.nsColor, range: r)
         }
