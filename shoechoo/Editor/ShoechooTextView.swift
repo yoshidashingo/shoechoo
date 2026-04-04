@@ -15,13 +15,13 @@ final class ShoechooTextView: NSTextView {
 
     // MARK: - Focus Mode
 
-    func applyFocusModeDimming(activeBlockRange: NSRange) {
+    func applyFocusModeDimming(activeBlockRange: NSRange, theme: EditorTheme) {
         let fullLength = textStorage?.length ?? 0
         let fullRange = NSRange(location: 0, length: fullLength)
 
         textStorage?.removeAttribute(.foregroundColor, range: fullRange)
 
-        let dimmingColor = NSColor.labelColor.withAlphaComponent(0.3)
+        let dimmingColor = theme.textColor.nsColor.withAlphaComponent(theme.focusDimOpacity)
 
         if activeBlockRange.location > 0 {
             let beforeRange = NSRange(location: 0, length: activeBlockRange.location)

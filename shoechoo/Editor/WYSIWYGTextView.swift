@@ -224,7 +224,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
             if let activeID = nodeModel.resolveActiveBlock(cursorOffset: cursorPosition),
                let activeBlock = nodeModel.block(withID: activeID) {
                 nodeModel.setActiveBlock(activeID)
-                textView.applyFocusModeDimming(activeBlockRange: activeBlock.sourceRange)
+                textView.applyFocusModeDimming(activeBlockRange: activeBlock.sourceRange, theme: parent.themeRegistry.activeTheme)
             }
         }
 
