@@ -28,6 +28,8 @@ struct WYSIWYGTextView: NSViewRepresentable {
         textView.isContinuousSpellCheckingEnabled = true
         textView.isGrammarCheckingEnabled = true
         textView.textContainerInset = NSSize(width: 40, height: 20)
+        textView.drawsBackground = true
+        textView.backgroundColor = .textBackgroundColor
         textView.delegate = context.coordinator
 
         let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
@@ -48,6 +50,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.drawsBackground = true
+        scrollView.backgroundColor = .textBackgroundColor
 
         context.coordinator.textView = textView
         context.coordinator.registerNotifications()
@@ -58,25 +61,33 @@ struct WYSIWYGTextView: NSViewRepresentable {
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         guard let textView = scrollView.documentView as? ShoechooTextView else { return }
 
+        // Apply appearance override
+        switch settings.appearanceOverride {
+        case .light:
+            scrollView.appearance = NSAppearance(named: .aqua)
+        case .dark:
+            scrollView.appearance = NSAppearance(named: .darkAqua)
+        case .system:
+            scrollView.appearance = nil
+        }
+
+        // Update font in typing attributes
         let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
             ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
-        if textView.font != font {
-            textView.font = font
-        }
+        textView.typingAttributes = [
+            .font: font,
+            .foregroundColor: NSColor.labelColor
+        ]
 
+        // Apply syntax highlighting (attributes only, never change text content)
         if viewModel.needsFullRerender || !viewModel.changedBlockIDs.isEmpty {
-            let appearance = textView.effectiveAppearance
-            let attributed = viewModel.attributedStringForDisplay(appearance: appearance)
-
-            let selectedRange = textView.selectedRange()
-            context.coordinator.isUpdating = true
-            textView.textStorage?.setAttributedString(attributed)
-
-            let safeLocation = min(selectedRange.location, textView.string.count)
-            textView.setSelectedRange(NSRange(location: safeLocation, length: 0))
-            context.coordinator.isUpdating = false
+            if let textStorage = textView.textStorage {
+                let appearance = textView.effectiveAppearance
+                viewModel.applySyntaxHighlighting(to: textStorage, appearance: appearance)
+            }
         }
 
+        // Focus mode dimming
         if viewModel.isFocusModeEnabled {
             if let activeID = viewModel.nodeModel.activeBlockID,
                let activeBlock = viewModel.nodeModel.block(withID: activeID) {
@@ -87,6 +98,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
             textView.removeFocusModeDimming()
         }
 
+        // Typewriter scroll
         if viewModel.isTypewriterScrollEnabled {
             let cursorRange = NSRange(location: viewModel.cursorPosition, length: 0)
             textView.scrollToCenterLine(cursorRange)
