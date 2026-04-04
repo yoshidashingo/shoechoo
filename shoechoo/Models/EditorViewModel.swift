@@ -11,7 +11,6 @@ final class EditorViewModel {
     var isTypewriterScrollEnabled: Bool
 
     private let parser = MarkdownParser()
-    private let renderCache = RenderCache()
     private var parseTask: Task<Void, Never>?
     private var revision: UInt64 = 0
 
@@ -41,7 +40,6 @@ final class EditorViewModel {
         let newActiveID = nodeModel.resolveActiveBlock(cursorOffset: position, in: sourceText)
         let changed = nodeModel.setActiveBlock(newActiveID)
         if !changed.isEmpty {
-            renderCache.invalidate(changed)
             changedBlockIDs = changed
         }
     }
@@ -61,7 +59,6 @@ final class EditorViewModel {
 
             guard let self, !Task.isCancelled else { return }
             self.nodeModel.applyParseResult(result)
-            self.renderCache.invalidateAll()
             self.needsFullRerender = true
 
             let activeID = self.nodeModel.resolveActiveBlock(cursorOffset: self.cursorPosition, in: self.sourceText)
@@ -69,29 +66,18 @@ final class EditorViewModel {
         }
     }
 
-    func attributedStringForDisplay(appearance: NSAppearance) -> NSAttributedString {
-        let renderer = MarkdownRenderer()
-        let rendererAppearance: MarkdownRenderer.Appearance = appearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil ? .dark : .light
-        let result = NSMutableAttributedString()
-
-        for block in nodeModel.blocks {
-            if let cached = renderCache.get(block.id), cached.isActive == block.isActive {
-                result.append(cached.attributedString)
-            } else {
-                let rendered: RenderResult
-                if block.isActive {
-                    rendered = renderer.renderActiveBlock(block: block, settings: settings, appearance: rendererAppearance)
-                } else {
-                    rendered = renderer.render(block: block, settings: settings, appearance: rendererAppearance)
-                }
-                renderCache.set(block.id, result: rendered)
-                result.append(rendered.attributedString)
-            }
-        }
-
+    func applySyntaxHighlighting(to textStorage: NSTextStorage, appearance: NSAppearance) {
+        let highlighter = SyntaxHighlighter()
+        let highlighterAppearance: SyntaxHighlighter.Appearance =
+            appearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil ? .dark : .light
+        highlighter.apply(
+            to: textStorage,
+            blocks: nodeModel.blocks,
+            settings: settings,
+            appearance: highlighterAppearance
+        )
         needsFullRerender = false
         changedBlockIDs.removeAll()
-        return result
     }
 
     func toggleBold() {
