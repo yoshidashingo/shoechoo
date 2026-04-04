@@ -36,17 +36,17 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
         scrollView.documentView = textView
 
-        // Set content BEFORE delegate
+        // Set coordinator and appearance BEFORE setting content
+        context.coordinator.textView = textView
+        context.coordinator.scrollView = scrollView
+        context.coordinator.applyAppearance(settings: settings)
+
+        // Set content BEFORE delegate to avoid double-fire
         if !viewModel.sourceText.isEmpty {
             textView.string = viewModel.sourceText
         }
 
         textView.delegate = context.coordinator
-        context.coordinator.textView = textView
-        context.coordinator.scrollView = scrollView
-
-        // Apply appearance
-        context.coordinator.applyAppearance(settings: settings)
         context.coordinator.registerNotifications()
 
         // Initial highlight
@@ -136,15 +136,21 @@ struct WYSIWYGTextView: NSViewRepresentable {
             let highlighter = SyntaxHighlighter()
             highlighter.apply(to: ts, blocks: result.blocks, settings: parent.settings, appearance: appearance)
 
-            let safe = min(savedSelection.location, ts.length)
-            textView.setSelectedRange(NSRange(location: safe, length: 0))
+            let safeLoc = min(savedSelection.location, ts.length)
+            let safeLen = min(savedSelection.length, ts.length - safeLoc)
+            textView.setSelectedRange(NSRange(location: safeLoc, length: safeLen))
         }
 
         // MARK: - Delegate
 
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
-            parent.viewModel.sourceText = textView.string
+            let newText = textView.string
+            parent.viewModel.sourceText = newText
+            // Update document snapshot for save
+            if let doc = textView.window?.windowController?.document as? MarkdownDocument {
+                doc.updateSnapshotText(newText)
+            }
             scheduleHighlight()
         }
 

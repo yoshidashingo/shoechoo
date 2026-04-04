@@ -55,7 +55,7 @@ struct SyntaxHighlighter {
 
         switch block.kind {
         case .heading(let level):
-            applyHeading(block, level: level, to: ts, baseFont: baseFont, settings: settings)
+            applyHeading(block, level: level, to: ts, baseFont: baseFont, settings: settings, appearance: appearance)
         case .codeBlock:
             applyCodeBlock(r, to: ts, settings: settings, appearance: appearance)
         case .blockquote:
@@ -83,7 +83,7 @@ struct SyntaxHighlighter {
 
     // MARK: - Heading
 
-    private func applyHeading(_ block: EditorNode, level: Int, to ts: NSTextStorage, baseFont: NSFont, settings: EditorSettings) {
+    private func applyHeading(_ block: EditorNode, level: Int, to ts: NSTextStorage, baseFont: NSFont, settings: EditorSettings, appearance: Appearance) {
         let r = block.sourceRange
         let fontSize: CGFloat = switch level {
         case 1: 28; case 2: 24; case 3: 20; case 4: 18; case 5: 16
@@ -105,7 +105,7 @@ struct SyntaxHighlighter {
                             range: NSRange(location: r.location, length: prefixLen))
         }
 
-        applyInlines(block, to: ts, totalLength: ts.length, baseFont: NSFont.boldSystemFont(ofSize: fontSize), settings: settings, appearance: .light)
+        applyInlines(block, to: ts, totalLength: ts.length, baseFont: NSFont.boldSystemFont(ofSize: fontSize), settings: settings, appearance: appearance)
     }
 
     // MARK: - Code Block
@@ -174,10 +174,12 @@ struct SyntaxHighlighter {
         if ch == 0x2D || ch == 0x2A || ch == 0x2B { // - * +
             i += 1
             // task list: - [ ] or - [x]
+            let blockStr = nsText as String
             if i + 2 < nsText.length && nsText.character(at: i) == 0x20 && nsText.character(at: i+1) == 0x5B {
-                if let closeBracket = (nsText as String).range(of: "] ", range: Range(NSRange(location: i, length: min(5, nsText.length - i)), in: nsText as String)!) {
-                    i = (nsText as String).distance(from: (nsText as String).startIndex, to: closeBracket.upperBound)
-                    i = (nsText as String)[..<closeBracket.upperBound].utf16.count
+                let searchRange = NSRange(location: i, length: min(5, nsText.length - i))
+                if let swiftRange = Range(searchRange, in: blockStr),
+                   let closeBracket = blockStr.range(of: "] ", range: swiftRange) {
+                    i = blockStr[blockStr.startIndex..<closeBracket.upperBound].utf16.count
                 }
             }
         } else if ch >= 0x30 && ch <= 0x39 { // digit
