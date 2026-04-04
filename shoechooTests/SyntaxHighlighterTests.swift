@@ -133,7 +133,7 @@ struct SyntaxHighlighterTests {
         #expect(traits.contains(.boldFontMask))
     }
 
-    @Test("Link gets linkColor and underline")
+    @Test("Link text gets linkColor and underline, brackets get delimiter color")
     func applyLink() {
         let source = "Visit [Example](https://example.com) now"
         let textStorage = makeTextStorage(source)
@@ -141,11 +141,12 @@ struct SyntaxHighlighterTests {
         let highlighter = SyntaxHighlighter()
         highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.github)
         #expect(textStorage.string == source)
-        let linkStart = (source as NSString).range(of: "[Example]").location
-        let linkAttrs = textStorage.attributes(at: linkStart, effectiveRange: nil)
-        let linkColor = linkAttrs[.foregroundColor] as? NSColor
-        #expect(linkColor != nil)
-        let underline = linkAttrs[.underlineStyle] as? Int
+        // "Example" text (inside brackets) should have link color + underline
+        let exampleStart = (source as NSString).range(of: "Example").location
+        let textAttrs = textStorage.attributes(at: exampleStart, effectiveRange: nil)
+        let textColor = textAttrs[.foregroundColor] as? NSColor
+        #expect(textColor == ThemePresets.github.linkColor.nsColor)
+        let underline = textAttrs[.underlineStyle] as? Int
         #expect(underline == NSUnderlineStyle.single.rawValue)
     }
 
