@@ -38,6 +38,19 @@ struct PreferencesView: View {
                     Toggle("Enable Focus Mode by default", isOn: $settings.defaultFocusMode)
                     Toggle("Enable Typewriter Scroll by default", isOn: $settings.defaultTypewriterScroll)
                 }
+
+                Section("Auto-Save") {
+                    Toggle("Enable Auto-Save", isOn: $settings.autoSaveEnabled)
+
+                    if settings.autoSaveEnabled {
+                        Picker("Save after idle", selection: $settings.autoSaveIntervalSeconds) {
+                            Text("5 seconds").tag(5)
+                            Text("10 seconds").tag(10)
+                            Text("30 seconds").tag(30)
+                            Text("60 seconds").tag(60)
+                        }
+                    }
+                }
             }
             .tabItem { Label("Editor", systemImage: "textformat") }
             .tag("editor")

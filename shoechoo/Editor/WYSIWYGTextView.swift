@@ -74,6 +74,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         weak var textView: ShoechooTextView?
         weak var scrollView: NSScrollView?
         nonisolated(unsafe) private var highlightTimer: Timer?
+        nonisolated(unsafe) private var autoSaveTimer: Timer?
         nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
 
         init(_ parent: WYSIWYGTextView) {
@@ -82,6 +83,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
         deinit {
             highlightTimer?.invalidate()
+            autoSaveTimer?.invalidate()
             for observer in notificationObservers {
                 NotificationCenter.default.removeObserver(observer)
             }
@@ -141,6 +143,29 @@ struct WYSIWYGTextView: NSViewRepresentable {
             textView.setSelectedRange(NSRange(location: safeLoc, length: safeLen))
         }
 
+        // MARK: - Auto-Save
+
+        func scheduleAutoSave() {
+            guard parent.settings.autoSaveEnabled else {
+                autoSaveTimer?.invalidate()
+                autoSaveTimer = nil
+                return
+            }
+            autoSaveTimer?.invalidate()
+            let interval = TimeInterval(parent.settings.autoSaveIntervalSeconds)
+            autoSaveTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.performAutoSave()
+                }
+            }
+        }
+
+        private func performAutoSave() {
+            guard let textView else { return }
+            guard let doc = textView.window?.windowController?.document as? NSDocument else { return }
+            doc.save(withDelegate: nil, didSave: nil, contextInfo: nil)
+        }
+
         // MARK: - Delegate
 
         func textDidChange(_ notification: Notification) {
@@ -152,6 +177,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
                 doc.updateSnapshotText(newText)
             }
             scheduleHighlight()
+            scheduleAutoSave()
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
@@ -192,7 +218,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
                     self?.handleSetLinePrefix(prefix: prefix)
                 }
             }
-            notificationObservers = [toggleObs, insertObs, prefixObs]
+            let scrollObs = NotificationCenter.default.addObserver(
+                forName: .scrollToPosition, object: nil, queue: .main
+            ) { [weak self] notification in
+                let position = notification.userInfo?["position"] as? Int
+                MainActor.assumeIsolated {
+                    self?.handleScrollToPosition(position: position)
+                }
+            }
+            notificationObservers = [toggleObs, insertObs, prefixObs, scrollObs]
         }
 
         private func handleToggleFormatting(prefix: String?, suffix: String?) {
@@ -222,6 +256,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
             let lineText = ns.substring(with: lineRange)
             let stripped = lineText.replacingOccurrences(of: "^#{1,6}\\s*", with: "", options: .regularExpression)
             textView.insertText(prefix + stripped, replacementRange: lineRange)
+        }
+
+        private func handleScrollToPosition(position: Int?) {
+            guard let textView, let position else { return }
+            let length = (textView.string as NSString).length
+            let safePosition = min(max(0, position), length)
+            let range = NSRange(location: safePosition, length: 0)
+            textView.setSelectedRange(range)
+            textView.scrollRangeToVisible(range)
         }
     }
 }

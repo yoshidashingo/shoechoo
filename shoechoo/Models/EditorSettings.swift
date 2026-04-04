@@ -29,6 +29,12 @@ final class EditorSettings {
     var defaultTypewriterScroll: Bool {
         didSet { UserDefaults.standard.set(defaultTypewriterScroll, forKey: "defaultTypewriterScroll") }
     }
+    var autoSaveEnabled: Bool {
+        didSet { UserDefaults.standard.set(autoSaveEnabled, forKey: "autoSaveEnabled") }
+    }
+    var autoSaveIntervalSeconds: Int {
+        didSet { UserDefaults.standard.set(autoSaveIntervalSeconds, forKey: "autoSaveIntervalSeconds") }
+    }
 
     static let shared = EditorSettings()
 
@@ -40,5 +46,11 @@ final class EditorSettings {
         self.appearanceOverride = AppearanceMode(rawValue: defaults.string(forKey: "appearanceOverride") ?? "") ?? .system
         self.defaultFocusMode = defaults.bool(forKey: "defaultFocusMode")
         self.defaultTypewriterScroll = defaults.bool(forKey: "defaultTypewriterScroll")
+        if defaults.object(forKey: "autoSaveEnabled") == nil {
+            self.autoSaveEnabled = true
+        } else {
+            self.autoSaveEnabled = defaults.bool(forKey: "autoSaveEnabled")
+        }
+        self.autoSaveIntervalSeconds = defaults.object(forKey: "autoSaveIntervalSeconds") as? Int ?? 10
     }
 }
