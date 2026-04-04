@@ -3,6 +3,7 @@ import Foundation
 @testable import shoechoo
 
 @Suite("EditorNodeModel")
+@MainActor
 struct EditorNodeModelTests {
 
     private let parser = MarkdownParser()

@@ -1,7 +1,7 @@
 import Foundation
 
-@Observable
-final class EditorNodeModel: @unchecked Sendable {
+@Observable @MainActor
+final class EditorNodeModel {
     var blocks: [EditorNode] = []
     var documentRevision: UInt64 = 0
     var activeBlockID: EditorNode.ID?

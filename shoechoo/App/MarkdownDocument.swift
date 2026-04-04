@@ -18,13 +18,8 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     nonisolated(unsafe) private var _snapshotText: String = ""
 
     init() {
-        if Thread.isMainThread {
-            self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
-        } else {
-            self.viewModel = DispatchQueue.main.sync {
-                MainActor.assumeIsolated { EditorViewModel() }
-            }
-        }
+        // ReferenceFileDocument.init is always called on main thread by SwiftUI
+        self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -33,19 +28,10 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         _snapshotText = text
-        if Thread.isMainThread {
-            let vm = MainActor.assumeIsolated { EditorViewModel() }
-            self.viewModel = vm
-            MainActor.assumeIsolated { vm.sourceText = text }
-        } else {
-            let vm = DispatchQueue.main.sync {
-                MainActor.assumeIsolated { EditorViewModel() }
-            }
-            self.viewModel = vm
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated { vm.sourceText = text }
-            }
-        }
+        // ReferenceFileDocument.init(configuration:) is called on main thread by SwiftUI
+        let vm = MainActor.assumeIsolated { EditorViewModel() }
+        self.viewModel = vm
+        MainActor.assumeIsolated { vm.sourceText = text }
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> String {

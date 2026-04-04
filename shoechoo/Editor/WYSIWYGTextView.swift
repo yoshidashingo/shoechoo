@@ -290,7 +290,6 @@ struct WYSIWYGTextView: NSViewRepresentable {
             guard let textView = textView as? ShoechooTextView else { return }
             guard parent.viewModel.isFocusModeEnabled else {
                 textView.removeFocusModeDimming()
-                scheduleHighlight()
                 return
             }
             if let activeID = nodeModel.resolveActiveBlock(cursorOffset: cursorPosition),
