@@ -89,4 +89,86 @@ struct SyntaxHighlighterTests {
         #expect(textStorage1.string == source)
         #expect(textStorage2.string == source)
     }
+
+    @Test("Heading # prefix colored as secondary")
+    func headingPrefixColor() {
+        let source = "## Sub"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        let prefixAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        let prefixColor = prefixAttrs[.foregroundColor] as? NSColor
+        #expect(prefixColor == NSColor.secondaryLabelColor)
+    }
+
+    @Test("Code block gets monospaced font")
+    func applyCodeBlock() {
+        let source = "```swift\nlet x = 1\n```"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        #expect(textStorage.string == source)
+        let fenceEnd = (source as NSString).range(of: "\n").location + 1
+        let attrs = textStorage.attributes(at: fenceEnd, effectiveRange: nil)
+        let font = attrs[.font] as? NSFont
+        #expect(font != nil)
+        #expect(font!.isFixedPitch)
+    }
+
+    @Test("Bold text gets bold font, delimiters secondary color")
+    func applyBold() {
+        let source = "This is **bold** text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        #expect(textStorage.string == source)
+        let boldStart = (source as NSString).range(of: "**bold**").location
+        let bAttrs = textStorage.attributes(at: boldStart + 2, effectiveRange: nil)
+        let bFont = bAttrs[.font] as? NSFont
+        #expect(bFont != nil)
+        let traits = NSFontManager.shared.traits(of: bFont!)
+        #expect(traits.contains(.boldFontMask))
+    }
+
+    @Test("Link gets linkColor and underline")
+    func applyLink() {
+        let source = "Visit [Example](https://example.com) now"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        #expect(textStorage.string == source)
+        let linkStart = (source as NSString).range(of: "[Example]").location
+        let linkAttrs = textStorage.attributes(at: linkStart, effectiveRange: nil)
+        let linkColor = linkAttrs[.foregroundColor] as? NSColor
+        #expect(linkColor == NSColor.linkColor)
+        let underline = linkAttrs[.underlineStyle] as? Int
+        #expect(underline == NSUnderlineStyle.single.rawValue)
+    }
+
+    @Test("Japanese text content is preserved and styled")
+    func japaneseTextPreserved() {
+        let source = "# 日本語タイトル\n\nこれは**太字**テスト"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        #expect(textStorage.string == source)
+    }
+
+    @Test("Mixed document: all block types styled without changing text")
+    func mixedDocument() {
+        let source = "# Title\n\nA paragraph with **bold** and *italic*.\n\n- Item 1\n- Item 2\n\n```swift\nlet x = 1\n```\n\n> A quote\n\n---"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        #expect(textStorage.string == source)
+        let titleAttrs = textStorage.attributes(at: 2, effectiveRange: nil)
+        let titleFont = titleAttrs[.font] as? NSFont
+        #expect(titleFont!.pointSize >= 28)
+    }
 }
