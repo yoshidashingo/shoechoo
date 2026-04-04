@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shoe Choo — Distraction-Free Markdown Editor for macOS</title>
-  <meta name="description" content="A clean, focused Markdown editor for macOS. Live preview, focus mode, typewriter scrolling, and full Markdown support — write without distractions.">
+  <title>Shoe Choo Editor — Distraction-Free Markdown Editor for macOS</title>
+  <meta name="description" content="A clean, focused Markdown editor for macOS. Live preview, focus mode, typewriter scrolling, and GFM support — write without distractions.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -26,6 +26,7 @@
     header img { width: 96px; height: 96px; border-radius: 22%; }
     header h1 { font-size: 36px; font-weight: 700; margin: 16px 0 8px; letter-spacing: -0.5px; }
     header p { font-size: 17px; color: #6e6e73; max-width: 400px; margin: 0 auto 24px; }
+    .version { display: inline-block; background: #f0f0f0; color: #6e6e73; font-size: 12px; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px; }
     .lang { font-size: 13px; color: #86868b; }
     .lang a { color: #86868b; }
 
@@ -54,7 +55,12 @@
 
     ul.features { list-style: none; }
     ul.features li { padding: 6px 0; font-size: 15px; }
-    ul.features li::before { content: "—"; color: #86868b; margin-right: 8px; }
+    ul.features li::before { content: "\2014"; color: #86868b; margin-right: 8px; }
+
+    .shortcuts { width: 100%; font-size: 14px; border-collapse: collapse; margin-top: 12px; }
+    .shortcuts th { text-align: left; font-weight: 600; padding: 6px 0; border-bottom: 1px solid #e8e8ed; }
+    .shortcuts td { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+    .shortcuts td:first-child { font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #6e6e73; width: 120px; }
 
     .install-note {
       background: #f5f5f7;
@@ -96,9 +102,10 @@
 <body>
 
 <header>
-  <img src="icon.png" alt="Shoe Choo">
-  <h1>Shoe Choo</h1>
+  <img src="icon.png" alt="Shoe Choo Editor">
+  <h1>Shoe Choo Editor</h1>
   <p>A distraction-free Markdown editor for macOS. Live preview, focus mode, and a clean writing experience.</p>
+  <span class="version">v0.1 — macOS 14+</span><br>
   <a href="https://github.com/yoshidashingo/shoechoo/releases/latest" class="dl-btn">Download</a>
   <a href="https://github.com/yoshidashingo/shoechoo" class="dl-btn dl-btn-secondary">GitHub</a>
   <br>
@@ -111,7 +118,7 @@
     <ul class="features">
       <li>Live preview — Markdown is rendered inline as you type, just like Typora</li>
       <li>Clean, minimal interface that stays out of your way</li>
-      <li>Subtle syntax highlighting without visual clutter</li>
+      <li>Syntax highlighting for code blocks via Highlightr</li>
     </ul>
     <h2 style="margin-top:32px">Writing Focus</h2>
     <ul class="features">
@@ -121,16 +128,37 @@
     </ul>
     <h2 style="margin-top:32px">Markdown</h2>
     <ul class="features">
-      <li>Full Markdown support — headings, lists, tables, code blocks, math (LaTeX), footnotes</li>
+      <li>GFM support — headings, bold, italic, strikethrough, lists, task lists, tables, code blocks, blockquotes, links, images</li>
       <li>Drag & drop or paste images directly into your document</li>
-      <li>Export as Markdown, HTML, or PDF</li>
+      <li>Export as HTML or PDF</li>
     </ul>
     <h2 style="margin-top:32px">General</h2>
     <ul class="features">
-      <li>Native macOS app built with Swift & SwiftUI</li>
-      <li>Full support for light and dark mode</li>
-      <li>Low memory usage, instant launch</li>
+      <li>Native macOS app built with Swift 6 + SwiftUI + TextKit 2</li>
+      <li>Auto-save, macOS Versions, tabbed windows</li>
+      <li>Full support for light and dark mode with override option</li>
+      <li>Sidebar for quick access to recent files</li>
+      <li>Customizable font, size, and line spacing</li>
     </ul>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Keyboard Shortcuts</h2>
+    <table class="shortcuts">
+      <tr><th>Shortcut</th><th>Action</th></tr>
+      <tr><td>&#8984;B</td><td>Bold</td></tr>
+      <tr><td>&#8984;I</td><td>Italic</td></tr>
+      <tr><td>&#8984;K</td><td>Insert link</td></tr>
+      <tr><td>&#8679;&#8984;K</td><td>Inline code</td></tr>
+      <tr><td>&#8984;1–6</td><td>Set heading level</td></tr>
+      <tr><td>&#8679;&#8984;F</td><td>Toggle focus mode</td></tr>
+      <tr><td>&#8679;&#8984;T</td><td>Toggle typewriter scroll</td></tr>
+      <tr><td>&#8679;&#8984;E</td><td>Export to HTML</td></tr>
+      <tr><td>&#8679;&#8997;&#8984;E</td><td>Export to PDF</td></tr>
+      <tr><td>&#8963;&#8984;F</td><td>Toggle full screen</td></tr>
+    </table>
   </div>
 </section>
 
@@ -141,7 +169,7 @@
     <p style="font-size:14px;color:#6e6e73;margin-top:4px">Requires macOS 14 (Sonoma) or later.</p>
     <div class="install-note">
       <p><strong>This app is not notarized.</strong> macOS will block it on first launch.</p>
-      <p>Run in Terminal: <code>xattr -cr /Applications/shoechoo.app</code></p>
+      <p>Run in Terminal: <code>xattr -cr "/Applications/Shoe Choo.app"</code></p>
       <p style="margin-bottom:0">Or: try to open the app → <strong>System Settings → Privacy & Security → Open Anyway</strong></p>
     </div>
   </div>
@@ -152,10 +180,10 @@
     <h2>FAQ</h2>
     <dl class="faq">
       <dt>Is it safe to use?</dt>
-      <dd>Yes. The source code is fully available on <a href="https://github.com/yoshidashingo/shoechoo">GitHub</a>. You can review and build it yourself.</dd>
+      <dd>Yes. The source code is fully available on <a href="https://github.com/yoshidashingo/shoechoo">GitHub</a> under the MIT license. You can review and build it yourself.</dd>
 
       <dt>Can I get support?</dt>
-      <dd>You can reach us at <a href="mailto:support@shoechoo.com">support@shoechoo.com</a>. Bug reports and feature requests are accepted as <a href="https://github.com/yoshidashingo/shoechoo/pulls">pull requests</a> on GitHub.</dd>
+      <dd>Bug reports and feature requests are welcome as <a href="https://github.com/yoshidashingo/shoechoo/issues">issues</a> on GitHub.</dd>
 
       <dt>Will there be an iOS version?</dt>
       <dd>Yes, an iOS / iPadOS version with iCloud sync is on the roadmap.</dd>
@@ -166,7 +194,7 @@
 <footer>
   <a href="https://github.com/yoshidashingo/shoechoo">GitHub</a> ·
   <a href="https://github.com/yoshidashingo/shoechoo/releases">Releases</a> ·
-  MIT License
+  <a href="https://github.com/yoshidashingo/shoechoo/blob/main/LICENSE">MIT License</a>
 </footer>
 
 </body>
