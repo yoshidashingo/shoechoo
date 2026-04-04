@@ -43,7 +43,6 @@ final class EditorNodeModel: @unchecked Sendable {
             let blockEnd = block.sourceRange.location + block.sourceRange.length
             if cursorOffset >= block.sourceRange.location && cursorOffset <= blockEnd {
                 candidate = block.id
-                // Check children for deeper match
                 for child in block.children {
                     let childEnd = child.sourceRange.location + child.sourceRange.length
                     if cursorOffset >= child.sourceRange.location && cursorOffset <= childEnd {
@@ -51,6 +50,11 @@ final class EditorNodeModel: @unchecked Sendable {
                     }
                 }
             }
+        }
+
+        // If cursor is past all blocks (e.g. at document end), use the last block
+        if candidate == nil, let last = blocks.last {
+            candidate = last.id
         }
 
         return candidate
