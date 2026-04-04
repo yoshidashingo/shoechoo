@@ -50,10 +50,8 @@ struct WYSIWYGTextView: NSViewRepresentable {
         textView.delegate = context.coordinator
         context.coordinator.registerNotifications()
 
-        // Initial highlight
-        if !viewModel.sourceText.isEmpty {
-            context.coordinator.scheduleHighlight()
-        }
+        // Initial highlight — apply synchronously so text is visible immediately
+        context.coordinator.applyHighlightNow()
 
         return scrollView
     }
@@ -77,6 +75,8 @@ struct WYSIWYGTextView: NSViewRepresentable {
         nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var autoSaveTimer: Timer?
         nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
+
+        private var isApplyingHighlight = false
 
         init(_ parent: WYSIWYGTextView) {
             self.parent = parent
@@ -124,9 +124,18 @@ struct WYSIWYGTextView: NSViewRepresentable {
             }
         }
 
-        private func applyHighlightNow() {
+        func applyHighlightNow() {
             guard let textView, let ts = textView.textStorage else { return }
             guard ts.length > 0 else { return }
+            // Skip highlight during IME composition — modifying textStorage
+            // destroys markedText and breaks input methods (Japanese, Chinese, etc.)
+            guard !textView.hasMarkedText() else {
+                scheduleHighlight() // retry after composition ends
+                return
+            }
+            guard !isApplyingHighlight else { return } // prevent re-entrancy
+            isApplyingHighlight = true
+            defer { isApplyingHighlight = false }
 
             let text = textView.string
             let parser = MarkdownParser()
@@ -170,13 +179,12 @@ struct WYSIWYGTextView: NSViewRepresentable {
         // MARK: - Delegate
 
         func textDidChange(_ notification: Notification) {
+            guard !isApplyingHighlight else { return } // ignore re-entrant calls from attribute changes
             guard let textView = notification.object as? NSTextView else { return }
             let newText = textView.string
             parent.viewModel.sourceText = newText
-            // Update document snapshot for save
-            if let doc = textView.window?.windowController?.document as? MarkdownDocument {
-                doc.updateSnapshotText(newText)
-            }
+            // Update document snapshot for save — use direct reference, not windowController chain
+            parent.document?.updateSnapshotText(newText)
             scheduleHighlight()
             scheduleAutoSave()
         }

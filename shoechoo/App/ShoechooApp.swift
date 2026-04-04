@@ -7,7 +7,7 @@ struct ShoechooApp: App {
 
     var body: some Scene {
         DocumentGroup(newDocument: { MarkdownDocument() }) { file in
-            EditorView(document: file.document)
+            EditorView(document: file.document, fileURL: file.fileURL)
                 .environment(settings)
         }
         .commands {

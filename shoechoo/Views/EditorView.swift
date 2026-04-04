@@ -2,20 +2,24 @@ import SwiftUI
 
 struct EditorView: View {
     var document: MarkdownDocument
+    var fileURL: URL?
 
     @Environment(EditorSettings.self) private var settings
     @State private var isExporting = false
-    @State private var showOutline = true
+    @State private var showSidebar = true
 
     var body: some View {
         HSplitView {
-            if showOutline {
-                OutlineView(viewModel: document.viewModel)
-                    .frame(minWidth: 150, idealWidth: 200, maxWidth: 300)
+            if showSidebar {
+                SidebarContainerView(
+                    viewModel: document.viewModel,
+                    documentURL: fileURL
+                )
+                .frame(minWidth: 150, idealWidth: 220, maxWidth: 300)
             }
 
             VStack(spacing: 0) {
-                WYSIWYGTextView(viewModel: document.viewModel, settings: settings)
+                WYSIWYGTextView(viewModel: document.viewModel, settings: settings, document: document)
                     .focusedSceneValue(\.editorViewModel, document.viewModel)
                     .frame(minWidth: 400, minHeight: 300)
 
@@ -38,11 +42,11 @@ struct EditorView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: { withAnimation { showOutline.toggle() } }) {
-                    Image(systemName: showOutline ? "sidebar.left" : "sidebar.left")
-                        .symbolVariant(showOutline ? .fill : .none)
+                Button(action: { withAnimation { showSidebar.toggle() } }) {
+                    Image(systemName: "sidebar.left")
+                        .symbolVariant(showSidebar ? .fill : .none)
                 }
-                .help("Toggle Outline (⌃⌘S)")
+                .help("Toggle Sidebar (⌃⌘S)")
 
                 Divider()
 

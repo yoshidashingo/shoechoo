@@ -63,16 +63,16 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
         lock.withLock { _snapshotText = text }
     }
 
-    // MARK: - Assets Directory
+    // MARK: - File URL
 
-    private var _fileURL: URL?
+    nonisolated(unsafe) var fileURL: URL?
 
     func setFileURL(_ url: URL?) {
-        _fileURL = url
+        fileURL = url
     }
 
     func assetsDirectoryURL() -> URL? {
-        guard let fileURL = _fileURL else { return nil }
+        guard let fileURL else { return nil }
         return fileURL.deletingPathExtension().appendingPathExtension("assets")
     }
 

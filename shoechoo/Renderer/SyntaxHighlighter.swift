@@ -89,7 +89,11 @@ struct SyntaxHighlighter {
         case 1: 28; case 2: 24; case 3: 20; case 4: 18; case 5: 16
         default: settings.fontSize
         }
-        ts.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: fontSize), range: r)
+        let headingFont = NSFont.boldSystemFont(ofSize: fontSize)
+        let headingColor: NSColor = appearance == .dark ? .white : .black
+        ts.addAttribute(.font, value: headingFont, range: r)
+        ts.addAttribute(.foregroundColor, value: headingColor, range: r)
+        ts.addAttribute(.paragraphStyle, value: headingParagraphStyle(settings: settings), range: r)
 
         // Color # prefix
         let nsText = block.sourceText as NSString
@@ -105,7 +109,7 @@ struct SyntaxHighlighter {
                             range: NSRange(location: r.location, length: prefixLen))
         }
 
-        applyInlines(block, to: ts, totalLength: ts.length, baseFont: NSFont.boldSystemFont(ofSize: fontSize), settings: settings, appearance: appearance)
+        applyInlines(block, to: ts, totalLength: ts.length, baseFont: headingFont, settings: settings, appearance: appearance)
     }
 
     // MARK: - Code Block
@@ -173,13 +177,12 @@ struct SyntaxHighlighter {
         let ch = i < nsText.length ? nsText.character(at: i) : 0
         if ch == 0x2D || ch == 0x2A || ch == 0x2B { // - * +
             i += 1
-            // task list: - [ ] or - [x]
-            let blockStr = nsText as String
+            // task list: - [ ] or - [x]  — use NSString API only to avoid UTF-16/Swift index mismatch
             if i + 2 < nsText.length && nsText.character(at: i) == 0x20 && nsText.character(at: i+1) == 0x5B {
                 let searchRange = NSRange(location: i, length: min(5, nsText.length - i))
-                if let swiftRange = Range(searchRange, in: blockStr),
-                   let closeBracket = blockStr.range(of: "] ", range: swiftRange) {
-                    i = blockStr[blockStr.startIndex..<closeBracket.upperBound].utf16.count
+                let found = nsText.range(of: "] ", range: searchRange)
+                if found.location != NSNotFound {
+                    i = found.location + found.length
                 }
             }
         } else if ch >= 0x30 && ch <= 0x39 { // digit
@@ -188,9 +191,10 @@ struct SyntaxHighlighter {
         }
         // trailing space
         if i < nsText.length && nsText.character(at: i) == 0x20 { i += 1 }
-        if i > afterWS {
-            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
-                            range: NSRange(location: block.sourceRange.location, length: i))
+        if i > afterWS && i <= nsText.length {
+            let markerRange = NSRange(location: block.sourceRange.location, length: i)
+            guard markerRange.location + markerRange.length <= ts.length else { return }
+            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: markerRange)
         }
     }
 
@@ -262,6 +266,14 @@ struct SyntaxHighlighter {
     private func baseParagraphStyle(settings: EditorSettings) -> NSMutableParagraphStyle {
         let s = NSMutableParagraphStyle()
         s.lineSpacing = settings.lineSpacing
+        s.paragraphSpacing = settings.fontSize * 0.5
+        return s
+    }
+
+    private func headingParagraphStyle(settings: EditorSettings) -> NSMutableParagraphStyle {
+        let s = baseParagraphStyle(settings: settings)
+        s.paragraphSpacingBefore = settings.fontSize * 0.75
+        s.paragraphSpacing = settings.fontSize * 0.4
         return s
     }
 }
