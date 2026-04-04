@@ -10,7 +10,7 @@ struct EditorNodeTests {
         kind: BlockKind,
         sourceText: String = "test"
     ) -> EditorNode {
-        let range = sourceText.startIndex..<sourceText.endIndex
+        let range = NSRange(location: 0, length: (sourceText as NSString).length)
         return EditorNode(
             kind: kind,
             sourceRange: range,
@@ -103,7 +103,7 @@ struct EditorNodeTests {
     @Test("EditorNode equality compares all fields")
     func nodeEquality() {
         let text = "Hello"
-        let range = text.startIndex..<text.endIndex
+        let range = NSRange(location: 0, length: (text as NSString).length)
         let id = UUID()
 
         var node1 = EditorNode(
@@ -130,7 +130,7 @@ struct EditorNodeTests {
     @Test("EditorNodes with different IDs are not equal")
     func nodesWithDifferentIDsNotEqual() {
         let text = "Hello"
-        let range = text.startIndex..<text.endIndex
+        let range = NSRange(location: 0, length: (text as NSString).length)
 
         let node1 = EditorNode(kind: .paragraph, sourceRange: range, sourceText: text)
         let node2 = EditorNode(kind: .paragraph, sourceRange: range, sourceText: text)
@@ -142,7 +142,7 @@ struct EditorNodeTests {
     @Test("EditorNodes with different kinds are not equal")
     func nodesWithDifferentKindsNotEqual() {
         let text = "Hello"
-        let range = text.startIndex..<text.endIndex
+        let range = NSRange(location: 0, length: (text as NSString).length)
         let id = UUID()
 
         let node1 = EditorNode(id: id, kind: .paragraph, sourceRange: range, sourceText: text)

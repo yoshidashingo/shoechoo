@@ -38,16 +38,16 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             self.viewModel = vm
             MainActor.assumeIsolated {
                 vm.sourceText = text
-                vm.textDidChange(text, editedRange: NSRange(location: 0, length: text.count))
             }
         } else {
             let vm = DispatchQueue.main.sync {
                 MainActor.assumeIsolated { EditorViewModel() }
             }
             self.viewModel = vm
-            Task { @MainActor in
-                vm.sourceText = text
-                vm.textDidChange(text, editedRange: NSRange(location: 0, length: text.count))
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    vm.sourceText = text
+                }
             }
         }
     }

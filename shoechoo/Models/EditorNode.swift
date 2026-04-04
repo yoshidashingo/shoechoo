@@ -32,7 +32,8 @@ enum ActivationScope: Sendable {
 // MARK: - InlineRun
 struct InlineRun: Equatable, Sendable {
     var type: InlineType
-    var range: Range<String.Index>
+    /// UTF-16 range relative to the owning block's sourceText.
+    var range: NSRange
 }
 
 enum InlineType: Equatable, Sendable {
@@ -51,20 +52,21 @@ enum InlineType: Equatable, Sendable {
 struct EditorNode: Identifiable, Equatable, Sendable {
     let id: UUID
     var kind: BlockKind
-    var sourceRange: Range<String.Index>
+    /// UTF-16 range in the full source document.
+    var sourceRange: NSRange
     var contentHash: Int
     var inlineRuns: [InlineRun]
     var isActive: Bool
     var activationScope: ActivationScope
-    // Raw source text for this block
+    /// Raw source text for this block.
     var sourceText: String
-    // Children for nested structures (list items in list, rows in table, blocks in blockquote)
+    /// Children for nested structures (list items in list, rows in table, blocks in blockquote).
     var children: [EditorNode]
 
     init(
         id: UUID = UUID(),
         kind: BlockKind,
-        sourceRange: Range<String.Index>,
+        sourceRange: NSRange,
         sourceText: String,
         inlineRuns: [InlineRun] = [],
         children: [EditorNode] = []

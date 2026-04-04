@@ -35,23 +35,18 @@ final class EditorNodeModel: @unchecked Sendable {
         documentRevision = result.revision
     }
 
-    // Resolve active block from cursor position
-    func resolveActiveBlock(cursorOffset: Int, in sourceText: String) -> EditorNode.ID? {
-        let cursorIndex = sourceText.index(
-            sourceText.startIndex,
-            offsetBy: min(cursorOffset, sourceText.count)
-        )
-
-        // Find innermost block containing cursor
+    // Resolve active block from cursor position (UTF-16 offset)
+    func resolveActiveBlock(cursorOffset: Int) -> EditorNode.ID? {
         var candidate: EditorNode.ID?
 
         for block in blocks {
-            if block.sourceRange.contains(cursorIndex)
-                || (cursorIndex == block.sourceRange.upperBound && cursorIndex == sourceText.endIndex) {
+            let blockEnd = block.sourceRange.location + block.sourceRange.length
+            if cursorOffset >= block.sourceRange.location && cursorOffset <= blockEnd {
                 candidate = block.id
                 // Check children for deeper match
                 for child in block.children {
-                    if child.sourceRange.contains(cursorIndex) {
+                    let childEnd = child.sourceRange.location + child.sourceRange.length
+                    if cursorOffset >= child.sourceRange.location && cursorOffset <= childEnd {
                         candidate = child.id
                     }
                 }

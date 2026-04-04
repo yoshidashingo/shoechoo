@@ -1,443 +1,265 @@
 import AppKit
 
-// MARK: - SyntaxHighlighter
-
-/// Applies syntax-highlighting attributes to an `NSTextStorage` WITHOUT changing the text content.
-/// The raw Markdown source stays in the text view; only font, color, and other visual attributes are modified.
+/// Applies syntax-highlighting attributes to an `NSTextStorage` WITHOUT changing text content.
+/// All ranges are NSRange (UTF-16 offsets) — no String.Index involved.
 @MainActor
 struct SyntaxHighlighter {
-
-    // MARK: - Appearance
 
     enum Appearance: Sendable {
         case light, dark
     }
 
-    // MARK: - Public API
-
-    /// Applies block-level and inline syntax-highlighting attributes to `textStorage`.
-    /// The string content of `textStorage` is never modified.
     func apply(
         to textStorage: NSTextStorage,
         blocks: [EditorNode],
         settings: EditorSettings,
         appearance: Appearance
     ) {
-        let fullSource = textStorage.string
-        let nsSource = fullSource as NSString
-        let fullRange = NSRange(location: 0, length: nsSource.length)
+        let totalLength = textStorage.length
+        guard totalLength > 0 else { return }
 
-        // 1. Apply base attributes across the whole document
         let baseFont = self.baseFont(settings: settings)
-        let baseColor = primaryTextColor(appearance: appearance)
-        let baseParaStyle = baseParagraphStyle(settings: settings)
+        let baseColor: NSColor = appearance == .dark ? .white : .black
+        let paraStyle = baseParagraphStyle(settings: settings)
 
         textStorage.beginEditing()
+
+        // Reset all attributes
+        let fullRange = NSRange(location: 0, length: totalLength)
         textStorage.setAttributes([
             .font: baseFont,
             .foregroundColor: baseColor,
-            .paragraphStyle: baseParaStyle,
+            .paragraphStyle: paraStyle,
         ], range: fullRange)
 
-        // 2. Apply per-block attributes
         for block in blocks {
-            applyBlock(block, to: textStorage, fullSource: fullSource, settings: settings, appearance: appearance)
+            applyBlock(block, to: textStorage, totalLength: totalLength,
+                       baseFont: baseFont, settings: settings, appearance: appearance)
         }
 
         textStorage.endEditing()
     }
 
-    // MARK: - Block Application
+    // MARK: - Block
 
     private func applyBlock(
         _ block: EditorNode,
-        to textStorage: NSTextStorage,
-        fullSource: String,
+        to ts: NSTextStorage,
+        totalLength: Int,
+        baseFont: NSFont,
         settings: EditorSettings,
         appearance: Appearance
     ) {
-        let blockRange = NSRange(block.sourceRange, in: fullSource)
-        guard blockRange.location != NSNotFound else { return }
+        let r = block.sourceRange
+        guard r.location >= 0, r.location + r.length <= totalLength else { return }
 
         switch block.kind {
-
         case .heading(let level):
-            applyHeading(block, level: level, range: blockRange, to: textStorage,
-                         fullSource: fullSource, settings: settings, appearance: appearance)
-
+            applyHeading(block, level: level, to: ts, baseFont: baseFont, settings: settings)
         case .codeBlock:
-            applyCodeBlock(block, range: blockRange, to: textStorage,
-                           settings: settings, appearance: appearance)
-
+            applyCodeBlock(r, to: ts, settings: settings, appearance: appearance)
         case .blockquote:
-            applyBlockquote(block, range: blockRange, to: textStorage,
-                            fullSource: fullSource, settings: settings, appearance: appearance)
-
+            applyBlockquote(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
         case .unorderedList, .orderedList:
             for child in block.children {
-                applyBlock(child, to: textStorage, fullSource: fullSource,
-                           settings: settings, appearance: appearance)
+                applyBlock(child, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
             }
-
-        case .listItem(let marker):
-            applyListItem(block, marker: marker, range: blockRange, to: textStorage,
-                          fullSource: fullSource, settings: settings, appearance: appearance)
-
+        case .listItem:
+            applyListMarker(block, to: ts)
+            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
         case .taskListItem:
-            applyInlineRuns(block, range: blockRange, to: textStorage,
-                            fullSource: fullSource, settings: settings, appearance: appearance)
-
+            applyListMarker(block, to: ts)
+            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
         case .horizontalRule:
-            textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: blockRange)
-
+            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: r)
         case .paragraph:
-            applyInlineRuns(block, range: blockRange, to: textStorage,
-                            fullSource: fullSource, settings: settings, appearance: appearance)
-
-        case .table, .tableRow:
-            // Keep base attributes for tables
-            break
-
+            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
         case .image:
-            textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: blockRange)
+            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: r)
+        case .table, .tableRow:
+            break
         }
     }
 
     // MARK: - Heading
 
-    private func applyHeading(
-        _ block: EditorNode,
-        level: Int,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        fullSource: String,
-        settings: EditorSettings,
-        appearance: Appearance
-    ) {
-        let fontSize = headingFontSize(level: level, base: settings.fontSize)
-        let font = NSFont.boldSystemFont(ofSize: fontSize)
-        textStorage.addAttribute(.font, value: font, range: range)
-
-        // Color the leading `#` prefix characters in secondaryLabelColor
-        let blockText = block.sourceText
-        var prefixEnd = blockText.startIndex
-        while prefixEnd < blockText.endIndex && blockText[prefixEnd] == "#" {
-            prefixEnd = blockText.index(after: prefixEnd)
+    private func applyHeading(_ block: EditorNode, level: Int, to ts: NSTextStorage, baseFont: NSFont, settings: EditorSettings) {
+        let r = block.sourceRange
+        let fontSize: CGFloat = switch level {
+        case 1: 28; case 2: 24; case 3: 20; case 4: 18; case 5: 16
+        default: settings.fontSize
         }
-        // Include the space after the hashes
-        if prefixEnd < blockText.endIndex && blockText[prefixEnd] == " " {
-            prefixEnd = blockText.index(after: prefixEnd)
+        ts.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: fontSize), range: r)
+
+        // Color # prefix
+        let nsText = block.sourceText as NSString
+        var prefixLen = 0
+        while prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x23 /* # */ {
+            prefixLen += 1
+        }
+        if prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x20 /* space */ {
+            prefixLen += 1
+        }
+        if prefixLen > 0 {
+            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
+                            range: NSRange(location: r.location, length: prefixLen))
         }
 
-        if prefixEnd > blockText.startIndex {
-            let prefixNSRange = NSRange(
-                blockText.startIndex..<prefixEnd,
-                in: blockText
-            ).shifted(by: range.location)
-            textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: prefixNSRange)
-        }
-
-        // Apply inline runs for the content portion
-        applyInlineRuns(block, range: range, to: textStorage,
-                        fullSource: fullSource, settings: settings, appearance: appearance,
-                        baseFont: font)
-    }
-
-    private func headingFontSize(level: Int, base: CGFloat) -> CGFloat {
-        switch level {
-        case 1: return 28
-        case 2: return 24
-        case 3: return 20
-        case 4: return 18
-        case 5: return 16
-        default: return base
-        }
+        applyInlines(block, to: ts, totalLength: ts.length, baseFont: NSFont.boldSystemFont(ofSize: fontSize), settings: settings, appearance: .light)
     }
 
     // MARK: - Code Block
 
-    private func applyCodeBlock(
-        _ block: EditorNode,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        settings: EditorSettings,
-        appearance: Appearance
-    ) {
-        let monoFont = monospacedFont(size: settings.fontSize)
-        let bgColor = appearance == .dark
+    private func applyCodeBlock(_ r: NSRange, to ts: NSTextStorage, settings: EditorSettings, appearance: Appearance) {
+        let mono = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
+        ts.addAttribute(.font, value: mono, range: r)
+        let bg = appearance == .dark
             ? NSColor.white.withAlphaComponent(0.06)
             : NSColor.black.withAlphaComponent(0.04)
+        ts.addAttribute(.backgroundColor, value: bg, range: r)
 
-        textStorage.addAttribute(.font, value: monoFont, range: range)
-        textStorage.addAttribute(.backgroundColor, value: bgColor, range: range)
-
-        // Color fence lines (``` lines) in secondaryLabelColor
-        let blockText = block.sourceText
-        let nsBlockText = blockText as NSString
-        let lines = blockText.components(separatedBy: "\n")
-        var lineStart = 0
-
-        for line in lines {
-            let lineLength = (line as NSString).length
-            let lineRange = NSRange(location: range.location + lineStart, length: lineLength)
-
+        // Color ``` fence lines
+        let blockText = (ts.string as NSString).substring(with: r) as NSString
+        var offset = 0
+        for line in (blockText as String).components(separatedBy: "\n") {
+            let lineLen = (line as NSString).length
             if line.hasPrefix("```") {
-                textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: lineRange)
+                ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
+                                range: NSRange(location: r.location + offset, length: lineLen))
             }
-
-            // +1 for the newline character
-            lineStart += lineLength + 1
-            if lineStart > nsBlockText.length { break }
+            offset += lineLen + 1
         }
     }
 
     // MARK: - Blockquote
 
-    private func applyBlockquote(
-        _ block: EditorNode,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        fullSource: String,
-        settings: EditorSettings,
-        appearance: Appearance
-    ) {
-        // Apply secondaryLabelColor to the whole blockquote
-        textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: range)
+    private func applyBlockquote(_ block: EditorNode, to ts: NSTextStorage, totalLength: Int, baseFont: NSFont, settings: EditorSettings, appearance: Appearance) {
+        let r = block.sourceRange
+        ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: r)
 
-        // Color `>` markers in systemGreen
-        let blockText = block.sourceText
-        let lines = blockText.components(separatedBy: "\n")
-        var lineOffset = 0
-
-        for line in lines {
-            let nsLine = line as NSString
+        // Color > markers green
+        let blockText = block.sourceText as NSString
+        var offset = 0
+        for line in (blockText as String).components(separatedBy: "\n") {
+            let lineLen = (line as NSString).length
             var markerEnd = 0
-            while markerEnd < nsLine.length && nsLine.character(at: markerEnd) == (">").utf16.first! {
+            while markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x3E /* > */ {
                 markerEnd += 1
             }
-            // Include optional space after >
-            if markerEnd < nsLine.length && nsLine.character(at: markerEnd) == (" ").utf16.first! {
+            if markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x20 {
                 markerEnd += 1
             }
             if markerEnd > 0 {
-                let markerRange = NSRange(location: range.location + lineOffset, length: markerEnd)
-                textStorage.addAttribute(.foregroundColor, value: NSColor.systemGreen, range: markerRange)
+                ts.addAttribute(.foregroundColor, value: NSColor.systemGreen,
+                                range: NSRange(location: r.location + offset, length: markerEnd))
             }
-            lineOffset += nsLine.length + 1 // +1 for newline
+            offset += lineLen + 1
         }
 
-        // Apply children recursively
         for child in block.children {
-            applyBlock(child, to: textStorage, fullSource: fullSource,
-                       settings: settings, appearance: appearance)
+            applyBlock(child, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, appearance: appearance)
         }
     }
 
-    // MARK: - List Item
+    // MARK: - List Marker
 
-    private func applyListItem(
+    private func applyListMarker(_ block: EditorNode, to ts: NSTextStorage) {
+        let nsText = block.sourceText as NSString
+        var i = 0
+        // Skip leading whitespace
+        while i < nsText.length && (nsText.character(at: i) == 0x20 || nsText.character(at: i) == 0x09) { i += 1 }
+        // Find marker end
+        let afterWS = i
+        let ch = i < nsText.length ? nsText.character(at: i) : 0
+        if ch == 0x2D || ch == 0x2A || ch == 0x2B { // - * +
+            i += 1
+            // task list: - [ ] or - [x]
+            if i + 2 < nsText.length && nsText.character(at: i) == 0x20 && nsText.character(at: i+1) == 0x5B {
+                if let closeBracket = (nsText as String).range(of: "] ", range: Range(NSRange(location: i, length: min(5, nsText.length - i)), in: nsText as String)!) {
+                    i = (nsText as String).distance(from: (nsText as String).startIndex, to: closeBracket.upperBound)
+                    i = (nsText as String)[..<closeBracket.upperBound].utf16.count
+                }
+            }
+        } else if ch >= 0x30 && ch <= 0x39 { // digit
+            while i < nsText.length && nsText.character(at: i) >= 0x30 && nsText.character(at: i) <= 0x39 { i += 1 }
+            if i < nsText.length && nsText.character(at: i) == 0x2E { i += 1 } // .
+        }
+        // trailing space
+        if i < nsText.length && nsText.character(at: i) == 0x20 { i += 1 }
+        if i > afterWS {
+            ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
+                            range: NSRange(location: block.sourceRange.location, length: i))
+        }
+    }
+
+    // MARK: - Inlines
+
+    private func applyInlines(
         _ block: EditorNode,
-        marker: ListMarker,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        fullSource: String,
+        to ts: NSTextStorage,
+        totalLength: Int,
+        baseFont: NSFont,
         settings: EditorSettings,
         appearance: Appearance
     ) {
-        // Find the marker prefix (-, *, or "1.") in secondaryLabelColor
-        let blockText = block.sourceText
-        let nsBlockText = blockText as NSString
-        var markerLength = 0
-
-        // Skip leading whitespace
-        while markerLength < nsBlockText.length &&
-              (blockText.unicodeScalars[blockText.index(blockText.startIndex, offsetBy: markerLength)] == " " ||
-               blockText.unicodeScalars[blockText.index(blockText.startIndex, offsetBy: markerLength)] == "\t") {
-            markerLength += 1
-        }
-
-        // Find the marker itself
-        let afterSpace = markerLength
-        switch marker {
-        case .bullet:
-            // -, *, or +
-            if afterSpace < nsBlockText.length {
-                let c = nsBlockText.character(at: afterSpace)
-                if c == ("-" as NSString).character(at: 0) ||
-                   c == ("*" as NSString).character(at: 0) ||
-                   c == ("+" as NSString).character(at: 0) {
-                    markerLength += 1
-                }
-            }
-        case .ordered:
-            // Digits followed by "."
-            while markerLength < nsBlockText.length {
-                let c = nsBlockText.character(at: markerLength)
-                if c >= ("0" as NSString).character(at: 0) && c <= ("9" as NSString).character(at: 0) {
-                    markerLength += 1
-                } else {
-                    break
-                }
-            }
-            if markerLength < nsBlockText.length && nsBlockText.character(at: markerLength) == (".").utf16.first! {
-                markerLength += 1
-            }
-        }
-        // Include trailing space after marker
-        if markerLength < nsBlockText.length && nsBlockText.character(at: markerLength) == (" ").utf16.first! {
-            markerLength += 1
-        }
-
-        if markerLength > 0 {
-            let markerRange = NSRange(location: range.location, length: markerLength)
-            textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: markerRange)
-        }
-
-        applyInlineRuns(block, range: range, to: textStorage,
-                        fullSource: fullSource, settings: settings, appearance: appearance)
-    }
-
-    // MARK: - Inline Runs
-
-    private func applyInlineRuns(
-        _ block: EditorNode,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        fullSource: String,
-        settings: EditorSettings,
-        appearance: Appearance,
-        baseFont: NSFont? = nil
-    ) {
-        let font = baseFont ?? self.baseFont(settings: settings)
-
         for run in block.inlineRuns {
-            // run.range is relative to block.sourceText
-            let blockText = block.sourceText
-            guard run.range.lowerBound >= blockText.startIndex,
-                  run.range.upperBound <= blockText.endIndex else { continue }
+            // run.range is relative to block.sourceText; convert to absolute
+            let absRange = NSRange(location: block.sourceRange.location + run.range.location,
+                                   length: run.range.length)
+            guard absRange.location >= 0, absRange.location + absRange.length <= totalLength else { continue }
 
-            // Convert to fullSource-relative range
-            let runInBlockNS = NSRange(run.range, in: blockText)
-            guard runInBlockNS.location != NSNotFound else { continue }
-
-            let runRange = NSRange(location: range.location + runInBlockNS.location,
-                                   length: runInBlockNS.length)
-            guard runRange.location + runRange.length <= (textStorage.string as NSString).length else { continue }
-
-            applyInlineStyle(run.type, range: runRange, to: textStorage,
-                             settings: settings, appearance: appearance, baseFont: font)
+            switch run.type {
+            case .bold:
+                ts.addAttribute(.font, value: NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask), range: absRange)
+                colorDelimiters("**", range: absRange, in: ts)
+            case .italic:
+                ts.addAttribute(.font, value: NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask), range: absRange)
+                colorDelimiters("*", range: absRange, in: ts)
+            case .boldItalic:
+                let bold = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
+                ts.addAttribute(.font, value: NSFontManager.shared.convert(bold, toHaveTrait: .italicFontMask), range: absRange)
+                colorDelimiters("***", range: absRange, in: ts)
+            case .strikethrough:
+                ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: absRange)
+                colorDelimiters("~~", range: absRange, in: ts)
+            case .inlineCode:
+                let mono = NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .regular)
+                ts.addAttribute(.font, value: mono, range: absRange)
+                let bg = appearance == .dark ? NSColor.white.withAlphaComponent(0.08) : NSColor.black.withAlphaComponent(0.06)
+                ts.addAttribute(.backgroundColor, value: bg, range: absRange)
+                colorDelimiters("`", range: absRange, in: ts)
+            case .link:
+                ts.addAttribute(.foregroundColor, value: NSColor.linkColor, range: absRange)
+                ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: absRange)
+            case .image:
+                ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: absRange)
+            case .text, .lineBreak:
+                break
+            }
         }
     }
 
-    private func applyInlineStyle(
-        _ type: InlineType,
-        range: NSRange,
-        to textStorage: NSTextStorage,
-        settings: EditorSettings,
-        appearance: Appearance,
-        baseFont: NSFont
-    ) {
-        switch type {
-        case .bold:
-            let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-            textStorage.addAttribute(.font, value: boldFont, range: range)
-            colorOuterDelimiters(in: textStorage, range: range, delimiter: "**",
-                                 color: NSColor.secondaryLabelColor)
-
-        case .italic:
-            let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
-            textStorage.addAttribute(.font, value: italicFont, range: range)
-            colorOuterDelimiters(in: textStorage, range: range, delimiter: "*",
-                                 color: NSColor.secondaryLabelColor)
-
-        case .boldItalic:
-            var boldItalicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-            boldItalicFont = NSFontManager.shared.convert(boldItalicFont, toHaveTrait: .italicFontMask)
-            textStorage.addAttribute(.font, value: boldItalicFont, range: range)
-            colorOuterDelimiters(in: textStorage, range: range, delimiter: "***",
-                                 color: NSColor.secondaryLabelColor)
-
-        case .strikethrough:
-            textStorage.addAttribute(.strikethroughStyle,
-                                     value: NSUnderlineStyle.single.rawValue, range: range)
-            colorOuterDelimiters(in: textStorage, range: range, delimiter: "~~",
-                                 color: NSColor.secondaryLabelColor)
-
-        case .inlineCode:
-            let monoFont = monospacedFont(size: baseFont.pointSize)
-            let bgColor = appearance == .dark
-                ? NSColor.white.withAlphaComponent(0.08)
-                : NSColor.black.withAlphaComponent(0.06)
-            textStorage.addAttribute(.font, value: monoFont, range: range)
-            textStorage.addAttribute(.backgroundColor, value: bgColor, range: range)
-            colorOuterDelimiters(in: textStorage, range: range, delimiter: "`",
-                                 color: NSColor.secondaryLabelColor)
-
-        case .link:
-            textStorage.addAttribute(.foregroundColor, value: NSColor.linkColor, range: range)
-            textStorage.addAttribute(.underlineStyle,
-                                     value: NSUnderlineStyle.single.rawValue, range: range)
-
-        case .image:
-            textStorage.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor, range: range)
-
-        case .text, .lineBreak:
-            break
-        }
+    private func colorDelimiters(_ delimiter: String, range: NSRange, in ts: NSTextStorage) {
+        let dLen = (delimiter as NSString).length
+        guard range.length >= dLen * 2 else { return }
+        let text = (ts.string as NSString).substring(with: range)
+        guard text.hasPrefix(delimiter), text.hasSuffix(delimiter) else { return }
+        ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
+                        range: NSRange(location: range.location, length: dLen))
+        ts.addAttribute(.foregroundColor, value: NSColor.secondaryLabelColor,
+                        range: NSRange(location: range.location + range.length - dLen, length: dLen))
     }
 
-    // MARK: - Delimiter Coloring
-
-    /// Colors the leading and trailing delimiter characters of a run in the given color.
-    private func colorOuterDelimiters(
-        in textStorage: NSTextStorage,
-        range: NSRange,
-        delimiter: String,
-        color: NSColor
-    ) {
-        let nsStorage = textStorage.string as NSString
-        let delimLen = (delimiter as NSString).length
-        guard range.length >= delimLen * 2 else { return }
-
-        let runText = nsStorage.substring(with: range)
-        guard runText.hasPrefix(delimiter) && runText.hasSuffix(delimiter) else { return }
-
-        let leadingRange = NSRange(location: range.location, length: delimLen)
-        let trailingRange = NSRange(location: range.location + range.length - delimLen, length: delimLen)
-
-        textStorage.addAttribute(.foregroundColor, value: color, range: leadingRange)
-        textStorage.addAttribute(.foregroundColor, value: color, range: trailingRange)
-    }
-
-    // MARK: - Font & Style Helpers
+    // MARK: - Helpers
 
     private func baseFont(settings: EditorSettings) -> NSFont {
-        if let font = NSFont(name: settings.fontFamily, size: settings.fontSize) {
-            return font
-        }
-        return NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
-    }
-
-    private func monospacedFont(size: CGFloat) -> NSFont {
-        NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
+        NSFont(name: settings.fontFamily, size: settings.fontSize)
+            ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
     }
 
     private func baseParagraphStyle(settings: EditorSettings) -> NSMutableParagraphStyle {
-        let style = NSMutableParagraphStyle()
-        style.lineSpacing = settings.lineSpacing
-        return style
-    }
-
-    private func primaryTextColor(appearance: Appearance) -> NSColor {
-        NSColor.labelColor
-    }
-}
-
-// MARK: - NSRange Helpers
-
-private extension NSRange {
-    /// Shifts the location of an `NSRange` by `offset`.
-    func shifted(by offset: Int) -> NSRange {
-        NSRange(location: location + offset, length: length)
+        let s = NSMutableParagraphStyle()
+        s.lineSpacing = settings.lineSpacing
+        return s
     }
 }

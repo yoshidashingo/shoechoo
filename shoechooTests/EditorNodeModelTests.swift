@@ -106,7 +106,7 @@ struct EditorNodeModelTests {
         let source = "# Hello\n\nWorld"
         let model = modelWithSource(source)
 
-        let blockID = model.resolveActiveBlock(cursorOffset: 2, in: source)
+        let blockID = model.resolveActiveBlock(cursorOffset: 2)
         #expect(blockID != nil)
         #expect(blockID == model.blocks[0].id)
     }
@@ -117,8 +117,8 @@ struct EditorNodeModelTests {
         let model = modelWithSource(source)
 
         // Cursor in "World" paragraph (after "# Hello\n\n")
-        let offset = "# Hello\n\n".count + 1
-        let blockID = model.resolveActiveBlock(cursorOffset: offset, in: source)
+        let offset = ("# Hello\n\n" as NSString).length + 1
+        let blockID = model.resolveActiveBlock(cursorOffset: offset)
         #expect(blockID != nil)
         #expect(blockID == model.blocks[1].id)
     }
@@ -126,7 +126,7 @@ struct EditorNodeModelTests {
     @Test("Resolve active block returns nil for empty model")
     func resolveActiveBlockEmptyModel() {
         let model = EditorNodeModel()
-        let blockID = model.resolveActiveBlock(cursorOffset: 0, in: "")
+        let blockID = model.resolveActiveBlock(cursorOffset: 0)
         #expect(blockID == nil)
     }
 

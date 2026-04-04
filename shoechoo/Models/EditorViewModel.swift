@@ -1,22 +1,12 @@
 import AppKit
-import Combine
 
 @Observable
 @MainActor
 final class EditorViewModel {
     var sourceText: String = ""
-    var nodeModel = EditorNodeModel()
     var cursorPosition: Int = 0
     var isFocusModeEnabled: Bool
     var isTypewriterScrollEnabled: Bool
-
-    private let parser = MarkdownParser()
-    private var parseTask: Task<Void, Never>?
-    private var revision: UInt64 = 0
-
-    var changedBlockIDs: Set<EditorNode.ID> = []
-    var needsFullRerender: Bool = false
-
     var isIMEComposing: Bool = false
     var lastError: String?
 
@@ -26,58 +16,6 @@ final class EditorViewModel {
         self.settings = settings
         self.isFocusModeEnabled = settings.defaultFocusMode
         self.isTypewriterScrollEnabled = settings.defaultTypewriterScroll
-    }
-
-    func textDidChange(_ newText: String, editedRange: NSRange) {
-        guard !isIMEComposing else { return }
-        sourceText = newText
-        scheduleParse()
-    }
-
-    func cursorDidMove(to position: Int) {
-        guard !isIMEComposing else { return }
-        cursorPosition = position
-        let newActiveID = nodeModel.resolveActiveBlock(cursorOffset: position, in: sourceText)
-        let changed = nodeModel.setActiveBlock(newActiveID)
-        if !changed.isEmpty {
-            changedBlockIDs = changed
-        }
-    }
-
-    private func scheduleParse() {
-        parseTask?.cancel()
-        revision += 1
-        let currentRevision = revision
-        let text = sourceText
-        let parser = self.parser
-
-        parseTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(50))
-            guard !Task.isCancelled else { return }
-
-            let result = parser.parse(text, revision: currentRevision)
-
-            guard let self, !Task.isCancelled else { return }
-            self.nodeModel.applyParseResult(result)
-            self.needsFullRerender = true
-
-            let activeID = self.nodeModel.resolveActiveBlock(cursorOffset: self.cursorPosition, in: self.sourceText)
-            self.nodeModel.setActiveBlock(activeID)
-        }
-    }
-
-    func applySyntaxHighlighting(to textStorage: NSTextStorage, appearance: NSAppearance) {
-        let highlighter = SyntaxHighlighter()
-        let highlighterAppearance: SyntaxHighlighter.Appearance =
-            appearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil ? .dark : .light
-        highlighter.apply(
-            to: textStorage,
-            blocks: nodeModel.blocks,
-            settings: settings,
-            appearance: highlighterAppearance
-        )
-        needsFullRerender = false
-        changedBlockIDs.removeAll()
     }
 
     func toggleBold() {

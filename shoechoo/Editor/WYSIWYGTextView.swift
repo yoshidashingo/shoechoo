@@ -6,16 +6,13 @@ struct WYSIWYGTextView: NSViewRepresentable {
     var settings: EditorSettings
 
     func makeNSView(context: Context) -> NSScrollView {
-        let textStorage = NSTextStorage()
-        let layoutManager = NSLayoutManager()
-        textStorage.addLayoutManager(layoutManager)
+        let scrollView = ShoechooScrollView()
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.autohidesScrollers = true
+        scrollView.drawsBackground = true
 
-        let textContainer = NSTextContainer()
-        textContainer.widthTracksTextView = true
-        textContainer.heightTracksTextView = false
-        layoutManager.addTextContainer(textContainer)
-
-        let textView = ShoechooTextView(frame: .zero, textContainer: textContainer)
+        let textView = ShoechooTextView()
         textView.isEditable = true
         textView.isSelectable = true
         textView.allowsUndo = true
@@ -25,84 +22,44 @@ struct WYSIWYGTextView: NSViewRepresentable {
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false
         textView.isAutomaticSpellingCorrectionEnabled = false
-        textView.isContinuousSpellCheckingEnabled = true
-        textView.isGrammarCheckingEnabled = true
+        textView.isContinuousSpellCheckingEnabled = false
+        textView.isGrammarCheckingEnabled = false
+        textView.isHorizontallyResizable = false
+        textView.isVerticallyResizable = true
+        textView.autoresizingMask = [.width]
         textView.textContainerInset = NSSize(width: 40, height: 20)
-        textView.drawsBackground = true
-        textView.backgroundColor = .textBackgroundColor
-        textView.delegate = context.coordinator
+        textView.textContainer?.widthTracksTextView = true
 
         let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
             ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
         textView.font = font
-        textView.typingAttributes = [
-            .font: font,
-            .foregroundColor: NSColor.labelColor
-        ]
 
+        scrollView.documentView = textView
+
+        // Set content BEFORE delegate
         if !viewModel.sourceText.isEmpty {
             textView.string = viewModel.sourceText
         }
 
-        let scrollView = NSScrollView()
-        scrollView.documentView = textView
-        scrollView.hasVerticalScroller = true
-        scrollView.hasHorizontalScroller = false
-        scrollView.autohidesScrollers = true
-        scrollView.drawsBackground = true
-        scrollView.backgroundColor = .textBackgroundColor
-
+        textView.delegate = context.coordinator
         context.coordinator.textView = textView
+        context.coordinator.scrollView = scrollView
+
+        // Apply appearance
+        context.coordinator.applyAppearance(settings: settings)
         context.coordinator.registerNotifications()
+
+        // Initial highlight
+        if !viewModel.sourceText.isEmpty {
+            context.coordinator.scheduleHighlight()
+        }
 
         return scrollView
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        guard let textView = scrollView.documentView as? ShoechooTextView else { return }
-
-        // Apply appearance override
-        switch settings.appearanceOverride {
-        case .light:
-            scrollView.appearance = NSAppearance(named: .aqua)
-        case .dark:
-            scrollView.appearance = NSAppearance(named: .darkAqua)
-        case .system:
-            scrollView.appearance = nil
-        }
-
-        // Update font in typing attributes
-        let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
-            ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
-        textView.typingAttributes = [
-            .font: font,
-            .foregroundColor: NSColor.labelColor
-        ]
-
-        // Apply syntax highlighting (attributes only, never change text content)
-        if viewModel.needsFullRerender || !viewModel.changedBlockIDs.isEmpty {
-            if let textStorage = textView.textStorage {
-                let appearance = textView.effectiveAppearance
-                viewModel.applySyntaxHighlighting(to: textStorage, appearance: appearance)
-            }
-        }
-
-        // Focus mode dimming
-        if viewModel.isFocusModeEnabled {
-            if let activeID = viewModel.nodeModel.activeBlockID,
-               let activeBlock = viewModel.nodeModel.block(withID: activeID) {
-                let nsRange = NSRange(activeBlock.sourceRange, in: viewModel.sourceText)
-                textView.applyFocusModeDimming(activeBlockRange: nsRange)
-            }
-        } else {
-            textView.removeFocusModeDimming()
-        }
-
-        // Typewriter scroll
-        if viewModel.isTypewriterScrollEnabled {
-            let cursorRange = NSRange(location: viewModel.cursorPosition, length: 0)
-            textView.scrollToCenterLine(cursorRange)
-        }
+        // Only update appearance — never touch text or attributes
+        context.coordinator.applyAppearance(settings: settings)
     }
 
     func makeCoordinator() -> Coordinator {
@@ -115,7 +72,8 @@ struct WYSIWYGTextView: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: WYSIWYGTextView
         weak var textView: ShoechooTextView?
-        var isUpdating = false
+        weak var scrollView: NSScrollView?
+        nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
 
         init(_ parent: WYSIWYGTextView) {
@@ -123,29 +81,83 @@ struct WYSIWYGTextView: NSViewRepresentable {
         }
 
         deinit {
+            highlightTimer?.invalidate()
             for observer in notificationObservers {
                 NotificationCenter.default.removeObserver(observer)
             }
         }
 
+        func applyAppearance(settings: EditorSettings) {
+            guard let textView, let scrollView else { return }
+
+            switch settings.appearanceOverride {
+            case .light: scrollView.appearance = NSAppearance(named: .aqua)
+            case .dark: scrollView.appearance = NSAppearance(named: .darkAqua)
+            case .system: scrollView.appearance = nil
+            }
+
+            let isDark = textView.effectiveAppearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
+            let bgColor: NSColor = isDark ? NSColor(red: 0.118, green: 0.118, blue: 0.141, alpha: 1.0) : .white
+            let fgColor: NSColor = isDark ? .white : .black
+
+            textView.drawsBackground = true
+            textView.backgroundColor = bgColor
+            scrollView.backgroundColor = bgColor
+            textView.insertionPointColor = fgColor
+
+            let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
+                ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
+            textView.typingAttributes = [.font: font, .foregroundColor: fgColor]
+        }
+
+        // MARK: - Highlight
+
+        func scheduleHighlight() {
+            highlightTimer?.invalidate()
+            highlightTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.applyHighlightNow()
+                }
+            }
+        }
+
+        private func applyHighlightNow() {
+            guard let textView, let ts = textView.textStorage else { return }
+            guard ts.length > 0 else { return }
+
+            let text = textView.string
+            let parser = MarkdownParser()
+            let result = parser.parse(text, revision: 0)
+
+            let isDark = textView.effectiveAppearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
+            let appearance: SyntaxHighlighter.Appearance = isDark ? .dark : .light
+
+            let savedSelection = textView.selectedRange()
+            let highlighter = SyntaxHighlighter()
+            highlighter.apply(to: ts, blocks: result.blocks, settings: parent.settings, appearance: appearance)
+
+            let safe = min(savedSelection.location, ts.length)
+            textView.setSelectedRange(NSRange(location: safe, length: 0))
+        }
+
+        // MARK: - Delegate
+
         func textDidChange(_ notification: Notification) {
-            guard !isUpdating,
-                  let textView = notification.object as? NSTextView else { return }
-            let newText = textView.string
-            let editedRange = textView.textStorage?.editedRange ?? NSRange(location: 0, length: 0)
-            parent.viewModel.textDidChange(newText, editedRange: editedRange)
+            guard let textView = notification.object as? NSTextView else { return }
+            parent.viewModel.sourceText = textView.string
+            scheduleHighlight()
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
-            guard !isUpdating,
-                  let textView = notification.object as? NSTextView else { return }
-            let position = textView.selectedRange().location
-            let composing = textView.hasMarkedText()
-            parent.viewModel.isIMEComposing = composing
-            if !composing {
-                parent.viewModel.cursorDidMove(to: position)
+            guard let textView = notification.object as? NSTextView else { return }
+            let pos = textView.selectedRange().location
+            if !textView.hasMarkedText() {
+                parent.viewModel.cursorPosition = pos
             }
+            parent.viewModel.isIMEComposing = textView.hasMarkedText()
         }
+
+        // MARK: - Notifications
 
         func registerNotifications() {
             let toggleObs = NotificationCenter.default.addObserver(
@@ -157,7 +169,6 @@ struct WYSIWYGTextView: NSViewRepresentable {
                     self?.handleToggleFormatting(prefix: prefix, suffix: suffix)
                 }
             }
-
             let insertObs = NotificationCenter.default.addObserver(
                 forName: .insertFormattedText, object: nil, queue: .main
             ) { [weak self] notification in
@@ -167,7 +178,6 @@ struct WYSIWYGTextView: NSViewRepresentable {
                     self?.handleInsertText(text: text, cursorOffset: cursorOffset)
                 }
             }
-
             let prefixObs = NotificationCenter.default.addObserver(
                 forName: .setLinePrefix, object: nil, queue: .main
             ) { [weak self] notification in
@@ -176,58 +186,48 @@ struct WYSIWYGTextView: NSViewRepresentable {
                     self?.handleSetLinePrefix(prefix: prefix)
                 }
             }
-
             notificationObservers = [toggleObs, insertObs, prefixObs]
         }
 
         private func handleToggleFormatting(prefix: String?, suffix: String?) {
-            guard let textView,
-                  let prefix = prefix,
-                  let suffix = suffix else { return }
-
-            let selectedRange = textView.selectedRange()
-            guard selectedRange.length > 0 else { return }
-
-            let text = textView.string as NSString
-            let selectedText = text.substring(with: selectedRange)
-
-            if selectedText.hasPrefix(prefix) && selectedText.hasSuffix(suffix) {
-                let stripped = String(selectedText.dropFirst(prefix.count).dropLast(suffix.count))
-                textView.insertText(stripped, replacementRange: selectedRange)
+            guard let textView, let prefix, let suffix else { return }
+            let sel = textView.selectedRange()
+            guard sel.length > 0 else { return }
+            let text = (textView.string as NSString).substring(with: sel)
+            if text.hasPrefix(prefix) && text.hasSuffix(suffix) {
+                textView.insertText(String(text.dropFirst(prefix.count).dropLast(suffix.count)), replacementRange: sel)
             } else {
-                let formatted = prefix + selectedText + suffix
-                textView.insertText(formatted, replacementRange: selectedRange)
+                textView.insertText(prefix + text + suffix, replacementRange: sel)
             }
         }
 
         private func handleInsertText(text: String?, cursorOffset: Int?) {
-            guard let textView,
-                  let text = text,
-                  let cursorOffset = cursorOffset else { return }
-
-            let selectedRange = textView.selectedRange()
-            textView.insertText(text, replacementRange: selectedRange)
-
-            let newPos = selectedRange.location + cursorOffset
-            textView.setSelectedRange(NSRange(location: newPos, length: 0))
+            guard let textView, let text, let cursorOffset else { return }
+            let sel = textView.selectedRange()
+            textView.insertText(text, replacementRange: sel)
+            textView.setSelectedRange(NSRange(location: sel.location + cursorOffset, length: 0))
         }
 
         private func handleSetLinePrefix(prefix: String?) {
-            guard let textView,
-                  let prefix = prefix else { return }
-
-            let text = textView.string as NSString
-            let selectedRange = textView.selectedRange()
-            let lineRange = text.lineRange(for: NSRange(location: selectedRange.location, length: 0))
-            let lineText = text.substring(with: lineRange)
-
-            let stripped = lineText.replacingOccurrences(
-                of: "^#{1,6}\\s*",
-                with: "",
-                options: .regularExpression
-            )
-            let newLine = prefix + stripped
-            textView.insertText(newLine, replacementRange: lineRange)
+            guard let textView, let prefix else { return }
+            let ns = textView.string as NSString
+            let sel = textView.selectedRange()
+            let lineRange = ns.lineRange(for: NSRange(location: sel.location, length: 0))
+            let lineText = ns.substring(with: lineRange)
+            let stripped = lineText.replacingOccurrences(of: "^#{1,6}\\s*", with: "", options: .regularExpression)
+            textView.insertText(prefix + stripped, replacementRange: lineRange)
         }
+    }
+}
+
+/// NSScrollView subclass so SwiftUI properly handles first responder.
+final class ShoechooScrollView: NSScrollView {
+    override var acceptsFirstResponder: Bool { true }
+
+    override func becomeFirstResponder() -> Bool {
+        if let textView = documentView as? NSTextView {
+            return window?.makeFirstResponder(textView) ?? false
+        }
+        return super.becomeFirstResponder()
     }
 }
