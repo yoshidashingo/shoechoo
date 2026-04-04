@@ -101,13 +101,11 @@ struct MarkdownParser: Sendable {
 
             switch child {
             case is Strong:
-                // Check if parent is Emphasis → boldItalic (#49)
-                if let emphasis = child.parent, emphasis is Emphasis {
-                    // Handled by parent Emphasis case
-                    break
-                }
+                // Check if parent is Emphasis → handled by parent
+                if child.parent is Emphasis { break }
                 // Check if child contains Emphasis → boldItalic
-                if let innerEmphasis = child.children.first(where: { $0 is Emphasis }) {
+                let hasInnerEmphasis = child.children.contains(where: { $0 is Emphasis })
+                if hasInnerEmphasis {
                     let expanded = expandRange(absRange, delimiter: "***", in: nsSource)
                     let localRange = toLocalRange(expanded, blockRange: blockRange, blockText: blockText)
                     if let lr = localRange { runs.append(InlineRun(type: .boldItalic, range: lr)) }
@@ -119,7 +117,8 @@ struct MarkdownParser: Sendable {
 
             case is Emphasis:
                 // Check if child contains Strong → boldItalic
-                if let innerStrong = child.children.first(where: { $0 is Strong }) {
+                let hasInnerStrong = child.children.contains(where: { $0 is Strong })
+                if hasInnerStrong {
                     let expanded = expandRange(absRange, delimiter: "***", in: nsSource)
                     let localRange = toLocalRange(expanded, blockRange: blockRange, blockText: blockText)
                     if let lr = localRange { runs.append(InlineRun(type: .boldItalic, range: lr)) }

@@ -328,7 +328,9 @@ struct SyntaxHighlighter {
             if textLen > 0 {
                 let textRange = NSRange(location: textStart, length: textLen)
                 ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: textRange)
-                ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: textRange)
+                if !isActive {
+                    ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: textRange)
+                }
             }
 
             let openBracket = NSRange(location: range.location, length: 1)
@@ -386,7 +388,7 @@ struct SyntaxHighlighter {
                 let altStart = r.location + 2
                 let altLen = altClose.location - 2
                 if altLen > 0 {
-                    ts.addAttribute(.foregroundColor, value: theme.blockquoteColor.nsColor,
+                    ts.addAttribute(.foregroundColor, value: theme.textColor.nsColor,
                                     range: NSRange(location: altStart, length: altLen))
                 }
                 // Hide "](url)"
@@ -478,7 +480,7 @@ struct SyntaxHighlighter {
     private func hideRange(_ range: NSRange, in ts: NSTextStorage, bgColor: NSColor) {
         ts.addAttribute(.font, value: Self.hiddenFont, range: range)
         ts.addAttribute(.foregroundColor, value: bgColor, range: range)
-        // (hidden range rendering)
+        ts.removeAttribute(.backgroundColor, range: range)
     }
 
     // MARK: - Font/Style Helpers
