@@ -151,9 +151,10 @@ struct WYSIWYGTextView: NSViewRepresentable {
             nodeModel.applyParseResult(result)
 
             let savedSelection = textView.selectedRange()
+            let activeBlockID = nodeModel.resolveActiveBlock(cursorOffset: savedSelection.location)
             let highlighter = SyntaxHighlighter()
             let theme = parent.themeRegistry.activeTheme
-            highlighter.apply(to: ts, blocks: nodeModel.blocks, settings: parent.settings, theme: theme)
+            highlighter.apply(to: ts, blocks: nodeModel.blocks, activeBlockID: activeBlockID, settings: parent.settings, theme: theme)
 
             // Apply focus mode dimming after highlight so it overlays correctly
             updateFocusModeDimming(cursorPosition: savedSelection.location)

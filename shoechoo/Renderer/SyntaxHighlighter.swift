@@ -1,13 +1,17 @@
 import AppKit
 
-/// Applies syntax-highlighting attributes to an `NSTextStorage` WITHOUT changing text content.
-/// All ranges are NSRange (UTF-16 offsets) — no String.Index involved.
+/// WYSIWYG syntax highlighter: inactive blocks hide delimiters, active block shows raw markdown.
+/// Text content is never modified — only attributes (font, color, size) are changed.
 @MainActor
 struct SyntaxHighlighter {
+
+    /// The tiny font used to visually hide delimiter characters in inactive blocks.
+    private static let hiddenFont = NSFont.systemFont(ofSize: 0.01)
 
     func apply(
         to textStorage: NSTextStorage,
         blocks: [EditorNode],
+        activeBlockID: EditorNode.ID?,
         settings: EditorSettings,
         theme: EditorTheme
     ) {
@@ -15,12 +19,11 @@ struct SyntaxHighlighter {
         guard totalLength > 0 else { return }
 
         let baseFont = self.baseFont(settings: settings)
-        let baseColor: NSColor = theme.textColor.nsColor
+        let baseColor = theme.textColor.nsColor
         let paraStyle = baseParagraphStyle(settings: settings)
 
         textStorage.beginEditing()
 
-        // Reset all attributes
         let fullRange = NSRange(location: 0, length: totalLength)
         textStorage.setAttributes([
             .font: baseFont,
@@ -29,17 +32,21 @@ struct SyntaxHighlighter {
         ], range: fullRange)
 
         for block in blocks {
-            applyBlock(block, to: textStorage, totalLength: totalLength,
+            let isActive = block.id == activeBlockID
+            applyBlock(block, isActive: isActive, activeBlockID: activeBlockID,
+                       to: textStorage, totalLength: totalLength,
                        baseFont: baseFont, settings: settings, theme: theme)
         }
 
         textStorage.endEditing()
     }
 
-    // MARK: - Block
+    // MARK: - Block Dispatch
 
     private func applyBlock(
         _ block: EditorNode,
+        isActive: Bool,
+        activeBlockID: EditorNode.ID?,
         to ts: NSTextStorage,
         totalLength: Int,
         baseFont: NSFont,
@@ -51,27 +58,29 @@ struct SyntaxHighlighter {
 
         switch block.kind {
         case .heading(let level):
-            applyHeading(block, level: level, to: ts, baseFont: baseFont, settings: settings, theme: theme)
+            applyHeading(block, level: level, isActive: isActive, to: ts,
+                         baseFont: baseFont, settings: settings, theme: theme)
         case .codeBlock:
-            applyCodeBlock(r, to: ts, settings: settings, theme: theme)
+            applyCodeBlock(block, isActive: isActive, to: ts, settings: settings, theme: theme)
         case .blockquote:
-            applyBlockquote(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+            applyBlockquote(block, isActive: isActive, activeBlockID: activeBlockID, to: ts,
+                            totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
         case .unorderedList, .orderedList:
             for child in block.children {
-                applyBlock(child, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+                let childActive = child.id == activeBlockID
+                applyBlock(child, isActive: childActive, activeBlockID: activeBlockID,
+                           to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
             }
-        case .listItem:
-            applyListMarker(block, to: ts, theme: theme)
-            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
-        case .taskListItem:
-            applyListMarker(block, to: ts, theme: theme)
-            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+        case .listItem, .taskListItem:
+            applyListItem(block, isActive: isActive, to: ts, totalLength: totalLength,
+                          baseFont: baseFont, settings: settings, theme: theme)
         case .horizontalRule:
             ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
             ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: r)
             ts.addAttribute(.strikethroughColor, value: theme.delimiterColor.nsColor, range: r)
         case .paragraph:
-            applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+            applyInlines(block, isActive: isActive, to: ts, totalLength: totalLength,
+                         baseFont: baseFont, settings: settings, theme: theme)
         case .image:
             ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
         case .table, .tableRow:
@@ -81,7 +90,10 @@ struct SyntaxHighlighter {
 
     // MARK: - Heading
 
-    private func applyHeading(_ block: EditorNode, level: Int, to ts: NSTextStorage, baseFont: NSFont, settings: EditorSettings, theme: EditorTheme) {
+    private func applyHeading(
+        _ block: EditorNode, level: Int, isActive: Bool,
+        to ts: NSTextStorage, baseFont: NSFont, settings: EditorSettings, theme: EditorTheme
+    ) {
         let r = block.sourceRange
         let fontSize: CGFloat = switch level {
         case 1: 28; case 2: 24; case 3: 20; case 4: 18; case 5: 16
@@ -89,45 +101,54 @@ struct SyntaxHighlighter {
         }
         let headingFont = NSFont.boldSystemFont(ofSize: fontSize)
         ts.addAttribute(.font, value: headingFont, range: r)
-        let headingColor = theme.headingColor(for: level).nsColor
-        ts.addAttribute(.foregroundColor, value: headingColor, range: r)
+        ts.addAttribute(.foregroundColor, value: theme.headingColor(for: level).nsColor, range: r)
         ts.addAttribute(.paragraphStyle, value: headingParagraphStyle(settings: settings), range: r)
 
-        // Color # prefix
+        // # prefix
         let nsText = block.sourceText as NSString
         var prefixLen = 0
-        while prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x23 /* # */ {
-            prefixLen += 1
-        }
-        if prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x20 /* space */ {
-            prefixLen += 1
-        }
+        while prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x23 { prefixLen += 1 }
+        if prefixLen < nsText.length && nsText.character(at: prefixLen) == 0x20 { prefixLen += 1 }
+
         if prefixLen > 0 {
-            let fadedDelim = theme.delimiterColor.nsColor.withAlphaComponent(0.35)
-            ts.addAttribute(.foregroundColor, value: fadedDelim,
-                            range: NSRange(location: r.location, length: prefixLen))
+            let prefixRange = NSRange(location: r.location, length: prefixLen)
+            if isActive {
+                // Show # in delimiter color
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: prefixRange)
+            } else {
+                // Hide # by making it invisible
+                hideRange(prefixRange, in: ts, bgColor: theme.backgroundColor.nsColor)
+            }
         }
 
-        applyInlines(block, to: ts, totalLength: ts.length, baseFont: headingFont, settings: settings, theme: theme)
+        applyInlines(block, isActive: isActive, to: ts, totalLength: ts.length,
+                     baseFont: headingFont, settings: settings, theme: theme)
     }
 
     // MARK: - Code Block
 
-    private func applyCodeBlock(_ r: NSRange, to ts: NSTextStorage, settings: EditorSettings, theme: EditorTheme) {
+    private func applyCodeBlock(
+        _ block: EditorNode, isActive: Bool,
+        to ts: NSTextStorage, settings: EditorSettings, theme: EditorTheme
+    ) {
+        let r = block.sourceRange
         let mono = NSFont(name: theme.codeFontFamily, size: settings.fontSize)
             ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
         ts.addAttribute(.font, value: mono, range: r)
-        let bg = theme.codeBackgroundColor.nsColor
-        ts.addAttribute(.backgroundColor, value: bg, range: r)
+        ts.addAttribute(.backgroundColor, value: theme.codeBackgroundColor.nsColor, range: r)
 
-        // Color ``` fence lines
+        // Fence lines
         let blockText = (ts.string as NSString).substring(with: r) as NSString
         var offset = 0
         for line in (blockText as String).components(separatedBy: "\n") {
             let lineLen = (line as NSString).length
             if line.hasPrefix("```") {
-                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
-                                range: NSRange(location: r.location + offset, length: lineLen))
+                let fenceRange = NSRange(location: r.location + offset, length: lineLen)
+                if isActive {
+                    ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: fenceRange)
+                } else {
+                    hideRange(fenceRange, in: ts, bgColor: theme.codeBackgroundColor.nsColor)
+                }
             }
             offset += lineLen + 1
         }
@@ -135,79 +156,90 @@ struct SyntaxHighlighter {
 
     // MARK: - Blockquote
 
-    private func applyBlockquote(_ block: EditorNode, to ts: NSTextStorage, totalLength: Int, baseFont: NSFont, settings: EditorSettings, theme: EditorTheme) {
+    private func applyBlockquote(
+        _ block: EditorNode, isActive: Bool, activeBlockID: EditorNode.ID?,
+        to ts: NSTextStorage, totalLength: Int, baseFont: NSFont,
+        settings: EditorSettings, theme: EditorTheme
+    ) {
         let r = block.sourceRange
         ts.addAttribute(.foregroundColor, value: theme.blockquoteColor.nsColor, range: r)
 
-        // Color > markers with blockquoteMarkerColor
         let blockText = block.sourceText as NSString
         var offset = 0
         for line in (blockText as String).components(separatedBy: "\n") {
             let lineLen = (line as NSString).length
             var markerEnd = 0
-            while markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x3E /* > */ {
-                markerEnd += 1
-            }
-            if markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x20 {
-                markerEnd += 1
-            }
+            while markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x3E { markerEnd += 1 }
+            if markerEnd < lineLen && (line as NSString).character(at: markerEnd) == 0x20 { markerEnd += 1 }
             if markerEnd > 0 {
-                ts.addAttribute(.foregroundColor, value: theme.blockquoteMarkerColor.nsColor,
-                                range: NSRange(location: r.location + offset, length: markerEnd))
+                let markerRange = NSRange(location: r.location + offset, length: markerEnd)
+                if isActive {
+                    ts.addAttribute(.foregroundColor, value: theme.blockquoteMarkerColor.nsColor, range: markerRange)
+                } else {
+                    hideRange(markerRange, in: ts, bgColor: theme.backgroundColor.nsColor)
+                }
             }
             offset += lineLen + 1
         }
 
         for child in block.children {
-            applyBlock(child, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+            let childActive = child.id == activeBlockID
+            applyBlock(child, isActive: childActive, activeBlockID: activeBlockID,
+                       to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
         }
     }
 
-    // MARK: - List Marker
+    // MARK: - List Item
 
-    private func applyListMarker(_ block: EditorNode, to ts: NSTextStorage, theme: EditorTheme) {
+    private func applyListItem(
+        _ block: EditorNode, isActive: Bool,
+        to ts: NSTextStorage, totalLength: Int, baseFont: NSFont,
+        settings: EditorSettings, theme: EditorTheme
+    ) {
         let nsText = block.sourceText as NSString
         var i = 0
-        // Skip leading whitespace
         while i < nsText.length && (nsText.character(at: i) == 0x20 || nsText.character(at: i) == 0x09) { i += 1 }
-        // Find marker end
         let afterWS = i
         let ch = i < nsText.length ? nsText.character(at: i) : 0
-        if ch == 0x2D || ch == 0x2A || ch == 0x2B { // - * +
+        if ch == 0x2D || ch == 0x2A || ch == 0x2B {
             i += 1
-            // task list: - [ ] or - [x]  — use NSString API only to avoid UTF-16/Swift index mismatch
+            let blockStr = nsText as String
             if i + 2 < nsText.length && nsText.character(at: i) == 0x20 && nsText.character(at: i+1) == 0x5B {
                 let searchRange = NSRange(location: i, length: min(5, nsText.length - i))
-                let found = nsText.range(of: "] ", range: searchRange)
-                if found.location != NSNotFound {
-                    i = found.location + found.length
+                if let swiftRange = Range(searchRange, in: blockStr),
+                   let closeBracket = blockStr.range(of: "] ", range: swiftRange) {
+                    i = blockStr[blockStr.startIndex..<closeBracket.upperBound].utf16.count
                 }
             }
-        } else if ch >= 0x30 && ch <= 0x39 { // digit
+        } else if ch >= 0x30 && ch <= 0x39 {
             while i < nsText.length && nsText.character(at: i) >= 0x30 && nsText.character(at: i) <= 0x39 { i += 1 }
-            if i < nsText.length && nsText.character(at: i) == 0x2E { i += 1 } // .
+            if i < nsText.length && nsText.character(at: i) == 0x2E { i += 1 }
         }
-        // trailing space
         if i < nsText.length && nsText.character(at: i) == 0x20 { i += 1 }
+
         if i > afterWS && i <= nsText.length {
             let markerRange = NSRange(location: block.sourceRange.location, length: i)
             guard markerRange.location + markerRange.length <= ts.length else { return }
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: markerRange)
+            if isActive {
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: markerRange)
+            } else {
+                // Show a bullet/number instead: just dim the raw marker
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor.withAlphaComponent(0.5), range: markerRange)
+            }
         }
+
+        applyInlines(block, isActive: isActive, to: ts, totalLength: totalLength,
+                     baseFont: baseFont, settings: settings, theme: theme)
     }
 
     // MARK: - Inlines
 
     private func applyInlines(
-        _ block: EditorNode,
-        to ts: NSTextStorage,
-        totalLength: Int,
-        baseFont: NSFont,
-        settings: EditorSettings,
-        theme: EditorTheme
+        _ block: EditorNode, isActive: Bool,
+        to ts: NSTextStorage, totalLength: Int, baseFont: NSFont,
+        settings: EditorSettings, theme: EditorTheme
     ) {
         for run in block.inlineRuns {
-            // run.range is relative to block.sourceText; convert to absolute
             let absRange = NSRange(location: block.sourceRange.location + run.range.location,
                                    length: run.range.length)
             guard absRange.location >= 0, absRange.location + absRange.length <= totalLength else { continue }
@@ -215,26 +247,25 @@ struct SyntaxHighlighter {
             switch run.type {
             case .bold:
                 ts.addAttribute(.font, value: NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask), range: absRange)
-                colorDelimiters("**", range: absRange, in: ts, theme: theme)
+                handleDelimiters("**", range: absRange, isActive: isActive, in: ts, theme: theme)
             case .italic:
                 ts.addAttribute(.font, value: NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask), range: absRange)
-                colorDelimiters("*", range: absRange, in: ts, theme: theme)
+                handleDelimiters("*", range: absRange, isActive: isActive, in: ts, theme: theme)
             case .boldItalic:
                 let bold = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 ts.addAttribute(.font, value: NSFontManager.shared.convert(bold, toHaveTrait: .italicFontMask), range: absRange)
-                colorDelimiters("***", range: absRange, in: ts, theme: theme)
+                handleDelimiters("***", range: absRange, isActive: isActive, in: ts, theme: theme)
             case .strikethrough:
                 ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: absRange)
-                colorDelimiters("~~", range: absRange, in: ts, theme: theme)
+                handleDelimiters("~~", range: absRange, isActive: isActive, in: ts, theme: theme)
             case .inlineCode:
                 let mono = NSFont(name: theme.codeFontFamily, size: baseFont.pointSize)
                     ?? NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .regular)
                 ts.addAttribute(.font, value: mono, range: absRange)
-                let bg = theme.codeBackgroundColor.nsColor
-                ts.addAttribute(.backgroundColor, value: bg, range: absRange)
-                colorDelimiters("`", range: absRange, in: ts, theme: theme)
+                ts.addAttribute(.backgroundColor, value: theme.codeBackgroundColor.nsColor, range: absRange)
+                handleDelimiters("`", range: absRange, isActive: isActive, in: ts, theme: theme)
             case .link:
-                applyLinkStyle(range: absRange, in: ts, theme: theme)
+                applyLinkStyle(range: absRange, isActive: isActive, in: ts, theme: theme)
             case .image:
                 ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: absRange)
             case .text, .lineBreak:
@@ -243,51 +274,73 @@ struct SyntaxHighlighter {
         }
     }
 
-    /// Style links: link text in link color with underline, brackets and URL in delimiter color.
-    private func applyLinkStyle(range: NSRange, in ts: NSTextStorage, theme: EditorTheme) {
+    // MARK: - Delimiter Handling
+
+    /// Active: show delimiters in dim color. Inactive: hide delimiters (tiny font + bg color).
+    private func handleDelimiters(
+        _ delimiter: String, range: NSRange, isActive: Bool,
+        in ts: NSTextStorage, theme: EditorTheme
+    ) {
+        let dLen = (delimiter as NSString).length
+        guard range.length >= dLen * 2 else { return }
+        let text = (ts.string as NSString).substring(with: range)
+        guard text.hasPrefix(delimiter), text.hasSuffix(delimiter) else { return }
+
+        let leadRange = NSRange(location: range.location, length: dLen)
+        let trailRange = NSRange(location: range.location + range.length - dLen, length: dLen)
+
+        if isActive {
+            let dimColor = theme.delimiterColor.nsColor
+            ts.addAttribute(.foregroundColor, value: dimColor, range: leadRange)
+            ts.addAttribute(.foregroundColor, value: dimColor, range: trailRange)
+        } else {
+            hideRange(leadRange, in: ts, bgColor: theme.backgroundColor.nsColor)
+            hideRange(trailRange, in: ts, bgColor: theme.backgroundColor.nsColor)
+        }
+    }
+
+    /// Link: active shows full [text](url), inactive shows underlined text only.
+    private func applyLinkStyle(range: NSRange, isActive: Bool, in ts: NSTextStorage, theme: EditorTheme) {
         let text = (ts.string as NSString).substring(with: range)
         let nsText = text as NSString
 
-        // Find [text](url) structure
         let bracketClose = nsText.range(of: "](")
         if bracketClose.location != NSNotFound && nsText.hasSuffix(")") {
-            // [text] part — color link text only (skip [ and ])
-            let textStart = range.location + 1  // skip [
-            let textLen = bracketClose.location - 1  // length of text
+            let textStart = range.location + 1
+            let textLen = bracketClose.location - 1
             if textLen > 0 {
                 let textRange = NSRange(location: textStart, length: textLen)
                 ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: textRange)
                 ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: textRange)
             }
-            // [ bracket
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
-                            range: NSRange(location: range.location, length: 1))
-            // ](url) part — all delimiter color
-            let urlPartStart = range.location + bracketClose.location
-            let urlPartLen = range.length - bracketClose.location
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
-                            range: NSRange(location: urlPartStart, length: urlPartLen))
+
+            let openBracket = NSRange(location: range.location, length: 1)
+            let urlPart = NSRange(location: range.location + bracketClose.location,
+                                  length: range.length - bracketClose.location)
+
+            if isActive {
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: openBracket)
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: urlPart)
+            } else {
+                hideRange(openBracket, in: ts, bgColor: theme.backgroundColor.nsColor)
+                hideRange(urlPart, in: ts, bgColor: theme.backgroundColor.nsColor)
+            }
         } else {
-            // Fallback: color entire range as link
             ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: range)
             ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
         }
     }
 
-    private func colorDelimiters(_ delimiter: String, range: NSRange, in ts: NSTextStorage, theme: EditorTheme) {
-        let dLen = (delimiter as NSString).length
-        guard range.length >= dLen * 2 else { return }
-        let text = (ts.string as NSString).substring(with: range)
-        guard text.hasPrefix(delimiter), text.hasSuffix(delimiter) else { return }
-        // Use delimiter color with reduced alpha to make markers fade into background (Bear-style)
-        let fadedColor = theme.delimiterColor.nsColor.withAlphaComponent(0.4)
-        ts.addAttribute(.foregroundColor, value: fadedColor,
-                        range: NSRange(location: range.location, length: dLen))
-        ts.addAttribute(.foregroundColor, value: fadedColor,
-                        range: NSRange(location: range.location + range.length - dLen, length: dLen))
+    // MARK: - Hide Range
+
+    /// Makes characters at the given range visually invisible by setting font to 0.01pt
+    /// and color to match the background.
+    private func hideRange(_ range: NSRange, in ts: NSTextStorage, bgColor: NSColor) {
+        ts.addAttribute(.font, value: Self.hiddenFont, range: range)
+        ts.addAttribute(.foregroundColor, value: bgColor, range: range)
     }
 
-    // MARK: - Helpers
+    // MARK: - Font/Style Helpers
 
     private func baseFont(settings: EditorSettings) -> NSFont {
         NSFont(name: settings.fontFamily, size: settings.fontSize)
