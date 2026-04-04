@@ -14,7 +14,6 @@
 		363A1A524ECEB0C2A6D359B5 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F368EF04CA1AC47A428C55 /* EditorView.swift */; };
 		37C30C295C9FFE55EDDCF756 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061F83A2972FCE6620101EA6 /* EditorSettings.swift */; };
 		4830FC59869A1D9383C05AE3 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */; };
-		49688C4D1FDEDAC6AE5863DC /* RenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636B743C5AE9A2366500E69B /* RenderCache.swift */; };
 		4A24FE7D983E59CC5FA96097 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2F536E829BB7F1289F3785 /* PreferencesView.swift */; };
 		4AF976C61099FCBAB4031E1E /* EditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3F6DE35963EF94CF714D18 /* EditorViewModel.swift */; };
 		59AF35E9102FBAB97678E092 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6978C85C04F500CE568709B8 /* SidebarView.swift */; };
@@ -27,7 +26,6 @@
 		A2DF6827BC0D004F41CF4185 /* EditorNodeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB1091BBB45F1020AB27F08 /* EditorNodeModel.swift */; };
 		A792B5036D8C985D4C96246C /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1966FCAF4A7AA805DB6ACE26 /* ExportService.swift */; };
 		A7D7FDB3B21374F55B2B7F61 /* EditorNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1FFAEE343FC90C900AEA5C /* EditorNodeTests.swift */; };
-		B7BCD634C08986C9816E6135 /* RenderCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7526280FE8D42984CCDF9BD4 /* RenderCacheTests.swift */; };
 		C1A2B3D4E5F60718293A4B5C /* HTMLConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B3C4E5F6071829A3B4C5D6 /* HTMLConverterTests.swift */; };
 		E3F4A5B6C7D80921B4C5D6E7 /* MarkdownRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A5B6C7D8092130C5D6E7F8 /* MarkdownRendererTests.swift */; };
 		912F8B6F25394C96AE063EC3 /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9B77EC89A3480180C012E1 /* SyntaxHighlighter.swift */; };
@@ -62,10 +60,8 @@
 		3C3F6DE35963EF94CF714D18 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
 		4160E6C836A48D1519FA6696 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
 		5FB1091BBB45F1020AB27F08 /* EditorNodeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNodeModel.swift; sourceTree = "<group>"; };
-		636B743C5AE9A2366500E69B /* RenderCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCache.swift; sourceTree = "<group>"; };
 		6978C85C04F500CE568709B8 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		6B1FDFD5A67EBBFDE20AE3B9 /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
-		7526280FE8D42984CCDF9BD4 /* RenderCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCacheTests.swift; sourceTree = "<group>"; };
 		76421064E68CB0D0FBA284BF /* ShoechooApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooApp.swift; sourceTree = "<group>"; };
 		8B1FFAEE343FC90C900AEA5C /* EditorNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNodeTests.swift; sourceTree = "<group>"; };
 		93A569063F6AAD6A3452627F /* ParseResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseResult.swift; sourceTree = "<group>"; };
@@ -153,7 +149,6 @@
 				061F83A2972FCE6620101EA6 /* EditorSettings.swift */,
 				3C3F6DE35963EF94CF714D18 /* EditorViewModel.swift */,
 				93A569063F6AAD6A3452627F /* ParseResult.swift */,
-				636B743C5AE9A2366500E69B /* RenderCache.swift */,
 				0C3F2706530E264E27BF475B /* RenderResult.swift */,
 			);
 			path = Models;
@@ -193,7 +188,6 @@
 				D2B3C4E5F6071829A3B4C5D6 /* HTMLConverterTests.swift */,
 				153925F175F3248589356ABC /* MarkdownParserTests.swift */,
 				F4A5B6C7D8092130C5D6E7F8 /* MarkdownRendererTests.swift */,
-				7526280FE8D42984CCDF9BD4 /* RenderCacheTests.swift */,
 				A51A5E17085840B7B58801FE /* SyntaxHighlighterTests.swift */,
 			);
 			path = shoechooTests;
@@ -333,7 +327,6 @@
 				C1A2B3D4E5F60718293A4B5C /* HTMLConverterTests.swift in Sources */,
 				8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */,
 				E3F4A5B6C7D80921B4C5D6E7 /* MarkdownRendererTests.swift in Sources */,
-				B7BCD634C08986C9816E6135 /* RenderCacheTests.swift in Sources */,
 				033CEE5EDE5B40CB9C724A68 /* SyntaxHighlighterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -356,7 +349,6 @@
 				912F8B6F25394C96AE063EC3 /* SyntaxHighlighter.swift in Sources */,
 				1657BDACC317990A3D521C21 /* ParseResult.swift in Sources */,
 				4A24FE7D983E59CC5FA96097 /* PreferencesView.swift in Sources */,
-				49688C4D1FDEDAC6AE5863DC /* RenderCache.swift in Sources */,
 				7F9692F35944852883C0C958 /* RenderResult.swift in Sources */,
 				077689B3A72389838566BA9C /* ShoechooApp.swift in Sources */,
 				BB492FCCDA97B2FDB7BB082C /* ShoechooTextView.swift in Sources */,
