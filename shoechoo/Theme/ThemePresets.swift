@@ -8,7 +8,6 @@ enum ThemePresets {
 
     static let github = EditorTheme(
         id: "github", name: "GitHub", isDark: false,
-        fontFamily: "SF Mono", fontSize: 14, lineSpacing: 6,
         backgroundColor: ThemeColor(hex: "#ffffff"),
         textColor: ThemeColor(hex: "#24292e"),
         headingColors: [
@@ -29,7 +28,6 @@ enum ThemePresets {
 
     static let newsprint = EditorTheme(
         id: "newsprint", name: "Newsprint", isDark: false,
-        fontFamily: "Georgia", fontSize: 16, lineSpacing: 8,
         backgroundColor: ThemeColor(hex: "#f5f0e8"),
         textColor: ThemeColor(hex: "#333333"),
         headingColors: [
@@ -50,7 +48,6 @@ enum ThemePresets {
 
     static let night = EditorTheme(
         id: "night", name: "Night", isDark: true,
-        fontFamily: "SF Mono", fontSize: 14, lineSpacing: 6,
         backgroundColor: ThemeColor(hex: "#1e1e2e"),
         textColor: ThemeColor(hex: "#cdd6f4"),
         headingColors: [
@@ -71,7 +68,6 @@ enum ThemePresets {
 
     static let pixyll = EditorTheme(
         id: "pixyll", name: "Pixyll", isDark: false,
-        fontFamily: "Helvetica Neue", fontSize: 16, lineSpacing: 8,
         backgroundColor: ThemeColor(hex: "#ffffff"),
         textColor: ThemeColor(hex: "#404040"),
         headingColors: [
@@ -92,7 +88,6 @@ enum ThemePresets {
 
     static let whitey = EditorTheme(
         id: "whitey", name: "Whitey", isDark: false,
-        fontFamily: "SF Mono", fontSize: 14, lineSpacing: 6,
         backgroundColor: ThemeColor(hex: "#ffffff"),
         textColor: ThemeColor(hex: "#333333"),
         headingColors: [
@@ -113,7 +108,6 @@ enum ThemePresets {
 
     static let solarizedLight = EditorTheme(
         id: "solarized-light", name: "Solarized Light", isDark: false,
-        fontFamily: "SF Mono", fontSize: 14, lineSpacing: 6,
         backgroundColor: ThemeColor(hex: "#fdf6e3"),
         textColor: ThemeColor(hex: "#657b83"),
         headingColors: [
@@ -134,7 +128,6 @@ enum ThemePresets {
 
     static let solarizedDark = EditorTheme(
         id: "solarized-dark", name: "Solarized Dark", isDark: true,
-        fontFamily: "SF Mono", fontSize: 14, lineSpacing: 6,
         backgroundColor: ThemeColor(hex: "#002b36"),
         textColor: ThemeColor(hex: "#839496"),
         headingColors: [

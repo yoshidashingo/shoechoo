@@ -68,6 +68,8 @@ struct SyntaxHighlighter {
             applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
         case .horizontalRule:
             ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
+            ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: r)
+            ts.addAttribute(.strikethroughColor, value: theme.delimiterColor.nsColor, range: r)
         case .paragraph:
             applyInlines(block, to: ts, totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
         case .image:
@@ -101,7 +103,8 @@ struct SyntaxHighlighter {
             prefixLen += 1
         }
         if prefixLen > 0 {
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+            let fadedDelim = theme.delimiterColor.nsColor.withAlphaComponent(0.35)
+            ts.addAttribute(.foregroundColor, value: fadedDelim,
                             range: NSRange(location: r.location, length: prefixLen))
         }
 
@@ -111,7 +114,8 @@ struct SyntaxHighlighter {
     // MARK: - Code Block
 
     private func applyCodeBlock(_ r: NSRange, to ts: NSTextStorage, settings: EditorSettings, theme: EditorTheme) {
-        let mono = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
+        let mono = NSFont(name: theme.codeFontFamily, size: settings.fontSize)
+            ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
         ts.addAttribute(.font, value: mono, range: r)
         let bg = theme.codeBackgroundColor.nsColor
         ts.addAttribute(.backgroundColor, value: bg, range: r)
@@ -223,14 +227,14 @@ struct SyntaxHighlighter {
                 ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: absRange)
                 colorDelimiters("~~", range: absRange, in: ts, theme: theme)
             case .inlineCode:
-                let mono = NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .regular)
+                let mono = NSFont(name: theme.codeFontFamily, size: baseFont.pointSize)
+                    ?? NSFont.monospacedSystemFont(ofSize: baseFont.pointSize, weight: .regular)
                 ts.addAttribute(.font, value: mono, range: absRange)
                 let bg = theme.codeBackgroundColor.nsColor
                 ts.addAttribute(.backgroundColor, value: bg, range: absRange)
                 colorDelimiters("`", range: absRange, in: ts, theme: theme)
             case .link:
-                ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: absRange)
-                ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: absRange)
+                applyLinkStyle(range: absRange, in: ts, theme: theme)
             case .image:
                 ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: absRange)
             case .text, .lineBreak:
@@ -239,14 +243,47 @@ struct SyntaxHighlighter {
         }
     }
 
+    /// Style links: link text in link color with underline, brackets and URL in delimiter color.
+    private func applyLinkStyle(range: NSRange, in ts: NSTextStorage, theme: EditorTheme) {
+        let text = (ts.string as NSString).substring(with: range)
+        let nsText = text as NSString
+
+        // Find [text](url) structure
+        let bracketClose = nsText.range(of: "](")
+        if bracketClose.location != NSNotFound && nsText.hasSuffix(")") {
+            // [text] part — color link text only (skip [ and ])
+            let textStart = range.location + 1  // skip [
+            let textLen = bracketClose.location - 1  // length of text
+            if textLen > 0 {
+                let textRange = NSRange(location: textStart, length: textLen)
+                ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: textRange)
+                ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: textRange)
+            }
+            // [ bracket
+            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+                            range: NSRange(location: range.location, length: 1))
+            // ](url) part — all delimiter color
+            let urlPartStart = range.location + bracketClose.location
+            let urlPartLen = range.length - bracketClose.location
+            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+                            range: NSRange(location: urlPartStart, length: urlPartLen))
+        } else {
+            // Fallback: color entire range as link
+            ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: range)
+            ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+        }
+    }
+
     private func colorDelimiters(_ delimiter: String, range: NSRange, in ts: NSTextStorage, theme: EditorTheme) {
         let dLen = (delimiter as NSString).length
         guard range.length >= dLen * 2 else { return }
         let text = (ts.string as NSString).substring(with: range)
         guard text.hasPrefix(delimiter), text.hasSuffix(delimiter) else { return }
-        ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+        // Use delimiter color with reduced alpha to make markers fade into background (Bear-style)
+        let fadedColor = theme.delimiterColor.nsColor.withAlphaComponent(0.4)
+        ts.addAttribute(.foregroundColor, value: fadedColor,
                         range: NSRange(location: range.location, length: dLen))
-        ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+        ts.addAttribute(.foregroundColor, value: fadedColor,
                         range: NSRange(location: range.location + range.length - dLen, length: dLen))
     }
 

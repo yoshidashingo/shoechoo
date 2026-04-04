@@ -84,6 +84,8 @@ struct ThemeRegistryTests {
     func themeChangesWithId() {
         let settings = EditorSettings.shared
         let registry = ThemeRegistry(settings: settings)
+        let originalId = settings.themeId
+        defer { settings.themeId = originalId }
         settings.themeId = "night"
         #expect(registry.activeTheme.id == "night")
     }
@@ -91,6 +93,8 @@ struct ThemeRegistryTests {
     @Test("Falls back to default for unknown themeId")
     func fallbackForUnknown() {
         let settings = EditorSettings.shared
+        let originalId = settings.themeId
+        defer { settings.themeId = originalId }
         settings.themeId = "nonexistent"
         let registry = ThemeRegistry(settings: settings)
         #expect(registry.activeTheme.id == "github")

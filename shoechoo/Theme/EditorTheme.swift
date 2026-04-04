@@ -34,10 +34,6 @@ struct EditorTheme: Codable, Identifiable, Sendable, Equatable {
     let name: String
     let isDark: Bool
 
-    var fontFamily: String
-    var fontSize: CGFloat
-    var lineSpacing: CGFloat
-
     var backgroundColor: ThemeColor
     var textColor: ThemeColor
     var headingColors: [ThemeColor]  // 6 elements, H1-H6
