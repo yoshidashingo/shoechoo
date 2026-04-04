@@ -137,6 +137,36 @@
   },
   "hotPaths": [
     {
+      "path": "shoechoo/App/MarkdownDocument.swift",
+      "accessCount": 14,
+      "lastAccessed": 1775305087701,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Models/EditorViewModel.swift",
+      "accessCount": 13,
+      "lastAccessed": 1775304979955,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 12,
+      "lastAccessed": 1775304744688,
+      "type": "directory"
+    },
+    {
+      "path": "shoechoo",
+      "accessCount": 12,
+      "lastAccessed": 1775305173761,
+      "type": "directory"
+    },
+    {
+      "path": "shoechoo/Editor/WYSIWYGTextView.swift",
+      "accessCount": 12,
+      "lastAccessed": 1775305180261,
+      "type": "file"
+    },
+    {
       "path": "shoechoo.xcodeproj/project.pbxproj",
       "accessCount": 9,
       "lastAccessed": 1775288904571,
@@ -149,9 +179,9 @@
       "type": "file"
     },
     {
-      "path": "shoechoo/Models/EditorViewModel.swift",
-      "accessCount": 8,
-      "lastAccessed": 1775288770712,
+      "path": "shoechoo/Models/EditorSettings.swift",
+      "accessCount": 9,
+      "lastAccessed": 1775304733876,
       "type": "file"
     },
     {
@@ -167,15 +197,9 @@
       "type": "file"
     },
     {
-      "path": "shoechoo",
-      "accessCount": 7,
-      "lastAccessed": 1775288781308,
-      "type": "directory"
-    },
-    {
-      "path": "shoechoo/Models/EditorSettings.swift",
-      "accessCount": 7,
-      "lastAccessed": 1775288809200,
+      "path": "shoechoo/Editor/ShoechooTextView.swift",
+      "accessCount": 8,
+      "lastAccessed": 1775304966298,
       "type": "file"
     },
     {
@@ -185,22 +209,34 @@
       "type": "file"
     },
     {
-      "path": "shoechoo/App/MarkdownDocument.swift",
+      "path": "shoechoo/Models/EditorNode.swift",
       "accessCount": 6,
-      "lastAccessed": 1775288808723,
+      "lastAccessed": 1775304734397,
       "type": "file"
     },
     {
-      "path": "shoechoo/Editor/ShoechooTextView.swift",
+      "path": "shoechoo/Parser/MarkdownParser.swift",
+      "accessCount": 6,
+      "lastAccessed": 1775304743746,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Models/EditorNodeModel.swift",
+      "accessCount": 5,
+      "lastAccessed": 1775304732575,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Views/EditorView.swift",
+      "accessCount": 5,
+      "lastAccessed": 1775304966714,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Renderer/SyntaxHighlighter.swift",
       "accessCount": 4,
-      "lastAccessed": 1775288772943,
+      "lastAccessed": 1775304736647,
       "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 3,
-      "lastAccessed": 1775288757509,
-      "type": "directory"
     },
     {
       "path": "shoechoo/Models/RenderResult.swift",
@@ -233,9 +269,9 @@
       "type": "file"
     },
     {
-      "path": "shoechoo/Parser/MarkdownParser.swift",
-      "accessCount": 2,
-      "lastAccessed": 1775288770859,
+      "path": "shoechoo/Views/SidebarView.swift",
+      "accessCount": 3,
+      "lastAccessed": 1775304733368,
       "type": "file"
     },
     {
@@ -245,27 +281,21 @@
       "type": "file"
     },
     {
-      "path": "shoechoo/Editor/WYSIWYGTextView.swift",
+      "path": "shoechoo/App/ShoechooApp.swift",
       "accessCount": 2,
-      "lastAccessed": 1775288773401,
+      "lastAccessed": 1775304737085,
       "type": "file"
     },
     {
-      "path": "shoechoo/Views/EditorView.swift",
+      "path": "shoechoo/Models/ParseResult.swift",
       "accessCount": 2,
-      "lastAccessed": 1775288773833,
+      "lastAccessed": 1775304742645,
       "type": "file"
     },
     {
-      "path": "shoechoo/Models/EditorNode.swift",
+      "path": "shoechoo/Views/PreferencesView.swift",
       "accessCount": 2,
-      "lastAccessed": 1775288788495,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Models/EditorNodeModel.swift",
-      "accessCount": 2,
-      "lastAccessed": 1775288789002,
+      "lastAccessed": 1775304743101,
       "type": "file"
     },
     {
@@ -293,33 +323,9 @@
       "type": "file"
     },
     {
-      "path": "shoechoo/App/ShoechooApp.swift",
-      "accessCount": 1,
-      "lastAccessed": 1775288769871,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Views/SidebarView.swift",
-      "accessCount": 1,
-      "lastAccessed": 1775288774271,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Views/PreferencesView.swift",
-      "accessCount": 1,
-      "lastAccessed": 1775288774606,
-      "type": "file"
-    },
-    {
       "path": "shoechooTests/EditorNodeModelTests.swift",
       "accessCount": 1,
       "lastAccessed": 1775288781255,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Models/ParseResult.swift",
-      "accessCount": 1,
-      "lastAccessed": 1775288789836,
       "type": "file"
     },
     {

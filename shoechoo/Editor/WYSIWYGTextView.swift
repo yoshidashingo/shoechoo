@@ -4,6 +4,7 @@ import AppKit
 struct WYSIWYGTextView: NSViewRepresentable {
     @Bindable var viewModel: EditorViewModel
     var settings: EditorSettings
+    weak var document: MarkdownDocument?
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = ShoechooScrollView()

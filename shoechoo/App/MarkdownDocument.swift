@@ -14,8 +14,8 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
 
-    private let lock = NSLock()
-    private var _snapshotText: String = ""
+    nonisolated(unsafe) private let lock = NSLock()
+    nonisolated(unsafe) private var _snapshotText: String = ""
 
     init() {
         if Thread.isMainThread {
@@ -36,34 +36,30 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
         if Thread.isMainThread {
             let vm = MainActor.assumeIsolated { EditorViewModel() }
             self.viewModel = vm
-            MainActor.assumeIsolated {
-                vm.sourceText = text
-            }
+            MainActor.assumeIsolated { vm.sourceText = text }
         } else {
             let vm = DispatchQueue.main.sync {
                 MainActor.assumeIsolated { EditorViewModel() }
             }
             self.viewModel = vm
             DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    vm.sourceText = text
-                }
+                MainActor.assumeIsolated { vm.sourceText = text }
             }
         }
     }
 
-    func snapshot(contentType: UTType) throws -> String {
+    nonisolated func snapshot(contentType: UTType) throws -> String {
         lock.withLock { _snapshotText }
     }
 
-    func fileWrapper(snapshot: String, configuration: WriteConfiguration) throws -> FileWrapper {
+    nonisolated func fileWrapper(snapshot: String, configuration: WriteConfiguration) throws -> FileWrapper {
         guard let data = snapshot.data(using: .utf8) else {
             throw CocoaError(.fileWriteInapplicableStringEncoding)
         }
         return FileWrapper(regularFileWithContents: data)
     }
 
-    func updateSnapshotText(_ text: String) {
+    nonisolated func updateSnapshotText(_ text: String) {
         lock.withLock { _snapshotText = text }
     }
 

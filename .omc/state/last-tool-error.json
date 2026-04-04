@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"gh issue create \\\\\\n  --title \\\"Handle image drop errors with user-facing alert\\\" \\\\\\n  --body \\\"## Description\\nIn \\\\`EditorViewModel.swift\\\\` (line 160), there is an explicit TODO commen...",
-  "error": "Exit code 1\ncould not add label: 'ux' not found",
-  "timestamp": "2026-04-04T07:00:06.034Z",
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/Users/shingo/.claude/projects/-Users-shingo-Documents-GitHub-shoechoo/memory/MEMORY.md\"}",
+  "error": "File does not exist. Note: your current working directory is /Users/shingo/Documents/GitHub/shoechoo.",
+  "timestamp": "2026-04-04T12:10:45.296Z",
   "retry_count": 1
 }
