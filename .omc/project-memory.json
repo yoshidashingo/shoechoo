@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775004307889,
+  "lastScanned": 1775285884952,
   "projectRoot": "/Users/shingo/Documents/GitHub/shoechoo",
   "techStack": {
     "languages": [],
@@ -24,277 +24,320 @@
   "structure": {
     "isMonorepo": false,
     "workspaces": [],
-    "mainDirectories": [],
+    "mainDirectories": [
+      "docs"
+    ],
     "gitBranches": {
       "defaultBranch": "main",
       "branchingStrategy": null
     }
   },
   "customNotes": [],
-  "directoryMap": {},
+  "directoryMap": {
+    "aidlc-docs": {
+      "path": "aidlc-docs",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1775285884944,
+      "keyFiles": [
+        "aidlc-state.md",
+        "audit.md"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 4,
+      "lastAccessed": 1775285884944,
+      "keyFiles": [
+        "CNAME",
+        "icon.png",
+        "index.html",
+        "ja.html"
+      ]
+    },
+    "shoechoo": {
+      "path": "shoechoo",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775285884945,
+      "keyFiles": []
+    },
+    "shoechoo.xcodeproj": {
+      "path": "shoechoo.xcodeproj",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "project.pbxproj"
+      ]
+    },
+    "shoechooTests": {
+      "path": "shoechooTests",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "EditorNodeModelTests.swift",
+        "EditorNodeTests.swift",
+        "MarkdownParserTests.swift",
+        "RenderCacheTests.swift"
+      ]
+    },
+    "shoechooUITests": {
+      "path": "shoechooUITests",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1775285884945,
+      "keyFiles": []
+    },
+    "shoechoo/App": {
+      "path": "shoechoo/App",
+      "purpose": "Application code",
+      "fileCount": 2,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "MarkdownDocument.swift",
+        "ShoechooApp.swift"
+      ]
+    },
+    "shoechoo/Models": {
+      "path": "shoechoo/Models",
+      "purpose": "Data models",
+      "fileCount": 7,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "EditorNode.swift",
+        "EditorNodeModel.swift",
+        "EditorSettings.swift"
+      ]
+    },
+    "shoechoo/Services": {
+      "path": "shoechoo/Services",
+      "purpose": "Business logic services",
+      "fileCount": 3,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "ExportService.swift",
+        "FileService.swift",
+        "ImageService.swift"
+      ]
+    },
+    "shoechoo/Views": {
+      "path": "shoechoo/Views",
+      "purpose": "View templates",
+      "fileCount": 3,
+      "lastAccessed": 1775285884945,
+      "keyFiles": [
+        "EditorView.swift",
+        "PreferencesView.swift",
+        "SidebarView.swift"
+      ]
+    }
+  },
   "hotPaths": [
     {
-      "path": "aidlc-docs/inception/requirements/requirements-questions.md",
-      "accessCount": 20,
-      "lastAccessed": 1775021573316,
+      "path": "shoechoo.xcodeproj/project.pbxproj",
+      "accessCount": 9,
+      "lastAccessed": 1775288904571,
+      "type": "directory"
+    },
+    {
+      "path": "shoechooTests/MarkdownRendererTests.swift",
+      "accessCount": 9,
+      "lastAccessed": 1775289120352,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/aidlc-state.md",
-      "accessCount": 13,
-      "lastAccessed": 1775091218904,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/plans/story-generation-plan.md",
+      "path": "shoechoo/Models/EditorViewModel.swift",
       "accessCount": 8,
-      "lastAccessed": 1775024574725,
+      "lastAccessed": 1775288770712,
       "type": "file"
     },
     {
-      "path": "README.md",
+      "path": "shoechoo/Services/ImageService.swift",
+      "accessCount": 8,
+      "lastAccessed": 1775288790070,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Renderer/MarkdownRenderer.swift",
+      "accessCount": 8,
+      "lastAccessed": 1775288809577,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo",
       "accessCount": 7,
-      "lastAccessed": 1775020148712,
+      "lastAccessed": 1775288781308,
+      "type": "directory"
+    },
+    {
+      "path": "shoechoo/Models/EditorSettings.swift",
+      "accessCount": 7,
+      "lastAccessed": 1775288809200,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/inception/plans/application-design-plan.md",
+      "path": "shoechoo/Services/ExportService.swift",
       "accessCount": 6,
-      "lastAccessed": 1775026899102,
+      "lastAccessed": 1775288771609,
       "type": "file"
     },
     {
-      "path": "README-ja.md",
-      "accessCount": 4,
-      "lastAccessed": 1775014592742,
+      "path": "shoechoo/App/MarkdownDocument.swift",
+      "accessCount": 6,
+      "lastAccessed": 1775288808723,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/construction/plans/unit-1-functional-design-plan.md",
+      "path": "shoechoo/Editor/ShoechooTextView.swift",
       "accessCount": 4,
-      "lastAccessed": 1775092153844,
+      "lastAccessed": 1775288772943,
       "type": "file"
     },
     {
       "path": "",
       "accessCount": 3,
-      "lastAccessed": 1775020152132,
+      "lastAccessed": 1775288757509,
       "type": "directory"
     },
     {
-      "path": "aidlc-docs/audit.md",
+      "path": "shoechoo/Models/RenderResult.swift",
+      "accessCount": 3,
+      "lastAccessed": 1775288790318,
+      "type": "file"
+    },
+    {
+      "path": "shoechooTests/HTMLConverterTests.swift",
+      "accessCount": 3,
+      "lastAccessed": 1775289016957,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 3,
+      "lastAccessed": 1775289076770,
+      "type": "file"
+    },
+    {
+      "path": "README-ja.md",
+      "accessCount": 3,
+      "lastAccessed": 1775289078524,
+      "type": "file"
+    },
+    {
+      "path": "aidlc-docs/aidlc-state.md",
+      "accessCount": 3,
+      "lastAccessed": 1775289276790,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Parser/MarkdownParser.swift",
       "accessCount": 2,
-      "lastAccessed": 1775021665468,
+      "lastAccessed": 1775288770859,
       "type": "file"
     },
     {
-      "path": "docs/CNAME",
-      "accessCount": 1,
-      "lastAccessed": 1775017410888,
+      "path": "shoechoo/Services/FileService.swift",
+      "accessCount": 2,
+      "lastAccessed": 1775288772103,
       "type": "file"
     },
     {
-      "path": "docs/index.html",
-      "accessCount": 1,
-      "lastAccessed": 1775017540911,
+      "path": "shoechoo/Editor/WYSIWYGTextView.swift",
+      "accessCount": 2,
+      "lastAccessed": 1775288773401,
       "type": "file"
     },
     {
-      "path": "docs/ja.html",
-      "accessCount": 1,
-      "lastAccessed": 1775017695832,
+      "path": "shoechoo/Views/EditorView.swift",
+      "accessCount": 2,
+      "lastAccessed": 1775288773833,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/common/process-overview.md",
-      "accessCount": 1,
-      "lastAccessed": 1775020162322,
+      "path": "shoechoo/Models/EditorNode.swift",
+      "accessCount": 2,
+      "lastAccessed": 1775288788495,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/inception/workspace-detection.md",
-      "accessCount": 1,
-      "lastAccessed": 1775020162413,
+      "path": "shoechoo/Models/EditorNodeModel.swift",
+      "accessCount": 2,
+      "lastAccessed": 1775288789002,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rules/core-workflow.md",
+      "path": "LICENSE",
       "accessCount": 1,
-      "lastAccessed": 1775020162565,
+      "lastAccessed": 1775285907073,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/common/welcome-message.md",
+      "path": "shoechooTests/MarkdownParserTests.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020174914,
+      "lastAccessed": 1775288753258,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/common/question-format-guide.md",
+      "path": "shoechooTests/EditorNodeTests.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020175213,
+      "lastAccessed": 1775288753416,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/common/content-validation.md",
+      "path": "shoechooTests/RenderCacheTests.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020176312,
+      "lastAccessed": 1775288753940,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/common/session-continuity.md",
+      "path": "shoechoo/App/ShoechooApp.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020176559,
+      "lastAccessed": 1775288769871,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/inception/vision.md",
+      "path": "shoechoo/Views/SidebarView.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020227851,
+      "lastAccessed": 1775288774271,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/inception/technical-environment.md",
+      "path": "shoechoo/Views/PreferencesView.swift",
       "accessCount": 1,
-      "lastAccessed": 1775020250984,
+      "lastAccessed": 1775288774606,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/inception/requirements-analysis.md",
+      "path": "shoechooTests/EditorNodeModelTests.swift",
       "accessCount": 1,
-      "lastAccessed": 1775021585179,
+      "lastAccessed": 1775288781255,
       "type": "file"
     },
     {
-      "path": ".steering/extensions/security/baseline/security-baseline.md",
+      "path": "shoechoo/Models/ParseResult.swift",
       "accessCount": 1,
-      "lastAccessed": 1775021586492,
+      "lastAccessed": 1775288789836,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/inception/requirements/requirements.md",
+      "path": "shoechoo/Models/RenderCache.swift",
       "accessCount": 1,
-      "lastAccessed": 1775021648030,
+      "lastAccessed": 1775288790243,
       "type": "file"
     },
     {
-      "path": ".steering/aws-aidlc-rule-details/inception/user-stories.md",
+      "path": "ARCHITECTURE.md",
       "accessCount": 1,
-      "lastAccessed": 1775021713908,
+      "lastAccessed": 1775288857447,
       "type": "file"
     },
     {
-      "path": "aidlc-docs/inception/plans/user-stories-assessment.md",
+      "path": "shoechoo.xcodeproj/xcshareddata/xcschemes/shoechoo.xcscheme",
       "accessCount": 1,
-      "lastAccessed": 1775021729444,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/user-stories/personas.md",
-      "accessCount": 1,
-      "lastAccessed": 1775024492123,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/user-stories/stories.md",
-      "accessCount": 1,
-      "lastAccessed": 1775024556686,
-      "type": "file"
-    },
-    {
-      "path": ".steering/aws-aidlc-rule-details/inception/workflow-planning.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026276507,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/plans/execution-plan.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026316239,
-      "type": "file"
-    },
-    {
-      "path": ".steering/aws-aidlc-rule-details/inception/application-design.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026379854,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/components.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026796622,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/component-methods.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026816163,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/services.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026835899,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/component-dependency.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026856513,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/application-design.md",
-      "accessCount": 1,
-      "lastAccessed": 1775026885727,
-      "type": "file"
-    },
-    {
-      "path": ".steering/aws-aidlc-rule-details/inception/units-generation.md",
-      "accessCount": 1,
-      "lastAccessed": 1775091152095,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/unit-of-work.md",
-      "accessCount": 1,
-      "lastAccessed": 1775091191171,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/unit-of-work-dependency.md",
-      "accessCount": 1,
-      "lastAccessed": 1775091202279,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/inception/application-design/unit-of-work-story-map.md",
-      "accessCount": 1,
-      "lastAccessed": 1775091212192,
-      "type": "file"
-    },
-    {
-      "path": ".steering/aws-aidlc-rule-details/construction/functional-design.md",
-      "accessCount": 1,
-      "lastAccessed": 1775091724651,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/domain-entities.md",
-      "accessCount": 1,
-      "lastAccessed": 1775092203919,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/business-logic-model.md",
-      "accessCount": 1,
-      "lastAccessed": 1775092241340,
-      "type": "file"
-    },
-    {
-      "path": "aidlc-docs/construction/unit-1-core-editor/functional-design/business-rules.md",
-      "accessCount": 1,
-      "lastAccessed": 1775092275590,
+      "lastAccessed": 1775289214040,
       "type": "file"
     }
   ],
