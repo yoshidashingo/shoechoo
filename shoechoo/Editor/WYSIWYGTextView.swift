@@ -72,11 +72,11 @@ struct WYSIWYGTextView: NSViewRepresentable {
         var parent: WYSIWYGTextView
         weak var textView: ShoechooTextView?
         weak var scrollView: NSScrollView?
+        private let nodeModel = EditorNodeModel()
+        private var isApplyingHighlight = false
         nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var autoSaveTimer: Timer?
         nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
-
-        private var isApplyingHighlight = false
 
         init(_ parent: WYSIWYGTextView) {
             self.parent = parent
@@ -141,16 +141,25 @@ struct WYSIWYGTextView: NSViewRepresentable {
             let parser = MarkdownParser()
             let result = parser.parse(text, revision: 0)
 
-            let isDark = textView.effectiveAppearance.bestMatch(from: [.darkAqua, .vibrantDark]) != nil
-            let appearance: SyntaxHighlighter.Appearance = isDark ? .dark : .light
+            nodeModel.applyParseResult(result)
 
             let savedSelection = textView.selectedRange()
             let highlighter = SyntaxHighlighter()
-            highlighter.apply(to: ts, blocks: result.blocks, settings: parent.settings, appearance: appearance)
+            let theme = ThemeRegistry(settings: parent.settings).activeTheme
+            highlighter.apply(to: ts, blocks: nodeModel.blocks, settings: parent.settings, theme: theme)
 
-            let safeLoc = min(savedSelection.location, ts.length)
-            let safeLen = min(savedSelection.length, ts.length - safeLoc)
-            textView.setSelectedRange(NSRange(location: safeLoc, length: safeLen))
+            // Apply focus mode dimming after highlight so it overlays correctly
+            updateFocusModeDimming(cursorPosition: savedSelection.location)
+
+            // Restore selection on next RunLoop tick — endEditing() triggers internal
+            // NSTextView processing that can reset selection after this method returns.
+            let length = ts.length
+            DispatchQueue.main.async { [weak textView] in
+                guard let textView else { return }
+                let safeLoc = min(savedSelection.location, length)
+                let safeLen = min(savedSelection.length, length - safeLoc)
+                textView.setSelectedRange(NSRange(location: safeLoc, length: safeLen))
+            }
         }
 
         // MARK: - Auto-Save
@@ -196,6 +205,20 @@ struct WYSIWYGTextView: NSViewRepresentable {
                 parent.viewModel.cursorPosition = pos
             }
             parent.viewModel.isIMEComposing = textView.hasMarkedText()
+            updateFocusModeDimming(cursorPosition: pos)
+        }
+
+        private func updateFocusModeDimming(cursorPosition: Int) {
+            guard let textView = textView as? ShoechooTextView else { return }
+            guard parent.viewModel.isFocusModeEnabled else {
+                textView.removeFocusModeDimming()
+                return
+            }
+            if let activeID = nodeModel.resolveActiveBlock(cursorOffset: cursorPosition),
+               let activeBlock = nodeModel.block(withID: activeID) {
+                nodeModel.setActiveBlock(activeID)
+                textView.applyFocusModeDimming(activeBlockRange: activeBlock.sourceRange)
+            }
         }
 
         // MARK: - Notifications

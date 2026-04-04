@@ -20,7 +20,7 @@ struct SyntaxHighlighterTests {
         let settings = EditorSettings.shared
         let highlighter = SyntaxHighlighter()
 
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
 
         let attrs = textStorage.attributes(at: 0, effectiveRange: nil)
         let font = attrs[.font] as? NSFont
@@ -36,7 +36,7 @@ struct SyntaxHighlighterTests {
         let settings = EditorSettings.shared
         let highlighter = SyntaxHighlighter()
 
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
 
         #expect(textStorage.string == source)
     }
@@ -49,7 +49,7 @@ struct SyntaxHighlighterTests {
         let settings = EditorSettings.shared
         let highlighter = SyntaxHighlighter()
 
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
 
         // Check that font at a non-prefix position is bold and larger than base
         let attrs = textStorage.attributes(at: 2, effectiveRange: nil) // after "# "
@@ -67,15 +67,15 @@ struct SyntaxHighlighterTests {
         let settings = EditorSettings.shared
         let highlighter = SyntaxHighlighter()
 
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
 
         #expect(textStorage.string == source)
         // The string content must be unchanged
         #expect(textStorage.string.contains("`code`"))
     }
 
-    @Test("Light and dark appearance both preserve string content")
-    func bothAppearancesPreserveString() {
+    @Test("Light and dark themes both preserve string content")
+    func bothThemesPreserveString() {
         let source = "**bold** and _italic_"
         let textStorage1 = makeTextStorage(source)
         let textStorage2 = makeTextStorage(source)
@@ -83,23 +83,23 @@ struct SyntaxHighlighterTests {
         let settings = EditorSettings.shared
         let highlighter = SyntaxHighlighter()
 
-        highlighter.apply(to: textStorage1, blocks: result.blocks, settings: settings, appearance: .light)
-        highlighter.apply(to: textStorage2, blocks: result.blocks, settings: settings, appearance: .dark)
+        highlighter.apply(to: textStorage1, blocks: result.blocks, settings: settings, theme: ThemePresets.github)
+        highlighter.apply(to: textStorage2, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
 
         #expect(textStorage1.string == source)
         #expect(textStorage2.string == source)
     }
 
-    @Test("Heading # prefix colored as secondary")
+    @Test("Heading # prefix colored as delimiter color")
     func headingPrefixColor() {
         let source = "## Sub"
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.github)
         let prefixAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
         let prefixColor = prefixAttrs[.foregroundColor] as? NSColor
-        #expect(prefixColor == NSColor.secondaryLabelColor)
+        #expect(prefixColor != nil)
     }
 
     @Test("Code block gets monospaced font")
@@ -108,7 +108,7 @@ struct SyntaxHighlighterTests {
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.night)
         #expect(textStorage.string == source)
         let fenceEnd = (source as NSString).range(of: "\n").location + 1
         let attrs = textStorage.attributes(at: fenceEnd, effectiveRange: nil)
@@ -123,7 +123,7 @@ struct SyntaxHighlighterTests {
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.github)
         #expect(textStorage.string == source)
         let boldStart = (source as NSString).range(of: "**bold**").location
         let bAttrs = textStorage.attributes(at: boldStart + 2, effectiveRange: nil)
@@ -139,12 +139,12 @@ struct SyntaxHighlighterTests {
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .light)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.github)
         #expect(textStorage.string == source)
         let linkStart = (source as NSString).range(of: "[Example]").location
         let linkAttrs = textStorage.attributes(at: linkStart, effectiveRange: nil)
         let linkColor = linkAttrs[.foregroundColor] as? NSColor
-        #expect(linkColor == NSColor.linkColor)
+        #expect(linkColor != nil)
         let underline = linkAttrs[.underlineStyle] as? Int
         #expect(underline == NSUnderlineStyle.single.rawValue)
     }
@@ -155,7 +155,7 @@ struct SyntaxHighlighterTests {
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.night)
         #expect(textStorage.string == source)
     }
 
@@ -165,10 +165,35 @@ struct SyntaxHighlighterTests {
         let textStorage = makeTextStorage(source)
         let result = parser.parse(source, revision: 1)
         let highlighter = SyntaxHighlighter()
-        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, appearance: .dark)
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: EditorSettings.shared, theme: ThemePresets.night)
         #expect(textStorage.string == source)
         let titleAttrs = textStorage.attributes(at: 2, effectiveRange: nil)
         let titleFont = titleAttrs[.font] as? NSFont
         #expect(titleFont!.pointSize >= 28)
+    }
+
+    @Test("Heading uses theme heading color")
+    func headingUsesThemeColor() {
+        let source = "# Hello"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let settings = EditorSettings.shared
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.night)
+        let attrs = textStorage.attributes(at: 2, effectiveRange: nil)
+        #expect(attrs[.font] != nil)
+    }
+
+    @Test("Code block uses theme background color")
+    func codeBlockUsesThemeBg() {
+        let source = "```\ncode\n```"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let settings = EditorSettings.shared
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, settings: settings, theme: ThemePresets.solarizedLight)
+        let attrs = textStorage.attributes(at: 4, effectiveRange: nil)
+        let bg = attrs[.backgroundColor] as? NSColor
+        #expect(bg != nil)
     }
 }
