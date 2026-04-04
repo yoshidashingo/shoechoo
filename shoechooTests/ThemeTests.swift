@@ -34,3 +34,36 @@ struct ThemeColorTests {
         #expect(decoded == original)
     }
 }
+
+@Suite("ThemePresets")
+struct ThemePresetsTests {
+
+    @Test("All 7 presets exist")
+    func allPresetsExist() {
+        let presets = ThemePresets.all
+        #expect(presets.count == 7)
+    }
+
+    @Test("Each preset has 6 heading colors")
+    func presetsHaveSixHeadingColors() {
+        for preset in ThemePresets.all {
+            #expect(preset.headingColors.count == 6, "Theme \(preset.id) should have 6 heading colors")
+        }
+    }
+
+    @Test("Each preset has unique id")
+    func presetsHaveUniqueIds() {
+        let ids = ThemePresets.all.map(\.id)
+        #expect(Set(ids).count == ids.count)
+    }
+
+    @Test("GitHub is the default theme")
+    func githubIsDefault() {
+        #expect(ThemePresets.defaultTheme.id == "github")
+    }
+
+    @Test("Focus dim opacity is between 0 and 1", arguments: ThemePresets.all)
+    func focusDimInRange(theme: EditorTheme) {
+        #expect(theme.focusDimOpacity >= 0.0 && theme.focusDimOpacity <= 1.0)
+    }
+}
