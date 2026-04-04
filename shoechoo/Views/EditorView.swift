@@ -7,51 +7,69 @@ struct EditorView: View {
     @State private var isExporting = false
 
     var body: some View {
-        WYSIWYGTextView(viewModel: document.viewModel, settings: settings)
-            .focusedSceneValue(\.editorViewModel, document.viewModel)
-            .frame(minWidth: 400, minHeight: 300)
-            .toolbar {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button(action: { document.viewModel.toggleBold() }) {
-                        Image(systemName: "bold")
-                    }
-                    .help("Bold (⌘B)")
+        VStack(spacing: 0) {
+            WYSIWYGTextView(viewModel: document.viewModel, settings: settings)
+                .focusedSceneValue(\.editorViewModel, document.viewModel)
+                .frame(minWidth: 400, minHeight: 300)
 
-                    Button(action: { document.viewModel.toggleItalic() }) {
-                        Image(systemName: "italic")
-                    }
-                    .help("Italic (⌘I)")
+            Divider()
 
-                    Button(action: { document.viewModel.toggleInlineCode() }) {
-                        Image(systemName: "chevron.left.forwardslash.chevron.right")
-                    }
-                    .help("Inline Code (⇧⌘K)")
-
-                    Divider()
-
-                    Button(action: { document.viewModel.toggleFocusMode() }) {
-                        Image(systemName: document.viewModel.isFocusModeEnabled ? "eye.fill" : "eye")
-                    }
-                    .help("Focus Mode (⇧⌘F)")
-
-                    Button(action: { document.viewModel.toggleTypewriterScroll() }) {
-                        Image(systemName: document.viewModel.isTypewriterScrollEnabled ? "arrow.up.and.down.text.horizontal" : "arrow.up.and.down")
-                    }
-                    .help("Typewriter Scroll")
-
-                    Divider()
-
-                    Button(action: { isExporting = true }) {
-                        Image(systemName: "square.and.arrow.up")
-                    }
-                    .help("Export HTML (⇧⌘E)")
+            HStack(spacing: 4) {
+                Text("\(document.viewModel.wordCount) words")
+                Text("·")
+                Text("\(document.viewModel.characterCount) characters")
+                Text("·")
+                Text("\(document.viewModel.lineCount) lines")
+                Spacer()
+            }
+            .font(.system(size: 11))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
+            .background(.bar)
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: { document.viewModel.toggleBold() }) {
+                    Image(systemName: "bold")
                 }
+                .help("Bold (⌘B)")
+
+                Button(action: { document.viewModel.toggleItalic() }) {
+                    Image(systemName: "italic")
+                }
+                .help("Italic (⌘I)")
+
+                Button(action: { document.viewModel.toggleInlineCode() }) {
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
+                }
+                .help("Inline Code (⇧⌘K)")
+
+                Divider()
+
+                Button(action: { document.viewModel.toggleFocusMode() }) {
+                    Image(systemName: document.viewModel.isFocusModeEnabled ? "eye.fill" : "eye")
+                }
+                .help("Focus Mode (⇧⌘F)")
+
+                Button(action: { document.viewModel.toggleTypewriterScroll() }) {
+                    Image(systemName: document.viewModel.isTypewriterScrollEnabled ? "arrow.up.and.down.text.horizontal" : "arrow.up.and.down")
+                }
+                .help("Typewriter Scroll")
+
+                Divider()
+
+                Button(action: { isExporting = true }) {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .help("Export HTML (⇧⌘E)")
             }
-            .task(id: isExporting) {
-                guard isExporting else { return }
-                defer { isExporting = false }
-                await exportHTML()
-            }
+        }
+        .task(id: isExporting) {
+            guard isExporting else { return }
+            defer { isExporting = false }
+            await exportHTML()
+        }
     }
 
     private func exportHTML() async {
