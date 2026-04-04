@@ -4,11 +4,13 @@ import UniformTypeIdentifiers
 @main
 struct ShoechooApp: App {
     @State private var settings = EditorSettings.shared
+    @State private var themeRegistry = ThemeRegistry()
 
     var body: some Scene {
         DocumentGroup(newDocument: { MarkdownDocument() }) { file in
             EditorView(document: file.document, fileURL: file.fileURL)
                 .environment(settings)
+                .environment(themeRegistry)
         }
         .commands {
             CommandGroup(replacing: .textFormatting) {
@@ -31,6 +33,7 @@ struct ShoechooApp: App {
         Settings {
             PreferencesView()
                 .environment(settings)
+                .environment(themeRegistry)
         }
     }
 }
