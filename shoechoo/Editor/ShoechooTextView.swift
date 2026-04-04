@@ -137,4 +137,88 @@ final class ShoechooTextView: NSTextView {
             Self.imageExtensions.contains(url.pathExtension.lowercased())
         }
     }
+
+    // MARK: - Auto Pair
+
+    private static let autoPairs: [(open: String, close: String)] = [
+        ("(", ")"), ("[", "]"), ("{", "}"),
+        ("\"", "\""), ("'", "'"),
+        ("`", "`"),
+    ]
+
+    override func insertText(_ string: Any, replacementRange: NSRange) {
+        guard let str = string as? String, str.count == 1 else {
+            super.insertText(string, replacementRange: replacementRange)
+            return
+        }
+
+        let sel = selectedRange()
+        let nsString = self.string as NSString
+
+        // Check if this is an opening character with text selected → wrap
+        if sel.length > 0 {
+            for pair in Self.autoPairs {
+                if str == pair.open {
+                    let selected = nsString.substring(with: sel)
+                    let wrapped = pair.open + selected + pair.close
+                    super.insertText(wrapped, replacementRange: sel)
+                    // Place cursor after the wrapped text (before closing)
+                    setSelectedRange(NSRange(location: sel.location + 1, length: sel.length))
+                    return
+                }
+            }
+        }
+
+        // Check if typing a closing character that matches the next character → skip
+        if sel.length == 0 && sel.location < nsString.length {
+            let nextChar = nsString.substring(with: NSRange(location: sel.location, length: 1))
+            for pair in Self.autoPairs {
+                if str == pair.close && nextChar == pair.close {
+                    // Check if there's a matching open before
+                    setSelectedRange(NSRange(location: sel.location + 1, length: 0))
+                    return
+                }
+            }
+        }
+
+        // Auto-pair: insert closing character
+        if sel.length == 0 {
+            for pair in Self.autoPairs {
+                if str == pair.open {
+                    // Don't auto-pair single quote inside a word
+                    if pair.open == "'" && sel.location > 0 {
+                        let prevChar = nsString.substring(with: NSRange(location: sel.location - 1, length: 1))
+                        if prevChar.unicodeScalars.first?.properties.isAlphabetic == true {
+                            break
+                        }
+                    }
+                    super.insertText(pair.open + pair.close, replacementRange: sel)
+                    setSelectedRange(NSRange(location: sel.location + 1, length: 0))
+                    return
+                }
+            }
+        }
+
+        super.insertText(string, replacementRange: replacementRange)
+    }
+
+    override func deleteBackward(_ sender: Any?) {
+        let sel = selectedRange()
+        let nsString = self.string as NSString
+
+        // If cursor is between a matched pair, delete both
+        if sel.length == 0 && sel.location > 0 && sel.location < nsString.length {
+            let prev = nsString.substring(with: NSRange(location: sel.location - 1, length: 1))
+            let next = nsString.substring(with: NSRange(location: sel.location, length: 1))
+            for pair in Self.autoPairs {
+                if prev == pair.open && next == pair.close {
+                    setSelectedRange(NSRange(location: sel.location - 1, length: 2))
+                    super.insertText("", replacementRange: NSRange(location: sel.location - 1, length: 2))
+                    return
+                }
+            }
+        }
+
+        super.deleteBackward(sender)
+    }
 }
