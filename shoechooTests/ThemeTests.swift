@@ -67,3 +67,39 @@ struct ThemePresetsTests {
         #expect(theme.focusDimOpacity >= 0.0 && theme.focusDimOpacity <= 1.0)
     }
 }
+
+@Suite("ThemeRegistry")
+@MainActor
+struct ThemeRegistryTests {
+
+    @Test("Returns default theme when no selection persisted")
+    func defaultTheme() {
+        UserDefaults.standard.removeObject(forKey: "themeId")
+        let settings = EditorSettings.shared
+        let registry = ThemeRegistry(settings: settings)
+        #expect(registry.activeTheme.id == "github")
+    }
+
+    @Test("Active theme changes when themeId changes")
+    func themeChangesWithId() {
+        let settings = EditorSettings.shared
+        let registry = ThemeRegistry(settings: settings)
+        settings.themeId = "night"
+        #expect(registry.activeTheme.id == "night")
+    }
+
+    @Test("Falls back to default for unknown themeId")
+    func fallbackForUnknown() {
+        let settings = EditorSettings.shared
+        settings.themeId = "nonexistent"
+        let registry = ThemeRegistry(settings: settings)
+        #expect(registry.activeTheme.id == "github")
+    }
+
+    @Test("Lists all presets")
+    func listsPresets() {
+        let settings = EditorSettings.shared
+        let registry = ThemeRegistry(settings: settings)
+        #expect(registry.presets.count == 7)
+    }
+}

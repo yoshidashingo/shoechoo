@@ -22,6 +22,9 @@ final class EditorSettings {
     var appearanceOverride: AppearanceMode {
         didSet { UserDefaults.standard.set(appearanceOverride.rawValue, forKey: "appearanceOverride") }
     }
+    var themeId: String {
+        didSet { UserDefaults.standard.set(themeId, forKey: "themeId") }
+    }
 
     var defaultFocusMode: Bool {
         didSet { UserDefaults.standard.set(defaultFocusMode, forKey: "defaultFocusMode") }
@@ -44,6 +47,7 @@ final class EditorSettings {
         self.fontSize = defaults.object(forKey: "fontSize") as? CGFloat ?? 14
         self.lineSpacing = defaults.object(forKey: "lineSpacing") as? CGFloat ?? 6
         self.appearanceOverride = AppearanceMode(rawValue: defaults.string(forKey: "appearanceOverride") ?? "") ?? .system
+        self.themeId = defaults.string(forKey: "themeId") ?? ThemePresets.defaultTheme.id
         self.defaultFocusMode = defaults.bool(forKey: "defaultFocusMode")
         self.defaultTypewriterScroll = defaults.bool(forKey: "defaultTypewriterScroll")
         if defaults.object(forKey: "autoSaveEnabled") == nil {
