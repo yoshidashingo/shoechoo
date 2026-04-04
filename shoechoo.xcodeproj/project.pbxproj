@@ -10,7 +10,9 @@
 		077689B3A72389838566BA9C /* ShoechooApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76421064E68CB0D0FBA284BF /* ShoechooApp.swift */; };
 		1657BDACC317990A3D521C21 /* ParseResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A569063F6AAD6A3452627F /* ParseResult.swift */; };
 		1D1FDE2FD3EC3FA4D32C9298 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 2F6DB8ADB22B86D627F8E42E /* AppIcon.icns */; };
+		1DF5C425173034E82138A545 /* ThemePresets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AAAF937F9A34C91C56FF87 /* ThemePresets.swift */; };
 		1EBB1F79ADFEE95F2AD09DDD /* OutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3A6A96A012611C0FE0C265 /* OutlineView.swift */; };
+		29AE29046ADC8771A84E4645 /* ThemeRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5C16C9C22F89126AE1647EE /* ThemeRegistry.swift */; };
 		2C14C4FE137002DFE6BFB56F /* EditorNodeModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D265677848FA22ED359E998 /* EditorNodeModelTests.swift */; };
 		363A1A524ECEB0C2A6D359B5 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F368EF04CA1AC47A428C55 /* EditorView.swift */; };
 		37C30C295C9FFE55EDDCF756 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061F83A2972FCE6620101EA6 /* EditorSettings.swift */; };
@@ -71,6 +73,7 @@
 		A4ADA997C3135E2C51F089EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		AB4FF6DB7DC47DA67B8836D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B0AAAF937F9A34C91C56FF87 /* ThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePresets.swift; sourceTree = "<group>"; };
 		B927C007304B710CF72A62CC /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
 		BEF43DC42FD2ACB63CF324B4 /* shoechoo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shoechoo.entitlements; sourceTree = "<group>"; };
 		BFDC5D5D3B8CBB1C19769BF4 /* EditorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorTheme.swift; sourceTree = "<group>"; };
@@ -78,6 +81,7 @@
 		CD0E58284466C1BAB9821A11 /* FileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileService.swift; sourceTree = "<group>"; };
 		CF364242DB0790DD1B46925C /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
 		D37E21639D40B6CE15866999 /* ThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTests.swift; sourceTree = "<group>"; };
+		D5C16C9C22F89126AE1647EE /* ThemeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeRegistry.swift; sourceTree = "<group>"; };
 		E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -135,6 +139,8 @@
 			isa = PBXGroup;
 			children = (
 				BFDC5D5D3B8CBB1C19769BF4 /* EditorTheme.swift */,
+				B0AAAF937F9A34C91C56FF87 /* ThemePresets.swift */,
+				D5C16C9C22F89126AE1647EE /* ThemeRegistry.swift */,
 			);
 			path = Theme;
 			sourceTree = "<group>";
@@ -353,6 +359,8 @@
 				BB492FCCDA97B2FDB7BB082C /* ShoechooTextView.swift in Sources */,
 				59AF35E9102FBAB97678E092 /* SidebarView.swift in Sources */,
 				3B8E01B6BE9F9B689F7FA0B3 /* SyntaxHighlighter.swift in Sources */,
+				1DF5C425173034E82138A545 /* ThemePresets.swift in Sources */,
+				29AE29046ADC8771A84E4645 /* ThemeRegistry.swift in Sources */,
 				D9EA47C95A44873CFD029DA1 /* WYSIWYGTextView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
