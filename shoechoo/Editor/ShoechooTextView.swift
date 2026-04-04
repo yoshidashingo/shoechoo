@@ -7,6 +7,12 @@ final class ShoechooTextView: NSTextView {
     weak var editorViewModel: EditorViewModel?
     var documentURL: URL?
 
+    // MARK: - Paste as Plain Text
+
+    override func paste(_ sender: Any?) {
+        pasteAsPlainText(sender)
+    }
+
     // MARK: - Setup
 
     func registerForImageDrag() {
