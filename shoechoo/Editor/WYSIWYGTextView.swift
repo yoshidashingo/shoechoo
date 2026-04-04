@@ -78,6 +78,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var autoSaveTimer: Timer?
         nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
+        private var currentActiveBlockID: EditorNode.ID?
 
         init(_ parent: WYSIWYGTextView) {
             self.parent = parent
@@ -152,6 +153,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
             let savedSelection = textView.selectedRange()
             let activeBlockID = nodeModel.resolveActiveBlock(cursorOffset: savedSelection.location)
+            currentActiveBlockID = activeBlockID
             let highlighter = SyntaxHighlighter()
             let theme = parent.themeRegistry.activeTheme
             highlighter.apply(to: ts, blocks: nodeModel.blocks, activeBlockID: activeBlockID, settings: parent.settings, theme: theme)
@@ -207,13 +209,59 @@ struct WYSIWYGTextView: NSViewRepresentable {
         }
 
         func textViewDidChangeSelection(_ notification: Notification) {
+            guard !isApplyingHighlight else { return }
             guard let textView = notification.object as? NSTextView else { return }
             let pos = textView.selectedRange().location
-            if !textView.hasMarkedText() {
-                parent.viewModel.cursorPosition = pos
+            let isComposing = textView.hasMarkedText()
+            parent.viewModel.isIMEComposing = isComposing
+            guard !isComposing else { return }
+
+            parent.viewModel.cursorPosition = pos
+
+            // Check if active block changed — if so, re-highlight for WYSIWYG switch
+            let newActiveID = nodeModel.resolveActiveBlock(cursorOffset: pos)
+            if newActiveID != currentActiveBlockID {
+                currentActiveBlockID = newActiveID
+                scheduleHighlightForCursorMove()
             }
-            parent.viewModel.isIMEComposing = textView.hasMarkedText()
+
             updateFocusModeDimming(cursorPosition: pos)
+        }
+
+        /// Lightweight re-highlight: reuses existing parsed blocks, only re-applies attributes.
+        private func scheduleHighlightForCursorMove() {
+            highlightTimer?.invalidate()
+            highlightTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.applyHighlightFromCache()
+                }
+            }
+        }
+
+        /// Re-apply highlighting using cached blocks (no re-parse needed).
+        private func applyHighlightFromCache() {
+            guard let textView, let ts = textView.textStorage else { return }
+            guard ts.length > 0 else { return }
+            guard !textView.hasMarkedText() else { return }
+            guard !isApplyingHighlight else { return }
+            isApplyingHighlight = true
+            defer { isApplyingHighlight = false }
+
+            let savedSelection = textView.selectedRange()
+            let highlighter = SyntaxHighlighter()
+            let theme = parent.themeRegistry.activeTheme
+            highlighter.apply(to: ts, blocks: nodeModel.blocks, activeBlockID: currentActiveBlockID,
+                              settings: parent.settings, theme: theme)
+
+            updateFocusModeDimming(cursorPosition: savedSelection.location)
+
+            let length = ts.length
+            DispatchQueue.main.async { [weak textView] in
+                guard let textView else { return }
+                let safeLoc = min(savedSelection.location, length)
+                let safeLen = min(savedSelection.length, length - safeLoc)
+                textView.setSelectedRange(NSRange(location: safeLoc, length: safeLen))
+            }
         }
 
         private func updateFocusModeDimming(cursorPosition: Int) {
