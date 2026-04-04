@@ -104,6 +104,50 @@
 - [ ] iOS / iPadOS app
 - [ ] iCloud sync across devices
 
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Swift 6 (strict concurrency) |
+| UI framework | SwiftUI (window/settings/toolbar) + AppKit NSTextView (text editing) |
+| Markdown parsing | [swift-markdown](https://github.com/swiftlang/swift-markdown) |
+| Testing | Swift Testing (`@Test`, `#expect`, `@Suite`) |
+| PDF generation | WebKit `WKWebView.pdf(configuration:)` |
+| Persistence | `ReferenceFileDocument` (SwiftUI document model) |
+| Minimum | macOS 14 Sonoma |
+
+## Architecture
+
+See `ARCHITECTURE.md` for full details. Core pipeline:
+
+```
+User Input → Coordinator.textDidChange()
+  → EditorViewModel.sourceText update
+  → MarkdownParser.parse() → EditorNodeModel.applyParseResult()
+  → SyntaxHighlighter.apply() → NSTextStorage attributes
+  → Focus Mode dimming (when enabled)
+```
+
+### Directory Structure
+
+```
+shoechoo/
+├── App/           # ShoechooApp, MarkdownDocument
+├── Models/        # EditorNode, EditorNodeModel, EditorViewModel, EditorSettings
+├── Parser/        # MarkdownParser (swift-markdown AST → EditorNode)
+├── Renderer/      # SyntaxHighlighter (EditorNode → NSTextStorage attributes)
+├── Theme/         # EditorTheme, ThemePresets, ThemeRegistry
+├── Editor/        # ShoechooTextView (NSTextView), WYSIWYGTextView (NSViewRepresentable)
+├── Views/         # EditorView, SidebarView, OutlineView, PreferencesView
+└── Services/      # ExportService, FileService, ImageService (all actors)
+```
+
+### Theme System
+
+- Colors accessed via `EditorTheme` protocol — never hardcoded
+- `ThemeRegistry` manages active theme selection
+- 7 preset themes: GitHub, Newsprint, Night, Pixyll, Whitey, Solarized Dark/Light
+
 ## Building from Source
 
 Requires Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
@@ -117,6 +161,29 @@ xcodebuild -project shoechoo.xcodeproj -scheme shoechoo -configuration Release C
 ```
 
 Or run `xcodegen generate`, then open `shoechoo.xcodeproj` in Xcode and build with ⌘B.
+
+### Build & Test Commands
+
+```bash
+# Build
+xcodebuild -scheme shoechoo -destination 'platform=macOS' build
+
+# Test (Swift Testing framework — outputs ◇/✔/✘)
+xcodebuild -scheme shoechoo -destination 'platform=macOS' test
+```
+
+### Commit Convention
+
+```
+<type>: <description>
+```
+
+Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
+
+### Documentation
+
+- **Design docs**: specs and plans in `docs/`
+- **Steering files**: work-in-progress docs in `.steering/[YYYYMMDD]-[title]/`
 
 ## License
 
