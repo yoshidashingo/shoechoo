@@ -58,8 +58,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        // Only update appearance — never touch text or attributes
         context.coordinator.applyAppearance(settings: settings)
+
+        // Sync text from viewModel → textView if out of sync
+        // (handles async document load where sourceText arrives after makeNSView)
+        guard let textView = scrollView.documentView as? NSTextView else { return }
+        if !viewModel.sourceText.isEmpty && textView.string != viewModel.sourceText {
+            textView.string = viewModel.sourceText
+            context.coordinator.scheduleHighlight()
+        }
     }
 
     func makeCoordinator() -> Coordinator {

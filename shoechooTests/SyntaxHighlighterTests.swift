@@ -197,4 +197,110 @@ struct SyntaxHighlighterTests {
         let bg = attrs[.backgroundColor] as? NSColor
         #expect(bg != nil)
     }
+
+    // MARK: - WYSIWYG Verification
+
+    @Test("WYSIWYG: bold ** delimiters are hidden (0.01pt font) when block is inactive")
+    func wysiwygBoldHidden() {
+        let source = "This is **bold** text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+
+        // activeBlockID = nil means ALL blocks are inactive (WYSIWYG mode)
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // Check paragraph block was parsed
+        #expect(result.blocks.count >= 1)
+        #expect(result.blocks[0].kind == .paragraph)
+        #expect(!result.blocks[0].inlineRuns.isEmpty, "Paragraph must have inline runs for bold")
+
+        // Find ** positions
+        let starPos = (source as NSString).range(of: "**").location
+        let starAttrs = textStorage.attributes(at: starPos, effectiveRange: nil)
+        let starFont = starAttrs[.font] as? NSFont
+        #expect(starFont != nil, "Font must be set on ** chars")
+        #expect(starFont!.pointSize < 1.0, "** must have tiny font (got \(starFont!.pointSize))")
+
+        // The "bold" text between ** should have normal-size bold font
+        let boldPos = (source as NSString).range(of: "bold").location
+        let boldAttrs = textStorage.attributes(at: boldPos, effectiveRange: nil)
+        let boldFont = boldAttrs[.font] as? NSFont
+        #expect(boldFont != nil)
+        #expect(boldFont!.pointSize >= 10, "bold text should have normal font size")
+        let traits = NSFontManager.shared.traits(of: boldFont!)
+        #expect(traits.contains(.boldFontMask), "bold text must have bold trait")
+    }
+
+    @Test("WYSIWYG: heading # prefix is hidden when block is inactive")
+    func wysiwygHeadingHidden() {
+        let source = "# Hello"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // # at position 0 should be hidden (0.01pt font)
+        let hashAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        let hashFont = hashAttrs[.font] as? NSFont
+        #expect(hashFont!.pointSize < 1.0, "# must be hidden (got \(hashFont!.pointSize))")
+
+        // "Hello" at position 2 should have large bold font
+        let textAttrs = textStorage.attributes(at: 2, effectiveRange: nil)
+        let textFont = textAttrs[.font] as? NSFont
+        #expect(textFont!.pointSize >= 28, "Hello should be 28pt (got \(textFont!.pointSize))")
+    }
+
+    @Test("WYSIWYG: active block shows raw markdown with delimiters visible")
+    func wysiwygActiveBlockShowsRaw() {
+        let source = "This is **bold** text"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+
+        // Set activeBlockID to the paragraph block
+        let blockID = result.blocks[0].id
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: blockID,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // ** should be visible (normal font size, not hidden)
+        let starPos = (source as NSString).range(of: "**").location
+        let starAttrs = textStorage.attributes(at: starPos, effectiveRange: nil)
+        let starFont = starAttrs[.font] as? NSFont
+        #expect(starFont!.pointSize >= 10, "** in active block should be visible (got \(starFont!.pointSize))")
+    }
+
+    @Test("WYSIWYG: link URL hidden when inactive, visible when active")
+    func wysiwygLinkHidden() {
+        let source = "Visit [Example](https://example.com) now"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+
+        // Inactive: URL part should be hidden
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        let urlPos = (source as NSString).range(of: "(https").location
+        let urlAttrs = textStorage.attributes(at: urlPos, effectiveRange: nil)
+        let urlFont = urlAttrs[.font] as? NSFont
+        #expect(urlFont!.pointSize < 1.0, "URL must be hidden when inactive (got \(urlFont!.pointSize))")
+    }
+
+    @Test("WYSIWYG: code fence hidden when inactive")
+    func wysiwygCodeFenceHidden() {
+        let source = "```\ncode\n```"
+        let textStorage = makeTextStorage(source)
+        let result = parser.parse(source, revision: 1)
+        let highlighter = SyntaxHighlighter()
+        highlighter.apply(to: textStorage, blocks: result.blocks, activeBlockID: nil,
+                          settings: EditorSettings.shared, theme: ThemePresets.github)
+
+        // ``` at position 0 should be hidden
+        let fenceAttrs = textStorage.attributes(at: 0, effectiveRange: nil)
+        let fenceFont = fenceAttrs[.font] as? NSFont
+        #expect(fenceFont!.pointSize < 1.0, "``` must be hidden when inactive (got \(fenceFont!.pointSize))")
+    }
 }

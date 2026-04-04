@@ -31,12 +31,16 @@ struct SyntaxHighlighter {
             .paragraphStyle: paraStyle,
         ], range: fullRange)
 
+        var activeCount = 0
+        var inactiveCount = 0
         for block in blocks {
             let isActive = block.id == activeBlockID
+            if isActive { activeCount += 1 } else { inactiveCount += 1 }
             applyBlock(block, isActive: isActive, activeBlockID: activeBlockID,
                        to: textStorage, totalLength: totalLength,
                        baseFont: baseFont, settings: settings, theme: theme)
         }
+        // Debug logging removed
 
         textStorage.endEditing()
     }
@@ -474,6 +478,7 @@ struct SyntaxHighlighter {
     private func hideRange(_ range: NSRange, in ts: NSTextStorage, bgColor: NSColor) {
         ts.addAttribute(.font, value: Self.hiddenFont, range: range)
         ts.addAttribute(.foregroundColor, value: bgColor, range: range)
+        // (hidden range rendering)
     }
 
     // MARK: - Font/Style Helpers
