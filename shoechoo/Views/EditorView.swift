@@ -10,28 +10,38 @@ struct EditorView: View {
     @State private var showSidebar = true
 
     var body: some View {
+        if let vm = document.viewModel {
+            editorBody(vm: vm)
+        } else {
+            ProgressView("Loading...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    @ViewBuilder
+    private func editorBody(vm: EditorViewModel) -> some View {
         HSplitView {
             if showSidebar {
                 SidebarContainerView(
-                    viewModel: document.viewModel,
+                    viewModel: vm,
                     documentURL: fileURL
                 )
                 .frame(minWidth: 150, idealWidth: 220, maxWidth: 300)
             }
 
             VStack(spacing: 0) {
-                WYSIWYGTextView(viewModel: document.viewModel, settings: settings, themeRegistry: themeRegistry, document: document)
-                    .focusedSceneValue(\.editorViewModel, document.viewModel)
+                WYSIWYGTextView(viewModel: vm, settings: settings, themeRegistry: themeRegistry, document: document)
+                    .focusedSceneValue(\.editorViewModel, vm)
                     .frame(minWidth: 400, minHeight: 300)
 
                 Divider()
 
                 HStack(spacing: 4) {
-                    Text("\(document.viewModel.wordCount) words")
+                    Text("\(vm.wordCount) words")
                     Text("·")
-                    Text("\(document.viewModel.characterCount) characters")
+                    Text("\(vm.characterCount) characters")
                     Text("·")
-                    Text("\(document.viewModel.lineCount) lines")
+                    Text("\(vm.lineCount) lines")
                     Spacer()
                 }
                 .font(.system(size: 11))
@@ -51,30 +61,30 @@ struct EditorView: View {
 
                 Divider()
 
-                Button(action: { document.viewModel.toggleBold() }) {
+                Button(action: { vm.toggleBold() }) {
                     Image(systemName: "bold")
                 }
                 .help("Bold (⌘B)")
 
-                Button(action: { document.viewModel.toggleItalic() }) {
+                Button(action: { vm.toggleItalic() }) {
                     Image(systemName: "italic")
                 }
                 .help("Italic (⌘I)")
 
-                Button(action: { document.viewModel.toggleInlineCode() }) {
+                Button(action: { vm.toggleInlineCode() }) {
                     Image(systemName: "chevron.left.forwardslash.chevron.right")
                 }
                 .help("Inline Code (⇧⌘K)")
 
                 Divider()
 
-                Button(action: { document.viewModel.toggleFocusMode() }) {
-                    Image(systemName: document.viewModel.isFocusModeEnabled ? "eye.fill" : "eye")
+                Button(action: { vm.toggleFocusMode() }) {
+                    Image(systemName: vm.isFocusModeEnabled ? "eye.fill" : "eye")
                 }
                 .help("Focus Mode (⇧⌘F)")
 
-                Button(action: { document.viewModel.toggleTypewriterScroll() }) {
-                    Image(systemName: document.viewModel.isTypewriterScrollEnabled ? "arrow.up.and.down.text.horizontal" : "arrow.up.and.down")
+                Button(action: { vm.toggleTypewriterScroll() }) {
+                    Image(systemName: vm.isTypewriterScrollEnabled ? "arrow.up.and.down.text.horizontal" : "arrow.up.and.down")
                 }
                 .help("Typewriter Scroll")
 
@@ -94,7 +104,8 @@ struct EditorView: View {
     }
 
     private func exportHTML() async {
-        let html = await document.viewModel.exportHTML()
+        guard let vm = document.viewModel else { return }
+        let html = await vm.exportHTML()
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.html]
         panel.nameFieldStringValue = "Export.html"

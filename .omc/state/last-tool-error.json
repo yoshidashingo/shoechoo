@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"GIT_EDITOR=true git rebase --continue\",\"description\":\"Continue rebase\"}",
-  "error": "Exit code 1\nYou must edit all merge conflicts and then\nmark them as resolved using git add",
-  "timestamp": "2026-04-04T22:24:42.066Z",
-  "retry_count": 3
+  "tool_input_preview": "{\"command\":\"ls /Users/shingo/Documents/GitHub/shoechoo/.steering/extensions/ 2>/dev/null; cat /Users/shingo/Documents/GitHub/shoechoo/.steering/extensions/security/baseline/security-baseline.opt-in.md...",
+  "error": "Exit code 1\nsecurity",
+  "timestamp": "2026-04-04T22:27:27.104Z",
+  "retry_count": 1
 }

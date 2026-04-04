@@ -18,8 +18,18 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     nonisolated(unsafe) private var _snapshotText: String = ""
 
     init() {
-        // ReferenceFileDocument.init is always called on main thread by SwiftUI
-        self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        if Thread.isMainThread {
+            self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        } else {
+            // NSDocumentController can call init from background thread (#81)
+            // viewModel stays nil; updateNSView will initialize it on main thread
+            self.viewModel = nil
+            DispatchQueue.main.async { [self] in
+                MainActor.assumeIsolated {
+                    self.viewModel = EditorViewModel()
+                }
+            }
+        }
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -28,10 +38,22 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         _snapshotText = text
-        // ReferenceFileDocument.init(configuration:) is called on main thread by SwiftUI
-        let vm = MainActor.assumeIsolated { EditorViewModel() }
-        self.viewModel = vm
-        MainActor.assumeIsolated { vm.sourceText = text }
+        if Thread.isMainThread {
+            let vm = MainActor.assumeIsolated { EditorViewModel() }
+            self.viewModel = vm
+            MainActor.assumeIsolated { vm.sourceText = text }
+        } else {
+            // NSDocumentController can call init(configuration:) from background thread (#81)
+            self.viewModel = nil
+            let savedText = text
+            DispatchQueue.main.async { [self] in
+                MainActor.assumeIsolated {
+                    let vm = EditorViewModel()
+                    vm.sourceText = savedText
+                    self.viewModel = vm
+                }
+            }
+        }
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> String {
