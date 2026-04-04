@@ -53,19 +53,19 @@
 ## インストール
 
 1. **[Releases ページ](https://github.com/yoshidashingo/shoechoo/releases/latest)** から最新版をダウンロード
-2. `.zip` または `.dmg` を開き、`Shoe Choo.app` をアプリケーションフォルダに移動
+2. `.zip` または `.dmg` を開き、`shoechoo.app` をアプリケーションフォルダに移動
 3. Shoe Choo を起動
 
 > **注意**: このアプリは公証（Notarization）されていません。初回起動時にmacOSによってブロックされます。以下のいずれかの方法で開いてください:
 >
 > **方法A**（ターミナル）:
 > ```
-> xattr -cr "/Applications/Shoe Choo.app"
+> xattr -cr "/Applications/shoechoo.app"
 > ```
 > その後、通常通りアプリを起動してください。
 >
 > **方法B**（システム設定）:
-> 1. `Shoe Choo.app` を開こうとする（ブロックされます）
+> 1. `shoechoo.app` を開こうとする（ブロックされます）
 > 2. **システム設定** → **プライバシーとセキュリティ** を開く
 > 3. 下にスクロールしてブロックされたアプリのメッセージを見つけ、**このまま開く** をクリック
 

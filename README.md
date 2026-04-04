@@ -53,19 +53,19 @@
 ## Installation
 
 1. Download the latest version from the **[Releases page](https://github.com/yoshidashingo/shoechoo/releases/latest)**
-2. Open the `.zip` or `.dmg` and move `Shoe Choo.app` to your Applications folder
+2. Open the `.zip` or `.dmg` and move `shoechoo.app` to your Applications folder
 3. Launch Shoe Choo
 
 > **Note**: This app is not notarized. On first launch, macOS will block it. To open it:
 >
 > **Option A** (Terminal):
 > ```
-> xattr -cr "/Applications/Shoe Choo.app"
+> xattr -cr "/Applications/shoechoo.app"
 > ```
 > Then launch the app normally.
 >
 > **Option B** (System Settings):
-> 1. Try to open `Shoe Choo.app` (it will be blocked)
+> 1. Try to open `shoechoo.app` (it will be blocked)
 > 2. Open **System Settings** > **Privacy & Security**
 > 3. Scroll down to find the blocked app message and click **Open Anyway**
 
