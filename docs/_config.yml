@@ -1,0 +1,6 @@
+title: Shoe Choo Editor
+description: Distraction-free Markdown editor for macOS
+theme: minima
+baseurl: ""
+exclude:
+  - superpowers/
