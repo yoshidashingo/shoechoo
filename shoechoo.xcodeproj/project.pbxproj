@@ -30,6 +30,8 @@
 		B7BCD634C08986C9816E6135 /* RenderCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7526280FE8D42984CCDF9BD4 /* RenderCacheTests.swift */; };
 		C1A2B3D4E5F60718293A4B5C /* HTMLConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B3C4E5F6071829A3B4C5D6 /* HTMLConverterTests.swift */; };
 		E3F4A5B6C7D80921B4C5D6E7 /* MarkdownRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4A5B6C7D8092130C5D6E7F8 /* MarkdownRendererTests.swift */; };
+		912F8B6F25394C96AE063EC3 /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9B77EC89A3480180C012E1 /* SyntaxHighlighter.swift */; };
+		033CEE5EDE5B40CB9C724A68 /* SyntaxHighlighterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51A5E17085840B7B58801FE /* SyntaxHighlighterTests.swift */; };
 		BB492FCCDA97B2FDB7BB082C /* ShoechooTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */; };
 		C44A596026B9FD35D93D45C3 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B927C007304B710CF72A62CC /* MarkdownDocument.swift */; };
 		D5EFC03F7891A3FCF4CD2C3F /* EditorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */; };
@@ -76,6 +78,8 @@
 		C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNode.swift; sourceTree = "<group>"; };
 		D2B3C4E5F6071829A3B4C5D6 /* HTMLConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLConverterTests.swift; sourceTree = "<group>"; };
 		F4A5B6C7D8092130C5D6E7F8 /* MarkdownRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererTests.swift; sourceTree = "<group>"; };
+		2F9B77EC89A3480180C012E1 /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
+		A51A5E17085840B7B58801FE /* SyntaxHighlighterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighterTests.swift; sourceTree = "<group>"; };
 		CD0E58284466C1BAB9821A11 /* FileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileService.swift; sourceTree = "<group>"; };
 		E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
@@ -190,6 +194,7 @@
 				153925F175F3248589356ABC /* MarkdownParserTests.swift */,
 				F4A5B6C7D8092130C5D6E7F8 /* MarkdownRendererTests.swift */,
 				7526280FE8D42984CCDF9BD4 /* RenderCacheTests.swift */,
+				A51A5E17085840B7B58801FE /* SyntaxHighlighterTests.swift */,
 			);
 			path = shoechooTests;
 			sourceTree = "<group>";
@@ -206,6 +211,7 @@
 			isa = PBXGroup;
 			children = (
 				6B1FDFD5A67EBBFDE20AE3B9 /* MarkdownRenderer.swift */,
+				2F9B77EC89A3480180C012E1 /* SyntaxHighlighter.swift */,
 			);
 			path = Renderer;
 			sourceTree = "<group>";
@@ -328,6 +334,7 @@
 				8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */,
 				E3F4A5B6C7D80921B4C5D6E7 /* MarkdownRendererTests.swift in Sources */,
 				B7BCD634C08986C9816E6135 /* RenderCacheTests.swift in Sources */,
+				033CEE5EDE5B40CB9C724A68 /* SyntaxHighlighterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +353,7 @@
 				C44A596026B9FD35D93D45C3 /* MarkdownDocument.swift in Sources */,
 				89682F7FB4488F0362A0B932 /* MarkdownParser.swift in Sources */,
 				2C9B49EE4586C20FD5DDE48F /* MarkdownRenderer.swift in Sources */,
+				912F8B6F25394C96AE063EC3 /* SyntaxHighlighter.swift in Sources */,
 				1657BDACC317990A3D521C21 /* ParseResult.swift in Sources */,
 				4A24FE7D983E59CC5FA96097 /* PreferencesView.swift in Sources */,
 				49688C4D1FDEDAC6AE5863DC /* RenderCache.swift in Sources */,
