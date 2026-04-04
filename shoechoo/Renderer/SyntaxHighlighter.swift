@@ -75,15 +75,16 @@ struct SyntaxHighlighter {
             applyListItem(block, isActive: isActive, to: ts, totalLength: totalLength,
                           baseFont: baseFont, settings: settings, theme: theme)
         case .horizontalRule:
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
-            ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.single.rawValue, range: r)
-            ts.addAttribute(.strikethroughColor, value: theme.delimiterColor.nsColor, range: r)
+            applyHorizontalRule(block, isActive: isActive, to: ts, theme: theme)
         case .paragraph:
             applyInlines(block, isActive: isActive, to: ts, totalLength: totalLength,
                          baseFont: baseFont, settings: settings, theme: theme)
         case .image:
-            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
-        case .table, .tableRow:
+            applyImage(block, isActive: isActive, to: ts, theme: theme)
+        case .table:
+            applyTable(block, isActive: isActive, activeBlockID: activeBlockID, to: ts,
+                       totalLength: totalLength, baseFont: baseFont, settings: settings, theme: theme)
+        case .tableRow:
             break
         }
     }
@@ -163,6 +164,18 @@ struct SyntaxHighlighter {
     ) {
         let r = block.sourceRange
         ts.addAttribute(.foregroundColor, value: theme.blockquoteColor.nsColor, range: r)
+        // Indent blockquote text
+        let quoteStyle = NSMutableParagraphStyle()
+        quoteStyle.lineSpacing = settings.lineSpacing
+        quoteStyle.headIndent = 20
+        quoteStyle.firstLineHeadIndent = isActive ? 0 : 20
+        quoteStyle.paragraphSpacing = settings.fontSize * 0.3
+        ts.addAttribute(.paragraphStyle, value: quoteStyle, range: r)
+        // Italic for blockquote content
+        if !isActive {
+            let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
+            ts.addAttribute(.font, value: italicFont, range: r)
+        }
 
         let blockText = block.sourceText as NSString
         var offset = 0
@@ -328,6 +341,129 @@ struct SyntaxHighlighter {
         } else {
             ts.addAttribute(.foregroundColor, value: theme.linkColor.nsColor, range: range)
             ts.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: range)
+        }
+    }
+
+    // MARK: - Horizontal Rule
+
+    private func applyHorizontalRule(
+        _ block: EditorNode, isActive: Bool,
+        to ts: NSTextStorage, theme: EditorTheme
+    ) {
+        let r = block.sourceRange
+        if isActive {
+            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
+        } else {
+            // Hide the --- text and show a strikethrough line
+            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor.withAlphaComponent(0.3), range: r)
+            ts.addAttribute(.strikethroughStyle, value: NSUnderlineStyle.thick.rawValue, range: r)
+            ts.addAttribute(.strikethroughColor, value: theme.delimiterColor.nsColor, range: r)
+        }
+    }
+
+    // MARK: - Image
+
+    private func applyImage(
+        _ block: EditorNode, isActive: Bool,
+        to ts: NSTextStorage, theme: EditorTheme
+    ) {
+        let r = block.sourceRange
+        if isActive {
+            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
+        } else {
+            // Hide ![]() syntax, show alt text only
+            let nsText = block.sourceText as NSString
+            // Find ![alt](url) structure
+            let altClose = nsText.range(of: "](")
+            if altClose.location != NSNotFound && nsText.length >= 4 {
+                // Hide "!["
+                hideRange(NSRange(location: r.location, length: 2), in: ts, bgColor: theme.backgroundColor.nsColor)
+                // Alt text visible (between ![ and ])
+                let altStart = r.location + 2
+                let altLen = altClose.location - 2
+                if altLen > 0 {
+                    ts.addAttribute(.foregroundColor, value: theme.blockquoteColor.nsColor,
+                                    range: NSRange(location: altStart, length: altLen))
+                }
+                // Hide "](url)"
+                let urlPartStart = r.location + altClose.location
+                let urlPartLen = r.length - altClose.location
+                hideRange(NSRange(location: urlPartStart, length: urlPartLen), in: ts, bgColor: theme.backgroundColor.nsColor)
+            } else {
+                ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor, range: r)
+            }
+        }
+    }
+
+    // MARK: - Table
+
+    private func applyTable(
+        _ block: EditorNode, isActive: Bool, activeBlockID: EditorNode.ID?,
+        to ts: NSTextStorage, totalLength: Int, baseFont: NSFont,
+        settings: EditorSettings, theme: EditorTheme
+    ) {
+        let r = block.sourceRange
+        let blockText = block.sourceText as NSString
+
+        // Apply monospace font for alignment
+        let mono = NSFont(name: theme.codeFontFamily, size: settings.fontSize)
+            ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
+        ts.addAttribute(.font, value: mono, range: r)
+
+        if isActive || block.id == activeBlockID {
+            // Active: show raw table with pipe delimiters in dim color
+            var offset = 0
+            for line in (blockText as String).components(separatedBy: "\n") {
+                let lineLen = (line as NSString).length
+                let lineRange = NSRange(location: r.location + offset, length: lineLen)
+                guard lineRange.location + lineRange.length <= totalLength else { break }
+
+                // Color | delimiters
+                let nsLine = line as NSString
+                for ci in 0..<nsLine.length {
+                    if nsLine.character(at: ci) == 0x7C { // |
+                        ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor,
+                                        range: NSRange(location: lineRange.location + ci, length: 1))
+                    }
+                }
+                offset += lineLen + 1
+            }
+        } else {
+            // Inactive: hide separator rows, dim pipe delimiters
+            var offset = 0
+            for line in (blockText as String).components(separatedBy: "\n") {
+                let lineLen = (line as NSString).length
+                let lineRange = NSRange(location: r.location + offset, length: lineLen)
+                guard lineRange.location + lineRange.length <= totalLength else { break }
+
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                let isSeparator = trimmed.allSatisfy({ $0 == "|" || $0 == "-" || $0 == ":" || $0 == " " })
+                    && trimmed.contains("-")
+
+                if isSeparator {
+                    // Hide separator row completely
+                    hideRange(lineRange, in: ts, bgColor: theme.backgroundColor.nsColor)
+                } else {
+                    // Dim pipe characters
+                    let nsLine = line as NSString
+                    for ci in 0..<nsLine.length {
+                        if nsLine.character(at: ci) == 0x7C { // |
+                            ts.addAttribute(.foregroundColor, value: theme.delimiterColor.nsColor.withAlphaComponent(0.2),
+                                            range: NSRange(location: lineRange.location + ci, length: 1))
+                        }
+                    }
+                }
+                offset += lineLen + 1
+            }
+
+            // Bold the header row (first child)
+            if let header = block.children.first {
+                let hr = header.sourceRange
+                if hr.location >= 0 && hr.location + hr.length <= totalLength {
+                    let boldMono = NSFontManager.shared.convert(mono, toHaveTrait: .boldFontMask)
+                    ts.addAttribute(.font, value: boldMono, range: hr)
+                }
+            }
         }
     }
 
