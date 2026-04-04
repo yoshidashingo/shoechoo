@@ -1,0 +1,99 @@
+name: shoechoo
+options:
+  bundleIdPrefix: com.shoechoo
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+packages:
+  swift-markdown:
+    url: https://github.com/swiftlang/swift-markdown.git
+    exactVersion: 0.5.0
+  Highlightr:
+    url: https://github.com/raspu/Highlightr.git
+    exactVersion: 2.2.1
+
+schemes:
+  shoechoo:
+    build:
+      targets:
+        shoechoo: all
+        shoechooTests: [test]
+    test:
+      targets:
+        - shoechooTests
+      gatherCoverageData: true
+
+targets:
+  shoechoo:
+    type: application
+    platform: macOS
+    sources:
+      - shoechoo
+    resources:
+      - path: shoechoo/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shoechoo.app
+        PRODUCT_NAME: shoechoo
+        INFOPLIST_FILE: shoechoo/Resources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: shoechoo/Resources/shoechoo.entitlements
+        ENABLE_HARDENED_RUNTIME: true
+        CODE_SIGN_IDENTITY: "-"
+    dependencies:
+      - package: swift-markdown
+        product: Markdown
+      - package: Highlightr
+    info:
+      path: shoechoo/Resources/Info.plist
+      properties:
+        CFBundleName: "Shoe Choo"
+        CFBundleDisplayName: "Shoe Choo"
+        CFBundleIdentifier: com.shoechoo.app
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundlePackageType: APPL
+        CFBundleExecutable: shoechoo
+        LSMinimumSystemVersion: "14.0"
+        NSHighResolutionCapable: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Markdown Document
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Default
+            LSItemContentTypes:
+              - net.daringfireball.markdown
+              - public.text
+            CFBundleTypeExtensions:
+              - md
+              - markdown
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: net.daringfireball.markdown
+            UTTypeDescription: Markdown Document
+            UTTypeConformsTo:
+              - public.text
+              - public.plain-text
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - md
+                - markdown
+
+  shoechooTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - shoechooTests
+    dependencies:
+      - target: shoechoo
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shoechoo.tests
+        GENERATE_INFOPLIST_FILE: true
