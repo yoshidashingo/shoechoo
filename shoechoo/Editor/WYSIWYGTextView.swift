@@ -32,6 +32,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         textView.autoresizingMask = [.width]
         textView.textContainerInset = NSSize(width: 40, height: 20)
         textView.textContainer?.widthTracksTextView = true
+        textView.setAccessibilityIdentifier("editor.textView")
 
         let font = NSFont(name: settings.fontFamily, size: settings.fontSize)
             ?? NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .regular)
