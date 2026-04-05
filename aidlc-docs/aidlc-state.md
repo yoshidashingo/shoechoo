@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield (Refactoring Cycle 2)
 - **Start Date**: 2026-04-05T00:00:00+09:00
-- **Current Stage**: INCEPTION - Workflow Planning (Complete)
+- **Current Stage**: CONSTRUCTION — All Units Complete
 - **Previous Cycle**: Completed 2026-04-04 (Greenfield → Build → Red Team Review)
 
 ## Workspace State
@@ -49,6 +49,6 @@ WYSIWYGエディタの品質・体験が貧弱でクラッシュが多発。根�
 - [x] Unit 1c: Timer → DebounceTask (FR-09) — nonisolated(unsafe) 0 in Coordinator
 - [x] Unit 2: Model cleanup (FR-07, FR-08, FR-10) — SnapshotStore, DocumentStatistics
 - [x] Unit 3: TextKit 2 PoC (FR-03) — Partial Go: already running TextKit 2 on macOS 14+
-- [ ] Unit 4: WYSIWYG + code block highlight (FR-04, FR-05)
-- [ ] Unit 5: ARCHITECTURE.md + test coverage (FR-11, NFR)
-- [ ] Build and Test (final)
+- [x] Unit 4: WYSIWYG + Highlightr code block highlight (FR-04, FR-05) — Red Team CRITICAL 0
+- [x] Unit 5: ARCHITECTURE.md + CLAUDE.md + 42 new tests (FR-11, NFR) — 207 tests total
+- [x] Build and Test: 207 tests, 16 suites, all passing. All 12 AC verified.
