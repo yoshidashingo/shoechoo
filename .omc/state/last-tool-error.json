@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"node \\\"/Users/shingo/.claude/plugins/marketplaces/openai-codex/plugins/codex/scripts/codex-companion.mjs\\\" task \\\"<task>Review the following files in the shoechoo Swift/macOS project for c...",
-  "error": "Exit code 1\nCodex CLI is not installed or is missing required runtime support. Install it with `npm install -g @openai/codex`, then rerun `/codex:setup`.",
-  "timestamp": "2026-04-05T02:32:53.054Z",
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/Users/shingo/Documents/GitHub/shoechoo/shoechoo.xcodeproj/project.pbxproj\"}",
+  "error": "File content (14121 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.",
+  "timestamp": "2026-04-05T02:44:43.394Z",
   "retry_count": 1
 }
