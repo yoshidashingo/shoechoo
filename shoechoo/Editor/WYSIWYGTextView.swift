@@ -50,7 +50,7 @@ struct WYSIWYGTextView: NSViewRepresentable {
         }
 
         textView.delegate = context.coordinator
-        context.coordinator.registerNotifications()
+        viewModel.commandHandler = context.coordinator
 
         // Initial highlight — apply synchronously so text is visible immediately
         context.coordinator.applyHighlightNow()
@@ -92,15 +92,16 @@ struct WYSIWYGTextView: NSViewRepresentable {
     // MARK: - Coordinator
 
     @MainActor
-    final class Coordinator: NSObject, NSTextViewDelegate {
+    final class Coordinator: NSObject, NSTextViewDelegate, EditorCommandHandler {
         var parent: WYSIWYGTextView
         weak var textView: ShoechooTextView?
         weak var scrollView: NSScrollView?
         let nodeModel = EditorNodeModel()
         private var isApplyingHighlight = false
+        // Timer.invalidate() is thread-safe; nonisolated(unsafe) is for deinit access only.
+        // Will be replaced with Task-based debounce in Unit 1c (FR-09).
         nonisolated(unsafe) private var highlightTimer: Timer?
         nonisolated(unsafe) private var autoSaveTimer: Timer?
-        nonisolated(unsafe) private var notificationObservers: [any NSObjectProtocol] = []
         private var currentActiveBlockID: EditorNode.ID?
 
         init(_ parent: WYSIWYGTextView) {
@@ -110,9 +111,6 @@ struct WYSIWYGTextView: NSViewRepresentable {
         deinit {
             highlightTimer?.invalidate()
             autoSaveTimer?.invalidate()
-            for observer in notificationObservers {
-                NotificationCenter.default.removeObserver(observer)
-            }
         }
 
         func applyAppearance(settings: EditorSettings) {
@@ -300,48 +298,10 @@ struct WYSIWYGTextView: NSViewRepresentable {
             }
         }
 
-        // MARK: - Notifications
+        // MARK: - EditorCommandHandler
 
-        func registerNotifications() {
-            let toggleObs = NotificationCenter.default.addObserver(
-                forName: .toggleFormatting, object: nil, queue: .main
-            ) { [weak self] notification in
-                let prefix = notification.userInfo?["prefix"] as? String
-                let suffix = notification.userInfo?["suffix"] as? String
-                MainActor.assumeIsolated {
-                    self?.handleToggleFormatting(prefix: prefix, suffix: suffix)
-                }
-            }
-            let insertObs = NotificationCenter.default.addObserver(
-                forName: .insertFormattedText, object: nil, queue: .main
-            ) { [weak self] notification in
-                let text = notification.userInfo?["text"] as? String
-                let cursorOffset = notification.userInfo?["cursorOffset"] as? Int
-                MainActor.assumeIsolated {
-                    self?.handleInsertText(text: text, cursorOffset: cursorOffset)
-                }
-            }
-            let prefixObs = NotificationCenter.default.addObserver(
-                forName: .setLinePrefix, object: nil, queue: .main
-            ) { [weak self] notification in
-                let prefix = notification.userInfo?["prefix"] as? String
-                MainActor.assumeIsolated {
-                    self?.handleSetLinePrefix(prefix: prefix)
-                }
-            }
-            let scrollObs = NotificationCenter.default.addObserver(
-                forName: .scrollToPosition, object: nil, queue: .main
-            ) { [weak self] notification in
-                let position = notification.userInfo?["position"] as? Int
-                MainActor.assumeIsolated {
-                    self?.handleScrollToPosition(position: position)
-                }
-            }
-            notificationObservers = [toggleObs, insertObs, prefixObs, scrollObs]
-        }
-
-        private func handleToggleFormatting(prefix: String?, suffix: String?) {
-            guard let textView, let prefix, let suffix else { return }
+        func toggleFormatting(prefix: String, suffix: String) {
+            guard let textView else { return }
             let sel = textView.selectedRange()
             guard sel.length > 0 else { return }
             let text = (textView.string as NSString).substring(with: sel)
@@ -352,15 +312,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
             }
         }
 
-        private func handleInsertText(text: String?, cursorOffset: Int?) {
-            guard let textView, let text, let cursorOffset else { return }
+        func insertFormattedText(_ text: String, cursorOffset: Int) {
+            guard let textView else { return }
             let sel = textView.selectedRange()
             textView.insertText(text, replacementRange: sel)
             textView.setSelectedRange(NSRange(location: sel.location + cursorOffset, length: 0))
         }
 
-        private func handleSetLinePrefix(prefix: String?) {
-            guard let textView, let prefix else { return }
+        func setLinePrefix(_ prefix: String) {
+            guard let textView else { return }
             let ns = textView.string as NSString
             let sel = textView.selectedRange()
             let lineRange = ns.lineRange(for: NSRange(location: sel.location, length: 0))
@@ -369,8 +329,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
             textView.insertText(prefix + stripped, replacementRange: lineRange)
         }
 
-        private func handleScrollToPosition(position: Int?) {
-            guard let textView, let position else { return }
+        func insertImageMarkdown(_ markdown: String, at position: Int) {
+            guard let textView else { return }
+            let length = (textView.string as NSString).length
+            let safePosition = min(max(0, position), length)
+            textView.insertText(markdown, replacementRange: NSRange(location: safePosition, length: 0))
+        }
+
+        func scrollToPosition(_ position: Int) {
+            guard let textView else { return }
             let length = (textView.string as NSString).length
             let safePosition = min(max(0, position), length)
             let range = NSRange(location: safePosition, length: 0)

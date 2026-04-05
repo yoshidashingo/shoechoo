@@ -8,7 +8,8 @@ struct HeadingItem: Identifiable, Sendable {
 }
 
 @Observable
-final class EditorViewModel: @unchecked Sendable {
+@MainActor
+final class EditorViewModel {
     var sourceText: String = ""
     var cursorPosition: Int = 0
     var isFocusModeEnabled: Bool
@@ -17,6 +18,7 @@ final class EditorViewModel: @unchecked Sendable {
     var lastError: String?
 
     let settings: EditorSettings
+    weak var commandHandler: EditorCommandHandler?
 
     init(settings: EditorSettings = .shared) {
         self.settings = settings
@@ -111,10 +113,7 @@ final class EditorViewModel: @unchecked Sendable {
 
     func insertImage(at position: Int, relativePath: String) {
         let markdown = "![](\(relativePath))"
-        NotificationCenter.default.post(name: .insertImageMarkdown, object: nil, userInfo: [
-            "markdown": markdown,
-            "position": position
-        ])
+        commandHandler?.insertImageMarkdown(markdown, at: position)
     }
 
     func handleImageDrop(urls: [URL], documentURL: URL?) async {
@@ -140,30 +139,14 @@ final class EditorViewModel: @unchecked Sendable {
     // MARK: - Private helpers
 
     private func toggleInlineFormatting(prefix: String, suffix: String) {
-        NotificationCenter.default.post(name: .toggleFormatting, object: nil, userInfo: [
-            "prefix": prefix,
-            "suffix": suffix
-        ])
+        commandHandler?.toggleFormatting(prefix: prefix, suffix: suffix)
     }
 
     private func insertText(_ text: String, cursorOffset: Int) {
-        NotificationCenter.default.post(name: .insertFormattedText, object: nil, userInfo: [
-            "text": text,
-            "cursorOffset": cursorOffset
-        ])
+        commandHandler?.insertFormattedText(text, cursorOffset: cursorOffset)
     }
 
     private func setLinePrefix(_ prefix: String) {
-        NotificationCenter.default.post(name: .setLinePrefix, object: nil, userInfo: [
-            "prefix": prefix
-        ])
+        commandHandler?.setLinePrefix(prefix)
     }
-}
-
-extension Notification.Name {
-    static let toggleFormatting = Notification.Name("shoechoo.toggleFormatting")
-    static let insertFormattedText = Notification.Name("shoechoo.insertFormattedText")
-    static let setLinePrefix = Notification.Name("shoechoo.setLinePrefix")
-    static let insertImageMarkdown = Notification.Name("shoechoo.insertImageMarkdown")
-    static let scrollToPosition = Notification.Name("shoechoo.scrollToPosition")
 }

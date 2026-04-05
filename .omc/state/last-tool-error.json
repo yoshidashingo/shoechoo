@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"find /Users/shingo/Documents/GitHub/shoechoo/shoechoo -name '*.swift' | wc -l && echo \\\"---\\\" && cat /Users/shingo/Documents/GitHub/shoechoo/shoechoo.xcodeproj/project.pbxproj | grep -c '....",
-  "error": "Exit code 1\n      21\n---\n112\n---\n    3150 total\n---",
-  "timestamp": "2026-04-04T22:31:30.016Z",
+  "tool_input_preview": "{\"command\":\"node \\\"/Users/shingo/.claude/plugins/marketplaces/openai-codex/plugins/codex/scripts/codex-companion.mjs\\\" task \\\"<task>Review the Unit 1a changes in the shoechoo macOS Markdown editor. Th...",
+  "error": "Exit code 1\nCodex CLI is not installed or is missing required runtime support. Install it with `npm install -g @openai/codex`, then rerun `/codex:setup`.",
+  "timestamp": "2026-04-05T01:50:05.835Z",
   "retry_count": 1
 }

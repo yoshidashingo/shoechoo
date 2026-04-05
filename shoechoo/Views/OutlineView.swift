@@ -36,10 +36,6 @@ struct OutlineView: View {
     }
 
     private func scrollToHeading(_ heading: HeadingItem) {
-        NotificationCenter.default.post(
-            name: .scrollToPosition,
-            object: nil,
-            userInfo: ["position": heading.position]
-        )
+        viewModel.commandHandler?.scrollToPosition(heading.position)
     }
 }

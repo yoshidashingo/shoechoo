@@ -9,16 +9,20 @@ extension UTType {
 final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     typealias Snapshot = String
 
-    nonisolated(unsafe) var viewModel: EditorViewModel
+    // Set once during init, accessed only from @MainActor context (views, Coordinator).
+    // nonisolated(unsafe) is required by ReferenceFileDocument protocol constraint (AC #9 exception).
+    // Never access from nonisolated methods (snapshot, fileWrapper).
+    nonisolated(unsafe) private(set) var viewModel: EditorViewModel
 
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
 
-    nonisolated(unsafe) private let lock = NSLock()
+    private let lock = NSLock()
     nonisolated(unsafe) private var _snapshotText: String = ""
 
     init() {
-        self.viewModel = EditorViewModel()
+        // SwiftUI DocumentGroup always calls init on MainActor
+        self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -26,9 +30,10 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
               let text = String(data: data, encoding: .utf8) else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        _snapshotText = text
-        let vm = EditorViewModel()
-        vm.sourceText = text
+        _snapshotText = text  // No lock needed during init — no concurrent access
+        // SwiftUI DocumentGroup calls init(configuration:) on MainActor
+        let vm = MainActor.assumeIsolated { EditorViewModel() }
+        MainActor.assumeIsolated { vm.sourceText = text }
         self.viewModel = vm
     }
 
