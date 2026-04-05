@@ -6,6 +6,14 @@
 
 ---
 
+## Red Team Review #3 → Application Design Rev.2 (Cycle 2)
+**Timestamp**: 2026-04-05T10:30:00+09:00
+**User Input**: "Red Team レビュー: application-design/ 8ファイル — CRITICAL 3件、HIGH 4件、MEDIUM 5件"
+**AI Response**: 全12件反映。主な変更: (1) MarkdownDocument.init @MainActor不可→nonisolated(unsafe) viewModel維持+AC#9例外注記、(2) SnapshotStore internal nonisolated(unsafe)をAC#9例外として明記、(3) SnapshotStore全ファイルでfinal classに統一、(4) viewModel @MainActor化断念→プロトコル制約による設計維持、(5) Cycle 1 unit-of-work 3ファイルをarchive-cycle1/に移動、(6) application-design.md全ファイル網羅に更新+ExportCoordinator→ExportHandler命名変更、(7) ShoechooTextViewを軽微変更に再分類。
+**Context**: INCEPTION - Application Design Rev.2
+
+---
+
 ## Requirements Rev.3 + Execution Plan Rev.3 Approval (Cycle 2)
 **Timestamp**: 2026-04-05T08:45:00+09:00
 **User Input**: "Approve & Continue"

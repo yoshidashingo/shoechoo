@@ -227,7 +227,7 @@ FR-11 (ARCHITECTURE.md) ── 全FR完了後
 6. ARCHITECTURE.md が実装と完全一致
 7. 画像D&D→Markdown挿入が正常動作
 8. 技術的負債 TD-01〜TD-08, TD-10 が解消（※注記参照）
-9. `nonisolated(unsafe)` の使用が0件
+9. `nonisolated(unsafe)` がpublic/internalインターフェースから排除（※例外: SnapshotStore内部のNSLock保護されたprivate実装、MarkdownDocument.viewModelのReferenceFileDocumentプロトコル制約による1箇所）
 10. ビルドエラー0、テスト全通過
 11. macOS 14+ で動作確認
 12. NFR-03のパフォーマンス基準を全項目クリア

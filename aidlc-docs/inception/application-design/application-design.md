@@ -1,97 +1,48 @@
-# Application Design: Shoe Choo (Consolidated)
+# Application Design — Cycle 2: Consolidated (Rev.2 — Red Team修正)
 
-## Architecture Overview
+## Overview
 
-**Pattern**: MVVM with SwiftUI shell + AppKit editor surface
-**UI Framework**: SwiftUI (window, toolbar, sidebar) + NSViewRepresentable (NSTextView/TextKit 2)
-**Rendering Pipeline**: 3-stage — Parser → EditorNodeModel → Renderer
-**State Management**: EditorViewModel (per-document) + EditorSettings (shared)
+本ドキュメントはCycle 2リファクタリングのApplication Design成果物を統合したものです。
 
----
+## 成果物一覧
 
-## Components (13)
+| ファイル | 内容 | 行数 |
+|---------|------|------|
+| `components.md` | 新規6コンポーネント定義 + 既存4コンポーネント変更 | ~350 |
+| `component-methods.md` | 全メソッドシグネチャ（Swiftコード付き） | ~449 |
+| `services.md` | サービス層設計、コマンドディスパッチフロー比較 | ~289 |
+| `component-dependency.md` | 依存グラフ、NotificationCenter/nonisolated(unsafe)排除 | ~316 |
+| `archive-cycle1/` | Cycle 1のunit-of-work定義（アーカイブ、参照しないこと） | — |
 
-| ID | Component | Type | Responsibility |
-|----|-----------|------|---------------|
-| C-01 | ShoechooApp | SwiftUI App | App lifecycle, document scene, menus |
-| C-02 | MarkdownDocument | NSDocument | File I/O, auto-save, versioning |
-| C-03 | EditorViewModel | @Observable | Editor logic, rendering orchestration |
-| C-04 | EditorSettings | @Observable (singleton) | App-wide preferences (font, theme) |
-| C-05 | MarkdownParser | Struct | Markdown → swift-markdown AST |
-| C-06 | EditorNodeModel | Class | Intermediate block model with stable IDs |
-| C-07 | MarkdownRenderer | Struct | EditorNode → NSAttributedString |
-| C-08 | WYSIWYGTextView | NSViewRepresentable | TextKit 2 editing surface |
-| C-09 | EditorView | SwiftUI View | Editor + toolbar composition |
-| C-10 | SidebarView | SwiftUI View | Recent files list |
-| C-11 | ExportService | Actor | HTML/PDF export |
-| C-12 | ImageService | Actor | Image asset management |
-| C-13 | FileService | Actor | Low-level file I/O utilities |
+## Red Team #3 で修正された設計判断
 
-## Rendering Pipeline
+### MarkdownDocument.init(configuration:) の @MainActor 制約
+`ReferenceFileDocument.init(configuration:)` は Apple プロトコル定義で @MainActor ではない。off-main スレッドから呼ばれる可能性があるため、`viewModel` の `nonisolated(unsafe)` を維持。現在の設計（off-main では `DispatchQueue.main.async` で遅延初期化）を継続。
 
-```
-Source Text (String)
-    |
-    v
-MarkdownParser (swift-markdown)
-    | produces Markup AST
-    v
-EditorNodeModel
-    | block-level EditorNodes with stable IDs
-    | tracks active block (cursor location)
-    v
-MarkdownRenderer
-    | active block → raw syntax with highlighting
-    | inactive blocks → styled rendering
-    v
-NSAttributedString → WYSIWYGTextView
-```
+### SnapshotStore の型: final class（struct ではない）
+内部に NSLock + mutable state を持つため、struct（値型コピー）は不適切。`final class: Sendable` が正しい型。内部の `nonisolated(unsafe) private var _text` は NSLock で完全保護された private 実装詳細として AC #9 の例外。
 
-**Key Design Decision**: Paragraph-level delayed rendering for MVP. When the cursor leaves a paragraph, it renders as styled output. When the cursor enters, raw Markdown syntax is shown. This achieves 90% of Typora's UX at 30% of the implementation complexity. Full inline-element-level toggle rendering planned for post-MVP.
+### AC #9 の例外注記
+macOS 14+ では `Mutex<String>`（Swift 6.2+/macOS 15+）が利用不可。以下を例外として許容:
+- `SnapshotStore` 内部の `nonisolated(unsafe) private var _text`（NSLock保護）
+- `MarkdownDocument.viewModel` の `nonisolated(unsafe)`（ReferenceFileDocument制約）
 
-## State Management
+## 新規コンポーネント
 
-```
-EditorSettings (shared, persisted)
-    |
-    +--- font, fontSize, lineSpacing
-    +--- appearanceOverride
-    +--- defaultFocusMode, defaultTypewriterScroll
-    |
-EditorViewModel (per-document, transient)
-    |
-    +--- sourceText (synced with MarkdownDocument)
-    +--- nodeModel (EditorNodeModel)
-    +--- cursorPosition, activeBlockID
-    +--- isFocusModeEnabled, isTypewriterScrollEnabled
-```
+| コンポーネント | タイプ | FR対応 | 目的 |
+|---------------|--------|--------|------|
+| `EditorCommandHandler` | protocol | FR-01 | 5つの編集コマンドの型安全インターフェース |
+| `DocumentStatistics` | struct | FR-07 | 語数/文字数/行数（ViewModelから分離、ハイライト時にデバウンス更新） |
+| `ExportHandler` | struct | FR-07 | HTML/PDFエクスポート委譲（命名変更: ExportCoordinator → ExportHandler） |
+| `ImageDropHandler` | struct | FR-07 | 画像D&D処理（ViewModelから分離） |
+| `DebounceTask` | class | FR-09 | Task ベースデバウンス（Timer置換） |
+| `SnapshotStore` | final class | FR-10 | Sendable snapshot管理（NSLock内包） |
 
-## Primary Data Flows
+## 既存コンポーネントの変更
 
-1. **Editing**: User types → NSTextView → EditorViewModel.textDidChange() → Parser → NodeModel update → Renderer → Display
-2. **Cursor Move**: Cursor moves → EditorViewModel.cursorDidMove() → NodeModel.setActiveBlock() → Re-render affected blocks
-3. **Image Drop**: Drop image → ImageService copies to assets/ → EditorViewModel inserts reference → Normal editing flow
-4. **Export**: User triggers → ExportService.generateHTML/PDF() → Save dialog → Write file
-
-## Key Architectural Decisions
-
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| SwiftUI/AppKit boundary | SwiftUI shell + NSViewRepresentable | TextKit 2 requires NSTextView; SwiftUI handles everything else |
-| Rendering pipeline | 3-stage with intermediate model | Enables paragraph-level delayed rendering and incremental re-rendering |
-| State split | Per-document ViewModel + Shared Settings | Avoids accidental state sharing across windows |
-| Services as Actors | ExportService, ImageService, FileService | Thread-safe async I/O without manual locking |
-| Parser as Struct | MarkdownParser | Stateless, synchronous, fast enough for main thread |
-
-## External Dependencies
-
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| swift-markdown (Apple) | Latest stable | Markdown parsing to typed AST |
-| Highlightr | Latest stable | Code block syntax highlighting |
-
----
-
-*Detailed method signatures: see `component-methods.md`*
-*Service orchestration: see `services.md`*
-*Dependency matrix and data flows: see `component-dependency.md`*
+| コンポーネント | 変更内容 |
+|---------------|---------|
+| `EditorViewModel` | 責務縮小: 統計/エクスポート/画像を分離。`weak var commandHandler` を保持 |
+| `WYSIWYGTextView.Coordinator` | `EditorCommandHandler` を実装。Timer → DebounceTask。NotificationCenter購読削除。commandHandler は `makeNSView` で設定 |
+| `MarkdownDocument` | SnapshotStore 使用。viewModel の nonisolated(unsafe) は維持（プロトコル制約） |
+| `ShoechooTextView` | `performDragOperation()` の呼び出し先変更（ImageDropHandler へ） |
