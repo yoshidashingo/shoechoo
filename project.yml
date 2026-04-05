@@ -111,3 +111,5 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shoechoo.uitests
         GENERATE_INFOPLIST_FILE: true
+        BUNDLE_LOADER: ""
+        TEST_HOST: ""

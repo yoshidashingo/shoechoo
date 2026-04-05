@@ -33,7 +33,7 @@ final class PreferencesUITests: ShoechooUITestCase {
         let initialWindowCount = app.windows.count
         openPreferences()
         // After opening Settings, there should be more windows (or at least the Settings one)
-        XCTAssertTrue(app.windows.count >= initialWindowCount,
+        XCTAssertTrue(app.windows.count > initialWindowCount,
                       "Settings window should have opened")
         // Verify we can find the toolbar with Editor/Appearance tabs
         let toolbar = app.toolbars.firstMatch

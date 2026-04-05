@@ -533,7 +533,7 @@
 		22066A4EC7AAB0A56BD20202 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				BUNDLE_LOADER = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -543,6 +543,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.shoechoo.uitests;
 				SDKROOT = macosx;
+				TEST_HOST = "";
 				TEST_TARGET_NAME = shoechoo;
 			};
 			name = Release;
@@ -724,7 +725,7 @@
 		F012D62C05A8EE68E6B195E3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				BUNDLE_LOADER = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -734,6 +735,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.shoechoo.uitests;
 				SDKROOT = macosx;
+				TEST_HOST = "";
 				TEST_TARGET_NAME = shoechoo;
 			};
 			name = Debug;

@@ -110,14 +110,14 @@ final class SidebarUITests: ShoechooUITestCase {
         ).firstMatch
 
         if firstHeading.waitForExistence(timeout: 5) {
-            XCTAssertTrue(true, "Heading appears in outline as button")
+            // Found as button — pass
         } else {
             // SwiftUI may expose the text as staticTexts instead
             let headingText = app.staticTexts.matching(
                 NSPredicate(format: "value CONTAINS[c] 'First Heading' OR label CONTAINS[c] 'First Heading'")
             ).firstMatch
             if headingText.waitForExistence(timeout: 3) {
-                XCTAssertTrue(true, "Heading appears in outline as static text")
+                // Found as static text — pass
             } else {
                 // Last resort: search all descendants
                 let any = app.descendants(matching: .any).matching(

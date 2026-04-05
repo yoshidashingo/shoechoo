@@ -2,30 +2,6 @@ import XCTest
 
 final class TextEditingUITests: ShoechooUITestCase {
 
-    // MARK: - Helpers
-
-    /// Paste text via clipboard (safe for special characters and newlines)
-    private func pasteInEditor(_ text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-
-        let textView = editorTextView.exists ? editorTextView : app.textViews.firstMatch
-        textView.click()
-        app.typeKey("v", modifierFlags: .command)
-        // Wait for paste to be processed
-        usleep(500_000)
-    }
-
-    /// Clear all text in editor (select all + delete)
-    private func clearEditor() {
-        let textView = editorTextView.exists ? editorTextView : app.textViews.firstMatch
-        textView.click()
-        app.typeKey("a", modifierFlags: .command)
-        app.typeKey(.delete, modifierFlags: [])
-        usleep(300_000)
-    }
-
     // MARK: - Tests
 
     func testTypeTextAndVerify() throws {

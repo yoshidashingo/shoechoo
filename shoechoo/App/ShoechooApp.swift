@@ -8,7 +8,7 @@ struct ShoechooApp: App {
         if CommandLine.arguments.contains("--uitesting") {
             UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
             // Prevent state restoration from previous sessions
-            UserDefaults.standard.set(false, forKey: "ApplePersistenceIgnoreState")
+            UserDefaults.standard.set(true, forKey: "ApplePersistenceIgnoreState")
         }
     }
 

@@ -4,15 +4,6 @@ final class ToolbarUITests: ShoechooUITestCase {
 
     // MARK: - Helpers
 
-    /// Clear all text in editor (select all + delete)
-    private func clearEditor() {
-        let textView = editorTextView.exists ? editorTextView : app.textViews.firstMatch
-        textView.click()
-        app.typeKey("a", modifierFlags: .command)
-        app.typeKey(.delete, modifierFlags: [])
-        usleep(300_000)
-    }
-
     /// Get the current text value from the editor
     private func editorValue() -> String {
         let textView = app.textViews.firstMatch

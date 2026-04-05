@@ -2,17 +2,6 @@ import XCTest
 
 final class ExportUITests: ShoechooUITestCase {
 
-    /// Paste text into the editor via clipboard (avoids # being interpreted as heading shortcut)
-    private func pasteInEditor(_ text: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-        let textView = editorTextView.exists ? editorTextView : app.textViews.firstMatch
-        textView.click()
-        app.typeKey("v", modifierFlags: .command)
-        usleep(500_000)
-    }
-
     func testExportHTMLButtonOpensPanel() throws {
         pasteInEditor("# Export Test\n\nSome content to export.")
 
