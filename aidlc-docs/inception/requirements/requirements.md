@@ -1,189 +1,235 @@
-# Requirements Document: Shoe Choo (集中)
+# Requirements — Cycle 2: WYSIWYG Editor Refactoring (Rev.3 — Red Team修正)
 
 ## Intent Analysis
 
-| Item | Detail |
-|------|--------|
-| **User Request** | Build a Typora-inspired distraction-free WYSIWYG Markdown editor for macOS |
-| **Request Type** | New Project (Greenfield) |
-| **Scope Estimate** | System-wide — new macOS application with editor engine, document management, and export |
-| **Complexity Estimate** | Complex — custom WYSIWYG rendering with TextKit 2, GFM support, native macOS integration |
-| **Depth Level** | Comprehensive |
+| 項目 | 内容 |
+|------|------|
+| **User Request** | WYSIWYGエディタの品質・体験が貧弱でクラッシュが多発。根本的にリファクタリング |
+| **Request Type** | Refactoring + Enhancement |
+| **Scope** | System-wide（21ソースファイル + 6テストファイル = 27 Swift files） |
+| **Complexity** | Complex |
+| **Depth** | Comprehensive |
+
+## Red Team Reviews Incorporated
+
+- **Rev.2**: Red Team #1 全11件反映（TD-06/07/08追加、PoC計画、依存グラフ等）
+- **Rev.3**: Red Team #2 全11件反映（TD番号修正、Unit分割、ブランチ戦略、MarkdownDocument対応等）
 
 ---
 
-## 1. Functional Requirements
+## Functional Requirements
 
-### FR-01: WYSIWYG Markdown Editing (Priority: Critical)
-- **FR-01.1**: The editor MUST render Markdown syntax inline as the user types (headings, bold, italic, links, images, lists, blockquotes, code blocks, horizontal rules)
-- **FR-01.2**: The editor MUST use TextKit 2 (NSTextView + custom rendering) for native macOS text system integration
-- **FR-01.3**: The editor MUST support seamless switching between Markdown source and rendered output without mode toggles
-- **FR-01.4**: The editor MUST properly handle IME input (Japanese, Chinese, Korean) via native AppKit text system
-- **FR-01.5**: The editor MUST support standard macOS text behaviors (Undo/Redo, spell check, text substitutions, dictation)
+### FR-01: NotificationCenter廃止と型安全なコマンドパターン
 
-### FR-02: GFM (GitHub Flavored Markdown) Support (Priority: Critical)
-- **FR-02.1**: The parser MUST support all basic Markdown: headings (h1-h6), bold, italic, links, images, ordered/unordered lists, blockquotes, inline code, code blocks, horizontal rules
-- **FR-02.2**: The parser MUST support GFM extensions: tables, task lists (checkboxes), strikethrough, fenced code blocks with language specification
-- **FR-02.3**: The parser MUST use Apple's swift-markdown library (which internally uses cmark-gfm for GFM spec compliance)
-- **FR-02.4**: Code blocks MUST have syntax highlighting for common programming languages
+**優先度**: Critical | **TD対応**: TD-01, TD-05
 
-### FR-03: Focus Mode (Priority: High)
-- **FR-03.1**: Focus mode MUST dim all paragraphs except the currently active paragraph
-- **FR-03.2**: Focus mode MUST be toggleable via keyboard shortcut (Cmd+Shift+F) and menu item
-- **FR-03.3**: The active paragraph MUST be visually distinct (full opacity) from dimmed paragraphs
-- **FR-03.4**: Focus mode state MUST persist across app restarts (per-document or global preference)
+5つのNotification（`toggleFormatting`, `insertFormattedText`, `setLinePrefix`, `insertImageMarkdown`, `scrollToPosition`）を廃止し、Protocol/Delegate + クロージャのハイブリッドに置換。
 
-### FR-04: Typewriter Scrolling (Priority: High)
-- **FR-04.1**: When enabled, the active editing line MUST remain vertically centered in the editor viewport
-- **FR-04.2**: Typewriter scrolling MUST be toggleable independently of focus mode
-- **FR-04.3**: Scrolling MUST animate smoothly when the cursor moves to a new line
+- [ ] `EditorCommandHandler` プロトコルを定義
+- [ ] Coordinator が `EditorCommandHandler` を実装
+- [ ] EditorViewModel が `weak var commandHandler: EditorCommandHandler?` を保持
+- [ ] SwiftUI メニューコマンド → EditorViewModel → commandHandler の呼び出しチェーン
+- [ ] 全5つの Notification.Name 定義と NotificationCenter 購読を削除
+- [ ] `scrollToPosition`（OutlineView.swift:39 から post）も Protocol 経由に移行
 
-### FR-05: Document Management (Priority: High)
-- **FR-05.1**: The app MUST use NSDocument-based architecture for standard macOS document handling
-- **FR-05.2**: The app MUST support: New, Open, Save, Save As, Revert, Duplicate, Rename, Move To
-- **FR-05.3**: The app MUST support macOS auto-save and Versions (document versioning)
-- **FR-05.4**: The app MUST support tabbed windows (macOS native tab merging)
-- **FR-05.5**: The app MUST track and display recently opened files
-- **FR-05.6**: Documents MUST be saved as standard `.md` files (fully portable)
+**段階的移行方針**:
+1. `EditorCommandHandler` プロトコル定義 + Coordinator実装
+2. Notification を1つずつ Protocol 呼び出しに置換（各置換後にビルド+テスト）
+3. 全Notification置換後に Notification.Name 定義を削除
 
-### FR-06: Sidebar (Priority: Medium)
-- **FR-06.1**: The app MUST provide a minimal sidebar showing recently opened files
-- **FR-06.2**: Clicking a sidebar item MUST open the document in the current window/tab
-- **FR-06.3**: The sidebar MUST be collapsible/toggleable
-- **FR-06.4**: Full folder tree navigation is OUT OF SCOPE for MVP (planned for future)
+**ロールバック**: 各Notification単位でコミットするため、問題発生時は該当コミットのみrevert可能
 
-### FR-07: Image Support (Priority: Medium)
-- **FR-07.1**: The editor MUST accept images via drag & drop and clipboard paste
-- **FR-07.2**: Dropped/pasted images MUST be copied to a `{filename}.assets/` subfolder adjacent to the `.md` file
-- **FR-07.3**: The Markdown image reference MUST use a relative path to the assets folder
-- **FR-07.4**: Images MUST be displayed inline in the WYSIWYG editor
-- **FR-07.5**: Supported formats: PNG, JPEG, GIF, WebP, SVG
+### FR-02: 複数ウィンドウ完全対応
 
-### FR-08: Export (Priority: Medium)
-- **FR-08.1**: The app MUST export to HTML format
-- **FR-08.2**: The app MUST export to PDF format (via macOS native PDF rendering)
-- **FR-08.3**: Exported documents MUST preserve styling consistent with the editor's rendered view
-- **FR-08.4**: Export MUST be accessible via menu and keyboard shortcut (Cmd+Shift+E)
+**優先度**: Critical | **依存**: FR-01 完了後
 
-### FR-09: Full-Screen Writing (Priority: Medium)
-- **FR-09.1**: The app MUST support macOS native full-screen mode
-- **FR-09.2**: In full-screen, the editor MUST present a clean, distraction-free writing surface
-- **FR-09.3**: Toolbar and sidebar MUST be auto-hideable in full-screen mode
+各ウィンドウ/ドキュメントが独立して動作。
 
-### FR-10: Dark Mode (Priority: Medium)
-- **FR-10.1**: The app MUST fully support macOS light and dark appearances
-- **FR-10.2**: Editor rendering (syntax highlighting, background, text colors) MUST adapt to the active appearance
-- **FR-10.3**: The app MUST follow the system appearance setting by default, with optional per-app override
+- [ ] FR-01のProtocol/Delegate導入でコマンドが特定Coordinatorにのみ伝達されることを保証
+- [ ] `EditorViewModel` がウィンドウ固有の状態のみ保持
+- [ ] UIテスト: 2ウィンドウ同時操作で干渉なしを検証
 
-### FR-11: Typography (Priority: Low)
-- **FR-11.1**: The user MUST be able to configure the editor font and font size
-- **FR-11.2**: The user MUST be able to configure line spacing
-- **FR-11.3**: The app SHOULD provide sensible default typography for comfortable reading
+### FR-03: TextKit 2 への移行
 
----
+**優先度**: High | **依存**: FR-01 完了後 | **TD対応**: TD-04
 
-## 2. Non-Functional Requirements
+**現状**: `isRichText = true`（コミット05b055dで変更済み）。ShoechooTextView.swift:53 で `textLayoutManager` / `NSTextContentStorage` を既に使用（部分的TextKit 2）。一方 SyntaxHighlighter は `NSTextStorage` 直接操作（TextKit 1）。**TextKit 1/2が混在**。
 
-### NFR-01: Performance
-- **NFR-01.1**: Cold launch MUST complete in under 1 second
-- **NFR-01.2**: Memory usage MUST remain under 50MB for documents up to 10,000 lines
-- **NFR-01.3**: Keystroke-to-render latency MUST be under 16ms (60fps) for typical documents
-- **NFR-01.4**: Opening a 1MB Markdown file MUST complete in under 500ms
+**移行スコープ**:
+- [ ] SyntaxHighlighter を `NSTextContentStorage` + `NSTextLayoutManager` API に対応
+- [ ] NSRange（UTF-16）→ NSTextRange への段階的移行
+- [ ] ペースト時のリッチ属性除去
+- [ ] IME互換性の検証（TextKit 2の`NSTextInputClient`挙動はTextKit 1と異なる）
+- [ ] タイプライタースクロールを TextKit 2 API で再実装
 
-### NFR-02: Reliability
-- **NFR-02.1**: Auto-save MUST prevent data loss on unexpected quit (leveraging NSDocument)
-- **NFR-02.2**: The editor MUST handle malformed Markdown gracefully without crashes
-- **NFR-02.3**: Image operations (copy, reference) MUST handle file system errors gracefully
+**PoC フェーズ（必須）**:
+- [ ] 最小限のTextKit 2ベースNSTextView + SyntaxHighlighter PoCを実装
+- [ ] IME（日本語入力）の動作検証
+- [ ] パフォーマンス比較（TextKit 1 vs TextKit 2、1,000行/10,000行ドキュメント）
+- [ ] PoC成功後に本実装へ進む
 
-### NFR-03: Usability
-- **NFR-03.1**: The app MUST conform to macOS Human Interface Guidelines
-- **NFR-03.2**: All features MUST be accessible via keyboard shortcuts
-- **NFR-03.3**: The app MUST support macOS VoiceOver accessibility
+**ロールバック計画**:
+- **撤退基準**: PoC でIME互換性が確保できない、またはパフォーマンスが20%以上劣化
+- **撤退方法**: TextKit 1ベースのまま`isRichText = true`で継続
+- **判定タイミング**: Unit 3のFunctional Design完了時にGo/No-Go判定
 
-### NFR-04: Maintainability
-- **NFR-04.1**: Architecture MUST follow MVVM with SwiftUI + AppKit integration
-- **NFR-04.2**: Code MUST have unit test coverage for parser, document model, and export services
-- **NFR-04.3**: The WYSIWYG rendering engine MUST be separated from business logic for independent testing
+### FR-04: WYSIWYG体験の向上
 
-### NFR-05: Security (Extension Enabled)
-- **NFR-05.1**: The app MUST use App Sandbox (entitlements for user-selected file access)
-- **NFR-05.2**: The app MUST use Hardened Runtime
-- **NFR-05.3**: File I/O MUST use explicit error handling with resource cleanup (SECURITY-15)
-- **NFR-05.4**: Dependencies MUST use exact versions via SPM Package.resolved (SECURITY-10)
-- **NFR-05.5**: No hardcoded credentials or secrets in source code (SECURITY-12 — N/A for auth, applicable for signing)
-- **NFR-05.6**: Error messages displayed to users MUST be generic (SECURITY-09, SECURITY-15)
+**優先度**: High | **依存**: FR-03 判定後
 
-### NFR-06: Distribution
-- **NFR-06.1**: The app MUST be signed with Developer ID certificate
-- **NFR-06.2**: The app MUST be notarized with Apple for Gatekeeper compatibility
-- **NFR-06.3**: Distribution via GitHub Releases (DMG + ZIP)
-- **NFR-06.4**: Mac App Store distribution is OUT OF SCOPE for MVP
+- [ ] 非アクティブブロックでのデリミタ非表示の安定化
+- [ ] アクティブブロック切替時のちらつき軽減（差分ハイライト適用）
+- [ ] カーソル移動時の軽量リハイライト（パース不要、キャッシュ済みブロック使用）
+- [ ] EditorNodeModel の position-based diff を活用したインクリメンタルハイライト
 
----
+### FR-05: コードブロックシンタックスハイライト
 
-## 3. Security Compliance Summary (Baseline Extension)
+**優先度**: Medium | **依存**: FR-04 完了後 | **TD対応**: TD-09
 
-| Rule | Applicability | Notes |
-|------|:---:|-------|
-| SECURITY-01: Encryption at Rest/Transit | N/A | No data stores or network communication |
-| SECURITY-02: Access Logging | N/A | No network intermediaries |
-| SECURITY-03: Application Logging | Applicable | Structured logging for crash diagnostics |
-| SECURITY-04: HTTP Security Headers | N/A | No web-serving endpoints |
-| SECURITY-05: Input Validation | Applicable | File path validation, Markdown input handling |
-| SECURITY-06: Least-Privilege Access | Applicable | App Sandbox entitlements, minimal file access |
-| SECURITY-07: Network Configuration | N/A | No network access in core functionality |
-| SECURITY-08: Application Access Control | N/A | No user authentication |
-| SECURITY-09: Security Hardening | Applicable | Hardened Runtime, generic error messages |
-| SECURITY-10: Supply Chain Security | Applicable | SPM lock file, dependency pinning |
-| SECURITY-11: Secure Design | Applicable | Sandbox isolation, defense in depth for file I/O |
-| SECURITY-12: Auth & Credential Mgmt | N/A | No user authentication |
-| SECURITY-13: Integrity Verification | Applicable | Notarization, code signing |
-| SECURITY-14: Alerting & Monitoring | N/A | Desktop app, no server-side monitoring |
-| SECURITY-15: Exception Handling | Applicable | Fail-safe file I/O, global error handling |
+**Highlightr 採用前の評価基準**:
+- [ ] Highlightr の最終コミット日、Swift 6対応、macOS 15+互換性を確認
+- [ ] 代替候補（TreeSitter ベース等）との比較評価
+- [ ] 評価結果に基づき採用ライブラリを決定
+- [ ] テーマ連動（`EditorTheme.highlightrTheme`）
+- [ ] 言語自動検出または明示指定
+
+### FR-06: insertImageMarkdown バグ修正
+
+**優先度**: High | **依存**: FR-01 と同時実装
+
+- [ ] FR-01で Protocol/Delegate 移行時に画像マークダウン挿入コマンドを含める
+- [ ] 画像ドロップ→アセットディレクトリ保存→Markdown構文挿入の完全フローをテスト
+- [ ] **注**: FR-06はFR-01の一部として実装。独立FRはトレーサビリティのため
+
+### FR-07: EditorViewModel 責務分割
+
+**優先度**: Medium | **TD対応**: TD-06 | **依存**: なし（独立）
+
+- [ ] 統計情報を専用の `DocumentStatistics` struct に抽出
+- [ ] エクスポート関連をEditorViewModelから分離
+- [ ] 画像ハンドリングをEditorViewModelから分離
+- [ ] EditorViewModelはUI状態管理とコマンドディスパッチに専念
+
+### FR-08: heading抽出ロジックの重複解消
+
+**優先度**: Low | **TD対応**: TD-07 | **依存**: なし（独立）
+
+- [ ] パーサー結果からheadingを抽出する単一ユーティリティに統合
+
+### FR-09: Timer → Task ベースデバウンスへの移行
+
+**優先度**: Medium | **TD対応**: TD-08 | **依存**: なし（FR-01と並行可能）
+
+- [ ] `highlightTimer: Timer?` を `Task` ベースのデバウンスに置換
+- [ ] `autoSaveTimer: Timer?` も同様に置換
+- [ ] Coordinator の `nonisolated(unsafe)` 3箇所を排除
+
+### FR-10: MarkdownDocument の nonisolated(unsafe) 排除
+
+**優先度**: Medium | **TD対応**: TD-10 | **依存**: なし（独立）
+
+MarkdownDocument の `nonisolated(unsafe)` 4箇所（`viewModel`, `_snapshotText`, `lock`, `_fileURL`）を解消。
+
+- [ ] `_snapshotText` + `lock` は既に `nonisolated(unsafe)` で NSLock保護済み → Sendable wrapper struct に抽出検討
+- [ ] `viewModel` の `nonisolated(unsafe)` → `@MainActor` 明示化 + Optional 排除
+- [ ] `_fileURL` → lock保護追加 or actor パターンに統合
+- [ ] Phase 1で部分修正済み（`DispatchQueue.main.sync`廃止）の確認と残件対応
+
+### FR-11: ARCHITECTURE.md と実装の再設計
+
+**優先度**: Medium | **依存**: 全FR完了後 | **TD対応**: TD-03
+
+- [ ] 現在の実装パイプラインを正式なアーキテクチャとして文書化
+- [ ] 不要コンポーネント記述を削除
+- [ ] 不整合（ディレクトリ名、デバウンス値等）を統一
+- [ ] Concurrency Model テーブルを更新
 
 ---
 
-## 4. Technical Decisions Summary
+## FR 依存グラフ
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Rendering Engine | TextKit 2 (NSTextView) | Native IME, accessibility, Undo, spell check |
-| Document Architecture | NSDocument | Standard macOS auto-save, tabs, versions |
-| Markdown Parser | swift-markdown (Apple) | Typed AST, internal cmark-gfm, maintained |
-| Image Handling | Copy to `{filename}.assets/` | Portability, self-contained documents |
-| Distribution | GitHub Releases + Notarization | Gatekeeper compatibility |
-| Markdown Scope | GFM (GitHub Flavored) | Tables, task lists, strikethrough, code fences |
-| Security | Baseline enabled | App Sandbox + Hardened Runtime |
+```
+FR-01 + FR-06 (NotificationCenter廃止、段階的移行)
+  │
+  ├──→ FR-02 (複数ウィンドウ)
+  │
+  └──→ FR-03 PoC (TextKit 2) ──→ [Go/No-Go判定]
+         │                              │
+         ├─ Go ──→ FR-04 (TextKit 2上)  │
+         └─ No-Go ──→ FR-04 (TextKit 1上)
+                   │
+                   └──→ FR-05 (コードブロックハイライト)
 
----
+FR-07 (ViewModel分割) ── 独立、Unit 1と並行可
+FR-08 (heading重複解消) ── 独立、FR-07と同時可
+FR-09 (Timer→Task) ── FR-01と並行可
+FR-10 (MarkdownDocument unsafe排除) ── 独立
 
-## 5. Feature Priority (MVP)
-
-| Priority | Feature | Status |
-|:---:|---------|--------|
-| 1 | WYSIWYG Markdown Editing (TextKit 2) | MVP |
-| 2 | Focus Mode | MVP |
-| 3 | Export (HTML, PDF) | MVP |
-| 4 | Sidebar (Recent Files) | MVP |
-| 5 | Dark Mode | MVP |
-| — | Full File Tree Sidebar | Post-MVP |
-| — | iOS / iPadOS app | Post-MVP |
-| — | iCloud Sync | Post-MVP |
-| — | LaTeX Math Rendering | Post-MVP |
-| — | Mermaid Diagrams | Post-MVP |
+FR-11 (ARCHITECTURE.md) ── 全FR完了後
+```
 
 ---
 
-## 6. Out of Scope (v1)
+## Non-Functional Requirements
 
-- iOS / iPadOS app
-- iCloud sync
-- Collaboration / real-time editing
-- Plugin / extension system
-- Table editing GUI (inline table editing)
-- LaTeX math rendering
-- Mermaid / diagram rendering
-- Version history / change tracking
-- Vim / Emacs keybindings
-- Mac App Store distribution
-- Full folder tree sidebar
+### NFR-01: テストカバレッジ 80%以上
+
+- TDDでテスト追加。Swift Testing（`@Test`, `#expect`, `@Suite`）
+- カバレッジ計測: `swift test --enable-code-coverage`
+
+### NFR-02: Swift 6 Strict Concurrency 完全準拠
+
+- `nonisolated(unsafe)` を**ゼロ**にする
+  - Coordinator 3箇所: FR-09（Timer→Task）で解消
+  - MarkdownDocument 4箇所: FR-10 で解消
+- `@unchecked Sendable` を可能な限り排除し、proper Sendable or actor 移行
+
+### NFR-03: パフォーマンス
+
+| 指標 | 基準 | 測定方法 |
+|------|------|---------|
+| ハイライトデバウンス | 0.15秒 | Timer/Task interval |
+| カーソル移動リハイライト | 0.02秒以内 | `XCTestMetrics` + `os_signpost` |
+| 大規模ドキュメントスクロール | 60fps (Apple Silicon) / 30fps (Intel) | Instruments Core Animation |
+| TextKit 2移行後パフォーマンス | TextKit 1ベースラインの80%以上 | PoC時に1,000行/10,000行で比較計測 |
+
+**ベースライン測定**: FR-03 PoC開始前にTextKit 1での計測を実施
+
+### NFR-04: セキュリティベースライン（Enabled）
+
+- 画像パストラバーサル防止、ファイルサイズ制限50MB、XSS防止を維持
+
+### NFR-05: macOS 14+ 互換性
+
+### NFR-06: コード品質
+
+- ファイル400行以下目安、最大800行。関数50行以下
+- SyntaxHighlighter.swift（506行）を機能別分割
+
+### NFR-07: E2E / UIテスト基準
+
+| テスト対象 | 検証方法 |
+|-----------|---------|
+| 複数ウィンドウ独立動作 | XCUITest: 2ウィンドウ同時操作 |
+| ちらつき軽減 | 手動検証チェックリスト or スクリーンショット比較 |
+| IME互換性 | XCUITest: 日本語入力→変換→確定→ハイライト保持 |
+| フォーカスモード | XCUITest: トグル→カーソル移動→dimming適用 |
+
+---
+
+## Acceptance Criteria
+
+1. NotificationCenter による通知が0件
+2. 複数ウィンドウで各ドキュメントが独立動作（XCUITestで検証済み）
+3. TextKit 2 ベース、またはPoC不合格時はTextKit 1 + isRichText=true で安定動作
+4. テストカバレッジ 80%以上
+5. コードブロックにシンタックスハイライト動作
+6. ARCHITECTURE.md が実装と完全一致
+7. 画像D&D→Markdown挿入が正常動作
+8. 技術的負債 TD-01〜TD-08, TD-10 が解消（※注記参照）
+9. `nonisolated(unsafe)` の使用が0件
+10. ビルドエラー0、テスト全通過
+11. macOS 14+ で動作確認
+12. NFR-03のパフォーマンス基準を全項目クリア
+
+**AC #8 スコープ注記**: TD-09（Unused Highlightr Dependency）はFR-05で対応。TD-03（ARCHITECTURE.md Divergences）はFR-11で対応。時間制約がある場合、FR-11は後続サイクルに延期可。
