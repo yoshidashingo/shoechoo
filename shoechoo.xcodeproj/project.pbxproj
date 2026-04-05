@@ -36,6 +36,7 @@
 		786749BAF5625541B10BD893 /* EditorCommandHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457F988E79AFF00FF1BDF46E /* EditorCommandHandler.swift */; };
 		79F6930849349A2260F19038 /* EditorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDC5D5D3B8CBB1C19769BF4 /* EditorTheme.swift */; };
 		89682F7FB4488F0362A0B932 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4160E6C836A48D1519FA6696 /* MarkdownParser.swift */; };
+		8B9B550BB784B7CBE0C686E2 /* ExportUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C6258FF6E06403332F6D69 /* ExportUITests.swift */; };
 		8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153925F175F3248589356ABC /* MarkdownParserTests.swift */; };
 		90AB5A6D7FF38E68A597C76E /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 90336BE3FB685E2ACB66B9D6 /* Markdown */; };
 		9F2B3E1386F2EA33E309648E /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = 7806018C325D894CFF578E10 /* Highlightr */; };
@@ -126,6 +127,7 @@
 		EBF2CA7F803E713EF2AB6884 /* SnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotStore.swift; sourceTree = "<group>"; };
 		EC4B99129A03B68B5B06B500 /* ToolbarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarUITests.swift; sourceTree = "<group>"; };
 		F02DEA3188A536081310D135 /* PreferencesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesUITests.swift; sourceTree = "<group>"; };
+		F1C6258FF6E06403332F6D69 /* ExportUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportUITests.swift; sourceTree = "<group>"; };
 		F2EA4B9C5B27DAB30571BB13 /* WYSIWYGVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WYSIWYGVerificationTests.swift; sourceTree = "<group>"; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -268,6 +270,7 @@
 			isa = PBXGroup;
 			children = (
 				BABA186BB6767117FE352217 /* AppLaunchUITests.swift */,
+				F1C6258FF6E06403332F6D69 /* ExportUITests.swift */,
 				1C5731862C830F9A31E6C6DF /* FocusModeUITests.swift */,
 				F02DEA3188A536081310D135 /* PreferencesUITests.swift */,
 				917C957986EF430441FBF23C /* ShoechooUITestCase.swift */,
@@ -430,6 +433,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53E37E11CCF573A91AD0DA4 /* AppLaunchUITests.swift in Sources */,
+				8B9B550BB784B7CBE0C686E2 /* ExportUITests.swift in Sources */,
 				532739CF3A8E490539BA4A4B /* FocusModeUITests.swift in Sources */,
 				16C8E015928ED4F4CE1F3914 /* PreferencesUITests.swift in Sources */,
 				CCA215E135D950A5901D2FD6 /* ShoechooUITestCase.swift in Sources */,
