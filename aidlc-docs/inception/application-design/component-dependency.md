@@ -151,24 +151,24 @@ graph TD
 
 **合計**: NotificationCenter 参照 **10 箇所 → 0 箇所**
 
-### 2. nonisolated(unsafe) の完全排除
+### 2. nonisolated(unsafe) の排除
 
-| 箇所 | ファイル:行 | 解消方法 |
-|------|-----------|---------|
-| `highlightTimer: Timer?` | WYSIWYGTextView.swift:101 | DebounceTask に置換 |
-| `autoSaveTimer: Timer?` | WYSIWYGTextView.swift:102 | DebounceTask に置換 |
-| `notificationObservers: [any NSObjectProtocol]` | WYSIWYGTextView.swift:103 | Notification 廃止により削除 |
-| `var viewModel: EditorViewModel` | MarkdownDocument.swift:13 | `@MainActor var viewModel` に変更 |
-| `private let lock = NSLock()` | MarkdownDocument.swift:17 | SnapshotStore に集約 |
-| `private var _snapshotText: String` | MarkdownDocument.swift:18 | SnapshotStore に集約 |
-| `var fileURL: URL?` | MarkdownDocument.swift:52 | `@MainActor var fileURL` に変更 |
+| 箇所 | ファイル:行 | 解消方法 | 実装状態 |
+|------|-----------|---------|---------|
+| `highlightTimer: Timer?` | WYSIWYGTextView.swift:101 | DebounceTask に置換 | ✅ 解消 |
+| `autoSaveTimer: Timer?` | WYSIWYGTextView.swift:102 | DebounceTask に置換 | ✅ 解消 |
+| `notificationObservers` | WYSIWYGTextView.swift:103 | Notification 廃止により削除 | ✅ 解消 |
+| `var viewModel` | MarkdownDocument.swift:15 | `nonisolated(unsafe)` 維持（AC #9 例外） | ⚠️ 維持 |
+| `private let lock` | MarkdownDocument.swift:17 | SnapshotStore に集約 | ✅ 解消 |
+| `private var _snapshotText` | MarkdownDocument.swift:18 | SnapshotStore に集約 | ✅ 解消 |
+| `var fileURL` | MarkdownDocument.swift:58 | `nonisolated(unsafe)` 維持（AC #9 例外） | ⚠️ 維持 |
 
-**合計**: `nonisolated(unsafe)` **7 箇所 → 0 箇所**（MarkdownDocument 外部）
+**合計**: Coordinator 3箇所 → **完全解消**。MarkdownDocument 4箇所 → 2箇所解消（SnapshotStore集約）、**2箇所維持**（ReferenceFileDocument プロトコル制約）。
 
-> SnapshotStore 内部に 1 箇所の `nonisolated(unsafe) var _text` が残るが、
-> これは NSLock で保護された private 実装詳細であり、ReferenceFileDocument の
-> nonisolated snapshot 要件を満たすための最小限の unsafe。
-> MarkdownDocument の public/internal インターフェースからは完全に排除される。
+**残存する `nonisolated(unsafe)`（AC #9 例外）**:
+1. `MarkdownDocument.viewModel` — init 時に一度だけ設定、以降は @MainActor コンテキストのみからアクセス
+2. `MarkdownDocument.fileURL` — @MainActor 化は `assetsDirectoryURL()` 等の nonisolated メソッドからのアクセスが必要なため不可
+3. `SnapshotStore._text` — NSLock で保護された private 実装詳細
 
 ### 3. 新規依存関係の追加
 

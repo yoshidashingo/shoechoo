@@ -384,26 +384,28 @@ final class Coordinator: NSObject, NSTextViewDelegate, EditorCommandHandler {
 ## EC-03: MarkdownDocument（リファクタリング後）
 
 ```swift
+/// 実装実態に基づく設計（Red Team #3 反映）。
+/// ReferenceFileDocument プロトコルが @unchecked Sendable を要求するため、
+/// viewModel/fileURL に nonisolated(unsafe) が残る（AC #9 例外）。
 final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     typealias Snapshot = String
 
-    // viewModel: nonisolated(unsafe) を維持（ReferenceFileDocument プロトコル制約）
-    // init(configuration:) は off-main スレッドから呼ばれる可能性があり、
-    // @MainActor な EditorViewModel を生成できない。AC #9 の例外として記録。
-    nonisolated(unsafe) var viewModel: EditorViewModel!
+    // Set once during init, accessed only from @MainActor context (views, Coordinator).
+    // nonisolated(unsafe) is required by ReferenceFileDocument protocol constraint (AC #9 exception).
+    nonisolated(unsafe) private(set) var viewModel: EditorViewModel
 
     // nonisolated(unsafe) lock + _snapshotText → SnapshotStore に集約
-    let snapshotStore = SnapshotStore()
+    private let snapshotStore = SnapshotStore()
 
-    // fileURL: SnapshotStore 類似パターンで lock 保護
-    // assetsDirectoryURL() が nonisolated から呼ばれるため @MainActor 不可
-    private let fileURLStore = SnapshotStore() // URL を String として保存、または専用 URLStore
+    // fileURL: nonisolated(unsafe) を維持。@MainActor 化は assetsDirectoryURL() 等の
+    // nonisolated メソッドからのアクセスが必要なため不可（AC #9 例外）。
+    nonisolated(unsafe) var fileURL: URL?
 
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
 
     init() {
-        // ReferenceFileDocument.init() は通常 MainActor から呼ばれる
+        // SwiftUI DocumentGroup always calls init on MainActor
         self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
     }
 
@@ -413,21 +415,9 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         snapshotStore.write(text)
-        // off-main の場合は遅延初期化（デッドロック防止）
-        if Thread.isMainThread {
-            let vm = MainActor.assumeIsolated { EditorViewModel() }
-            MainActor.assumeIsolated { vm.sourceText = text }
-            self.viewModel = vm
-        } else {
-            DispatchQueue.main.async { [weak self] in
-                MainActor.assumeIsolated {
-                    let vm = EditorViewModel()
-                    vm.sourceText = text
-                    self?.viewModel = vm
-                }
-            }
-        }
-        vm.sourceText = text
+        // SwiftUI DocumentGroup calls init(configuration:) on MainActor
+        let vm = MainActor.assumeIsolated { EditorViewModel() }
+        MainActor.assumeIsolated { vm.sourceText = text }
         self.viewModel = vm
     }
 

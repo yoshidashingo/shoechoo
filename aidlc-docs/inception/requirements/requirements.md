@@ -105,16 +105,20 @@
 
 **優先度**: Medium | **TD対応**: TD-06 | **依存**: なし（独立）
 
-- [ ] 統計情報を専用の `DocumentStatistics` struct に抽出
-- [ ] エクスポート関連をEditorViewModelから分離
-- [ ] 画像ハンドリングをEditorViewModelから分離
-- [ ] EditorViewModelはUI状態管理とコマンドディスパッチに専念
+- [x] 統計情報を専用の `DocumentStatistics` struct に抽出 ✅ 実装済み
+- [ ] エクスポート関連（ExportCoordinator）をEditorViewModelから分離 — **未実装**（EditorViewModel に残存）
+- [ ] 画像ハンドリング（ImageDropHandler）をEditorViewModelから分離 — **未実装**（EditorViewModel に残存）
+- [ ] EditorViewModelはUI状態管理とコマンドディスパッチに専念 — **部分達成**（exportHTML/exportPDF/handleImageDrop が残存）
+
+> **実装ステータス**: DocumentStatistics のみ完了。ExportCoordinator/ImageDropHandler はコア機能（FR-01 NotificationCenter廃止）に影響しないため後続対応
 
 ### FR-08: heading抽出ロジックの重複解消
 
 **優先度**: Low | **TD対応**: TD-07 | **依存**: なし（独立）
 
-- [ ] パーサー結果からheadingを抽出する単一ユーティリティに統合
+- [ ] パーサー結果からheadingを抽出する単一ユーティリティに統合 — **未実装**
+
+> **実装ステータス**: 未着手。EditorViewModel.headings は手動文字列パースのまま残存。Low 優先度のため後続サイクルで対応
 
 ### FR-09: Timer → Task ベースデバウンスへの移行
 
