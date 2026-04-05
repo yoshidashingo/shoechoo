@@ -144,8 +144,8 @@
     },
     {
       "path": "",
-      "accessCount": 32,
-      "lastAccessed": 1775356423880,
+      "accessCount": 33,
+      "lastAccessed": 1775356676292,
       "type": "directory"
     },
     {
@@ -161,6 +161,12 @@
       "type": "file"
     },
     {
+      "path": "shoechoo/Renderer/SyntaxHighlighter.swift",
+      "accessCount": 26,
+      "lastAccessed": 1775356891844,
+      "type": "file"
+    },
+    {
       "path": "shoechoo",
       "accessCount": 20,
       "lastAccessed": 1775356592266,
@@ -170,12 +176,6 @@
       "path": "aidlc-docs/aidlc-state.md",
       "accessCount": 19,
       "lastAccessed": 1775356648504,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Renderer/SyntaxHighlighter.swift",
-      "accessCount": 15,
-      "lastAccessed": 1775351248907,
       "type": "file"
     },
     {
@@ -323,6 +323,12 @@
       "type": "file"
     },
     {
+      "path": "shoechoo/Theme/EditorTheme.swift",
+      "accessCount": 4,
+      "lastAccessed": 1775356784112,
+      "type": "file"
+    },
+    {
       "path": "shoechoo/Models/RenderResult.swift",
       "accessCount": 3,
       "lastAccessed": 1775288790318,
@@ -332,12 +338,6 @@
       "path": "README-ja.md",
       "accessCount": 3,
       "lastAccessed": 1775289078524,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Theme/EditorTheme.swift",
-      "accessCount": 3,
-      "lastAccessed": 1775351250930,
       "type": "file"
     },
     {

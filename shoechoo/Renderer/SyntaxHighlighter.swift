@@ -1,4 +1,5 @@
 import AppKit
+import Highlightr
 
 /// WYSIWYG syntax highlighter: inactive blocks hide delimiters, active block shows raw markdown.
 /// Text content is never modified — only attributes (font, color, size) are changed.
@@ -7,6 +8,11 @@ struct SyntaxHighlighter {
 
     /// The tiny font used to visually hide delimiter characters in inactive blocks.
     private static let hiddenFont = NSFont.systemFont(ofSize: 0.01)
+
+    /// Shared Highlightr instance. MUST only be accessed from @MainActor context.
+    /// Highlightr uses JSContext internally which is not thread-safe.
+    private static let highlightr: Highlightr? = Highlightr()
+    private static var currentHighlightrThemeName: String?
 
     func apply(
         to textStorage: NSTextStorage,
@@ -142,10 +148,17 @@ struct SyntaxHighlighter {
         ts.addAttribute(.font, value: mono, range: r)
         ts.addAttribute(.backgroundColor, value: theme.codeBackgroundColor.nsColor, range: r)
 
-        // Fence lines
         let blockText = (ts.string as NSString).substring(with: r) as NSString
+        let blockStr = blockText as String
+        let lines = blockStr.components(separatedBy: "\n")
+
+        // Extract language from first fence line and code content range
+        var language: String?
+        var codeStart = 0
+        var codeEnd = blockText.length
         var offset = 0
-        for line in (blockText as String).components(separatedBy: "\n") {
+
+        for (index, line) in lines.enumerated() {
             let lineLen = (line as NSString).length
             if line.hasPrefix("```") {
                 let fenceRange = NSRange(location: r.location + offset, length: lineLen)
@@ -154,8 +167,45 @@ struct SyntaxHighlighter {
                 } else {
                     hideRange(fenceRange, in: ts, bgColor: theme.codeBackgroundColor.nsColor)
                 }
+                if index == 0 {
+                    // First fence: extract language (first token only, ignore metadata like "swift copy")
+                    let langStr = String(line.dropFirst(3))
+                        .trimmingCharacters(in: .whitespaces)
+                        .components(separatedBy: .whitespaces)
+                        .first ?? ""
+                    if !langStr.isEmpty { language = langStr }
+                    codeStart = offset + lineLen + 1 // after first fence + newline
+                } else {
+                    // Closing fence — stop after first one found
+                    codeEnd = offset
+                    break
+                }
             }
             offset += lineLen + 1
+        }
+
+        // Apply Highlightr syntax highlighting to code content (non-active blocks only)
+        // IMPORTANT: Only transfer foregroundColor from Highlightr.
+        // Highlightr sets its own .font (Courier) — we preserve the mono font set above.
+        guard codeStart >= 0, codeEnd > codeStart, codeEnd <= blockText.length else { return }
+        if !isActive,
+           let highlightr = Self.highlightr {
+            // Cache theme to avoid reloading JSON on every pass
+            if Self.currentHighlightrThemeName != theme.highlightrTheme {
+                highlightr.setTheme(to: theme.highlightrTheme)
+                Self.currentHighlightrThemeName = theme.highlightrTheme
+            }
+            let codeContent = (blockStr as NSString).substring(with: NSRange(location: codeStart, length: codeEnd - codeStart))
+            if let highlighted = highlightr.highlight(codeContent, as: language) {
+                let absCodeStart = r.location + codeStart
+                highlighted.enumerateAttributes(in: NSRange(location: 0, length: highlighted.length)) { attrs, attrRange, _ in
+                    let targetRange = NSRange(location: absCodeStart + attrRange.location, length: attrRange.length)
+                    guard targetRange.location + targetRange.length <= ts.length else { return }
+                    if let color = attrs[.foregroundColor] {
+                        ts.addAttribute(.foregroundColor, value: color, range: targetRange)
+                    }
+                }
+            }
         }
     }
 

@@ -19,3 +19,5 @@
 {"t":0,"agent":"afafc0a","agent_type":"codex:codex-rescue","event":"agent_start","parent_mode":"none"}
 {"t":0,"agent":"afafc0a","agent_type":"codex:codex-rescue","event":"agent_stop","success":true,"duration_ms":77635}
 {"t":0,"agent":"a97ee7a","agent_type":"code-reviewer","event":"agent_stop","success":true,"duration_ms":139075}
+{"t":0,"agent":"a2207dc","agent_type":"code-reviewer","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a2207dc","agent_type":"code-reviewer","event":"agent_stop","success":true,"duration_ms":90965}
