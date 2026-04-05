@@ -27,9 +27,11 @@ schemes:
       targets:
         shoechoo: all
         shoechooTests: [test]
+        shoechooUITests: [test]
     test:
       targets:
         - shoechooTests
+        - shoechooUITests
       gatherCoverageData: true
 
 targets:
@@ -97,3 +99,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shoechoo.tests
         GENERATE_INFOPLIST_FILE: true
+
+  shoechooUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - shoechooUITests
+    dependencies:
+      - target: shoechoo
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shoechoo.uitests
+        GENERATE_INFOPLIST_FILE: true
+        BUNDLE_LOADER: ""
+        TEST_HOST: ""

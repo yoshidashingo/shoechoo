@@ -20,8 +20,16 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     private let snapshotStore = SnapshotStore()
 
     init() {
-        // SwiftUI DocumentGroup always calls init on MainActor
-        self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        // NSDocumentController may call init() from a background queue
+        // ("NSDocumentController Opening"), so MainActor.assumeIsolated crashes.
+        // DispatchQueue.main.sync is normally forbidden (deadlock risk), but this is
+        // a necessary exception: synchronous init must produce a @MainActor object,
+        // and the calling queue (NSDocumentController Opening) never holds main-queue lock.
+        if Thread.isMainThread {
+            self.viewModel = MainActor.assumeIsolated { EditorViewModel() }
+        } else {
+            self.viewModel = DispatchQueue.main.sync { EditorViewModel() }
+        }
     }
 
     required init(configuration: ReadConfiguration) throws {
@@ -30,10 +38,18 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
             throw CocoaError(.fileReadCorruptFile)
         }
         snapshotStore.write(text)
-        // SwiftUI DocumentGroup calls init(configuration:) on MainActor
-        let vm = MainActor.assumeIsolated { EditorViewModel() }
-        MainActor.assumeIsolated { vm.sourceText = text }
-        self.viewModel = vm
+        // Same exception as init() — see comment above.
+        if Thread.isMainThread {
+            let vm = MainActor.assumeIsolated { EditorViewModel() }
+            MainActor.assumeIsolated { vm.sourceText = text }
+            self.viewModel = vm
+        } else {
+            self.viewModel = DispatchQueue.main.sync {
+                let vm = EditorViewModel()
+                vm.sourceText = text
+                return vm
+            }
+        }
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> String {

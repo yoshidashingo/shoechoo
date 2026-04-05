@@ -41,6 +41,7 @@ struct EditorView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
                 .background(.bar)
+                .accessibilityIdentifier("editor.stats")
             }
         }
         .toolbar {
@@ -50,6 +51,7 @@ struct EditorView: View {
                         .symbolVariant(showSidebar ? .fill : .none)
                 }
                 .help("Toggle Sidebar (⌃⌘S)")
+                .accessibilityIdentifier("toolbar.sidebar")
 
                 Divider()
 
@@ -57,16 +59,19 @@ struct EditorView: View {
                     Image(systemName: "bold")
                 }
                 .help("Bold (⌘B)")
+                .accessibilityIdentifier("toolbar.bold")
 
                 Button(action: { vm.toggleItalic() }) {
                     Image(systemName: "italic")
                 }
                 .help("Italic (⌘I)")
+                .accessibilityIdentifier("toolbar.italic")
 
                 Button(action: { vm.toggleInlineCode() }) {
                     Image(systemName: "chevron.left.forwardslash.chevron.right")
                 }
                 .help("Inline Code (⇧⌘K)")
+                .accessibilityIdentifier("toolbar.inlineCode")
 
                 Divider()
 
@@ -74,11 +79,13 @@ struct EditorView: View {
                     Image(systemName: vm.isFocusModeEnabled ? "eye.fill" : "eye")
                 }
                 .help("Focus Mode (⇧⌘F)")
+                .accessibilityIdentifier("toolbar.focusMode")
 
                 Button(action: { vm.toggleTypewriterScroll() }) {
                     Image(systemName: vm.isTypewriterScrollEnabled ? "arrow.up.and.down.text.horizontal" : "arrow.up.and.down")
                 }
                 .help("Typewriter Scroll")
+                .accessibilityIdentifier("toolbar.typewriterScroll")
 
                 Divider()
 
@@ -86,6 +93,7 @@ struct EditorView: View {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .help("Export HTML (⇧⌘E)")
+                .accessibilityIdentifier("toolbar.export")
             }
         }
         .task(id: isExporting) {

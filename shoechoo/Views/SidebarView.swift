@@ -34,6 +34,7 @@ struct SidebarContainerView: View {
                     .background(mode == m ? Color.accentColor.opacity(0.2) : Color.clear)
                     .cornerRadius(4)
                     .help(m.rawValue)
+                    .accessibilityIdentifier("sidebar.mode.\(m.rawValue.lowercased().replacingOccurrences(of: " ", with: ""))")
                 }
             }
             .padding(.horizontal, 8)
@@ -51,6 +52,7 @@ struct SidebarContainerView: View {
                 FileListView(folderURL: folderURL)
             }
         }
+        .accessibilityIdentifier("sidebar.container")
         .onAppear { resolveFolder() }
         .onChange(of: documentURL) { resolveFolder() }
     }

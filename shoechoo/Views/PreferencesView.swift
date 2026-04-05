@@ -57,6 +57,7 @@ struct PreferencesView: View {
             }
             .tabItem { Label("Editor", systemImage: "textformat") }
             .tag("editor")
+            .accessibilityIdentifier("prefs.editor")
 
             Form {
                 Section("Theme") {
@@ -75,6 +76,7 @@ struct PreferencesView: View {
                             .tag(theme.id)
                         }
                     }
+                    .accessibilityIdentifier("prefs.theme")
                 }
 
                 Section("Appearance Override") {
@@ -84,6 +86,7 @@ struct PreferencesView: View {
                         Text("Dark").tag(AppearanceMode.dark)
                     }
                     .pickerStyle(.segmented)
+                    .accessibilityIdentifier("prefs.appearanceMode")
                     Text("Dark themes automatically use dark mode. This override applies to light themes only.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -91,6 +94,7 @@ struct PreferencesView: View {
             }
             .tabItem { Label("Appearance", systemImage: "paintbrush") }
             .tag("appearance")
+            .accessibilityIdentifier("prefs.appearance")
         }
         .frame(width: 450, height: 300)
         .padding()

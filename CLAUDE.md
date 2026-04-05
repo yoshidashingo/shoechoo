@@ -48,3 +48,8 @@ AC #9 により public/internal インターフェースから排除。以下は
 - `SnapshotStore` 内部の `nonisolated(unsafe) private var _text`（NSLock 保護）
 - `MarkdownDocument.viewModel`（ReferenceFileDocument プロトコル制約）
 - `MarkdownDocument.fileURL`（@unchecked Sendable クラスの制約）
+
+## DispatchQueue.main.sync の例外
+
+AC により `DispatchQueue.main.sync` は原則禁止。以下は許容される例外:
+- `MarkdownDocument.init()` / `init(configuration:)`（NSDocumentController がバックグラウンドキューから呼び出す場合。`Thread.isMainThread` ガード付き。呼び出し元はメインキューのロックを保持しないことが保証されている）
