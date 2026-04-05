@@ -3,6 +3,15 @@ import UniformTypeIdentifiers
 
 @main
 struct ShoechooApp: App {
+    init() {
+        // UI Tests: suppress the "Reopen documents?" dialog and Open Dialog
+        if CommandLine.arguments.contains("--uitesting") {
+            UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+            // Prevent state restoration from previous sessions
+            UserDefaults.standard.set(false, forKey: "ApplePersistenceIgnoreState")
+        }
+    }
+
     @State private var settings = EditorSettings.shared
     @State private var themeRegistry = ThemeRegistry()
 

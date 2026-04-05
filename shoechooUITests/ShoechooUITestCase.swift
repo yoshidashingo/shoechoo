@@ -9,8 +9,14 @@ class ShoechooUITestCase: XCTestCase {
         app.launchArguments = ["--uitesting"]
         app.launch()
 
-        // DocumentGroup の新規ドキュメント作成
-        // Open Dialog が出る場合は ⌘N で新規ドキュメントを開く
+        // Handle macOS "Reopen documents?" dialog after crash recovery.
+        // Button title uses smart apostrophe, so match by accessibility identifier.
+        let dontReopenButton = app.buttons["action-button--999"]
+        if dontReopenButton.waitForExistence(timeout: 3) {
+            dontReopenButton.click()
+        }
+
+        // DocumentGroup: create new document if no editor appeared
         let newDocTimeout: TimeInterval = 3
         let textView = app.textViews.firstMatch
         if !textView.waitForExistence(timeout: newDocTimeout) {
@@ -20,21 +26,20 @@ class ShoechooUITestCase: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // ドキュメントを保存せず閉じる
         app.typeKey("w", modifierFlags: .command)
-        let dontSaveButton = app.buttons["Don't Save"]
+        let dontSaveButton = app.buttons["Don\u{2019}t Save"]
         if dontSaveButton.waitForExistence(timeout: 2) {
             dontSaveButton.click()
         }
         app = nil
     }
 
-    /// エディタのメインテキストビューを取得
+    /// Get the main editor text view
     var editorTextView: XCUIElement {
         app.textViews["editor.textView"]
     }
 
-    /// テキストを入力してエディタに反映されるのを待つ
+    /// Type text into the editor
     func typeInEditor(_ text: String) {
         let textView = editorTextView.exists ? editorTextView : app.textViews.firstMatch
         textView.click()
