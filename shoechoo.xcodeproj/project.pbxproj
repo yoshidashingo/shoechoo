@@ -35,6 +35,7 @@
 		89682F7FB4488F0362A0B932 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4160E6C836A48D1519FA6696 /* MarkdownParser.swift */; };
 		8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153925F175F3248589356ABC /* MarkdownParserTests.swift */; };
 		90AB5A6D7FF38E68A597C76E /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 90336BE3FB685E2ACB66B9D6 /* Markdown */; };
+		9756F79C2A9B3BDD06FEC760 /* shoechooUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D748FAACE2D75799DAA9A03 /* shoechooUITests.swift */; };
 		9F2B3E1386F2EA33E309648E /* Highlightr in Frameworks */ = {isa = PBXBuildFile; productRef = 7806018C325D894CFF578E10 /* Highlightr */; };
 		A0608E501C34EE471BA31555 /* MarkdownDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788A1CFEE490A614C4BAF42F /* MarkdownDocumentTests.swift */; };
 		A2DF6827BC0D004F41CF4185 /* EditorNodeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB1091BBB45F1020AB27F08 /* EditorNodeModel.swift */; };
@@ -52,6 +53,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		176061EEBBB6D3F3AAACC772 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A736579E8B8A8EF5448BB069 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5773C9F0419C8DE28A4F43F6;
+			remoteInfo = shoechoo;
+		};
 		CD79A9506D7DE2C59783250F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A736579E8B8A8EF5448BB069 /* Project object */;
@@ -67,6 +75,7 @@
 		0601F57BD9C09E9448FC8A86 /* EditorCommandHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCommandHandlerTests.swift; sourceTree = "<group>"; };
 		061F83A2972FCE6620101EA6 /* EditorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSettings.swift; sourceTree = "<group>"; };
 		0D265677848FA22ED359E998 /* EditorNodeModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNodeModelTests.swift; sourceTree = "<group>"; };
+		0D748FAACE2D75799DAA9A03 /* shoechooUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = shoechooUITests.swift; sourceTree = "<group>"; };
 		153925F175F3248589356ABC /* MarkdownParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParserTests.swift; sourceTree = "<group>"; };
 		1966FCAF4A7AA805DB6ACE26 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		1A2F536E829BB7F1289F3785 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
@@ -86,6 +95,7 @@
 		91A9655FFFE93AE5BAE81563 /* DocumentStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStatistics.swift; sourceTree = "<group>"; };
 		93A569063F6AAD6A3452627F /* ParseResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseResult.swift; sourceTree = "<group>"; };
 		961EEF569A27FC490BE114A8 /* shoechoo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shoechoo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D2BC7AE9805CD716B87E92E /* shoechooUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F3903C4539590D24CE5F8D6 /* MultiWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiWindowTests.swift; sourceTree = "<group>"; };
 		A4ADA997C3135E2C51F089EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
@@ -126,6 +136,7 @@
 			children = (
 				13FEC8E60B3033B50FD10D8F /* App */,
 				F8A9E7A5440B61073777DD29 /* Editor */,
+				B9AFFC25A4D5D8FEE7681E53 /* Extensions */,
 				892BBB326DF1374FF42E83B8 /* Models */,
 				F57AD2A88618349AB683BBD7 /* Parser */,
 				F6BDA8F09F33641DBD034E48 /* Renderer */,
@@ -194,6 +205,13 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		B9AFFC25A4D5D8FEE7681E53 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		C64E2A4C02535A3BCAD8B521 /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -209,6 +227,7 @@
 			children = (
 				1006F2338841AAFD435ACDD6 /* shoechoo */,
 				E2D5DE4FE91DE5EA7D83786A /* shoechooTests */,
+				F4D618BD32D1706300B3E538 /* shoechooUITests */,
 				FB12EBCF63BE44054FDADDA5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -231,6 +250,14 @@
 				F2EA4B9C5B27DAB30571BB13 /* WYSIWYGVerificationTests.swift */,
 			);
 			path = shoechooTests;
+			sourceTree = "<group>";
+		};
+		F4D618BD32D1706300B3E538 /* shoechooUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0D748FAACE2D75799DAA9A03 /* shoechooUITests.swift */,
+			);
+			path = shoechooUITests;
 			sourceTree = "<group>";
 		};
 		F57AD2A88618349AB683BBD7 /* Parser */ = {
@@ -263,6 +290,7 @@
 			children = (
 				961EEF569A27FC490BE114A8 /* shoechoo.app */,
 				E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */,
+				9D2BC7AE9805CD716B87E92E /* shoechooUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,6 +298,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3A80AA07FD868CB62F5AF78D /* shoechooUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99575544149B3DEB65752B72 /* Build configuration list for PBXNativeTarget "shoechooUITests" */;
+			buildPhases = (
+				17AA1A53813396FACEACD7B0 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B314BEF5F0CE31D77073B61B /* PBXTargetDependency */,
+			);
+			name = shoechooUITests;
+			packageProductDependencies = (
+			);
+			productName = shoechooUITests;
+			productReference = 9D2BC7AE9805CD716B87E92E /* shoechooUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		501C78BCC2B0E87B2FAB7B2A /* shoechooTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 17003DADD71A114DC3BFCD8D /* Build configuration list for PBXNativeTarget "shoechooTests" */;
@@ -318,6 +364,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					3A80AA07FD868CB62F5AF78D = {
+						TestTargetID = 5773C9F0419C8DE28A4F43F6;
+					};
 				};
 			};
 			buildConfigurationList = 552F2238CBA4F95EBB4F3BD1 /* Build configuration list for PBXProject "shoechoo" */;
@@ -340,6 +389,7 @@
 			targets = (
 				5773C9F0419C8DE28A4F43F6 /* shoechoo */,
 				501C78BCC2B0E87B2FAB7B2A /* shoechooTests */,
+				3A80AA07FD868CB62F5AF78D /* shoechooUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -357,6 +407,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		17AA1A53813396FACEACD7B0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9756F79C2A9B3BDD06FEC760 /* shoechooUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		86BE2E07DBB808DC00DA418B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -412,6 +470,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		B314BEF5F0CE31D77073B61B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5773C9F0419C8DE28A4F43F6 /* shoechoo */;
+			targetProxy = 176061EEBBB6D3F3AAACC772 /* PBXContainerItemProxy */;
+		};
 		BD6955B4417546D7250DB40E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 5773C9F0419C8DE28A4F43F6 /* shoechoo */;
@@ -436,6 +499,23 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.shoechoo.app;
 				PRODUCT_NAME = shoechoo;
 				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		22066A4EC7AAB0A56BD20202 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shoechoo.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = shoechoo;
 			};
 			name = Release;
 		};
@@ -613,6 +693,23 @@
 			};
 			name = Release;
 		};
+		F012D62C05A8EE68E6B195E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shoechoo.uitests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = shoechoo;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -639,6 +736,15 @@
 			buildConfigurations = (
 				6B053EB4BD502E5C01CCF796 /* Debug */,
 				1FFE22DA6FCCB02D8DA02285 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		99575544149B3DEB65752B72 /* Build configuration list for PBXNativeTarget "shoechooUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F012D62C05A8EE68E6B195E3 /* Debug */,
+				22066A4EC7AAB0A56BD20202 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

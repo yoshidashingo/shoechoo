@@ -35,6 +35,20 @@
                ReferencedContainer = "container:shoechoo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3A80AA07FD868CB62F5AF78D"
+               BuildableName = "shoechooUITests.xctest"
+               BlueprintName = "shoechooUITests"
+               ReferencedContainer = "container:shoechoo.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -62,6 +76,17 @@
                BlueprintIdentifier = "501C78BCC2B0E87B2FAB7B2A"
                BuildableName = "shoechooTests.xctest"
                BlueprintName = "shoechooTests"
+               ReferencedContainer = "container:shoechoo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3A80AA07FD868CB62F5AF78D"
+               BuildableName = "shoechooUITests.xctest"
+               BlueprintName = "shoechooUITests"
                ReferencedContainer = "container:shoechoo.xcodeproj">
             </BuildableReference>
          </TestableReference>
