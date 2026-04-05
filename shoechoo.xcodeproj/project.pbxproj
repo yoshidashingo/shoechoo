@@ -27,6 +27,7 @@
 		4830FC59869A1D9383C05AE3 /* ImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */; };
 		4A24FE7D983E59CC5FA96097 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2F536E829BB7F1289F3785 /* PreferencesView.swift */; };
 		4AF976C61099FCBAB4031E1E /* EditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3F6DE35963EF94CF714D18 /* EditorViewModel.swift */; };
+		532739CF3A8E490539BA4A4B /* FocusModeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5731862C830F9A31E6C6DF /* FocusModeUITests.swift */; };
 		57330963820445BBDC92C7A4 /* ThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E21639D40B6CE15866999 /* ThemeTests.swift */; };
 		59AF35E9102FBAB97678E092 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6978C85C04F500CE568709B8 /* SidebarView.swift */; };
 		685A5CA408CAB23623B17E01 /* EditorViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D3FADF58E5CDDCD11DC24F /* EditorViewModelTests.swift */; };
@@ -82,6 +83,7 @@
 		153925F175F3248589356ABC /* MarkdownParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParserTests.swift; sourceTree = "<group>"; };
 		1966FCAF4A7AA805DB6ACE26 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		1A2F536E829BB7F1289F3785 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		1C5731862C830F9A31E6C6DF /* FocusModeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModeUITests.swift; sourceTree = "<group>"; };
 		25C5231565A66836003C4D34 /* WYSIWYGTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WYSIWYGTextView.swift; sourceTree = "<group>"; };
 		25DE2380BF9D55E84ACC3537 /* HTMLConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLConverterTests.swift; sourceTree = "<group>"; };
 		2F6DB8ADB22B86D627F8E42E /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 			isa = PBXGroup;
 			children = (
 				BABA186BB6767117FE352217 /* AppLaunchUITests.swift */,
+				1C5731862C830F9A31E6C6DF /* FocusModeUITests.swift */,
 				F02DEA3188A536081310D135 /* PreferencesUITests.swift */,
 				917C957986EF430441FBF23C /* ShoechooUITestCase.swift */,
 				DEDDF91C3868623258D259CF /* TextEditingUITests.swift */,
@@ -424,6 +427,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F53E37E11CCF573A91AD0DA4 /* AppLaunchUITests.swift in Sources */,
+				532739CF3A8E490539BA4A4B /* FocusModeUITests.swift in Sources */,
 				16C8E015928ED4F4CE1F3914 /* PreferencesUITests.swift in Sources */,
 				CCA215E135D950A5901D2FD6 /* ShoechooUITestCase.swift in Sources */,
 				2955D94AC67F143212B12393 /* TextEditingUITests.swift in Sources */,
