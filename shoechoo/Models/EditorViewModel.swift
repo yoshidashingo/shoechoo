@@ -83,18 +83,8 @@ final class EditorViewModel {
 
     // MARK: - Statistics
 
-    var wordCount: Int {
-        let words = sourceText.split { $0.isWhitespace || $0.isNewline }
-        return words.count
-    }
-
-    var characterCount: Int {
-        sourceText.count
-    }
-
-    var lineCount: Int {
-        guard !sourceText.isEmpty else { return 0 }
-        return sourceText.components(separatedBy: "\n").count
+    var statistics: DocumentStatistics {
+        DocumentStatistics(from: sourceText)
     }
 
     // MARK: - Export

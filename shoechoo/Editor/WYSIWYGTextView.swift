@@ -98,19 +98,13 @@ struct WYSIWYGTextView: NSViewRepresentable {
         weak var scrollView: NSScrollView?
         let nodeModel = EditorNodeModel()
         private var isApplyingHighlight = false
-        // Timer.invalidate() is thread-safe; nonisolated(unsafe) is for deinit access only.
-        // Will be replaced with Task-based debounce in Unit 1c (FR-09).
-        nonisolated(unsafe) private var highlightTimer: Timer?
-        nonisolated(unsafe) private var autoSaveTimer: Timer?
+        private var highlightDebounce: DebounceTask?
+        private var cursorHighlightDebounce: DebounceTask?
+        private var autoSaveDebounce: DebounceTask?
         private var currentActiveBlockID: EditorNode.ID?
 
         init(_ parent: WYSIWYGTextView) {
             self.parent = parent
-        }
-
-        deinit {
-            highlightTimer?.invalidate()
-            autoSaveTimer?.invalidate()
         }
 
         func applyAppearance(settings: EditorSettings) {
@@ -145,12 +139,12 @@ struct WYSIWYGTextView: NSViewRepresentable {
         // MARK: - Highlight
 
         func scheduleHighlight() {
-            highlightTimer?.invalidate()
-            highlightTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { [weak self] _ in
-                MainActor.assumeIsolated {
+            if highlightDebounce == nil {
+                highlightDebounce = DebounceTask(interval: 0.15) { [weak self] in
                     self?.applyHighlightNow()
                 }
             }
+            highlightDebounce?.schedule()
         }
 
         func applyHighlightNow() {
@@ -197,17 +191,15 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
         func scheduleAutoSave() {
             guard parent.settings.autoSaveEnabled else {
-                autoSaveTimer?.invalidate()
-                autoSaveTimer = nil
+                autoSaveDebounce?.cancel()
                 return
             }
-            autoSaveTimer?.invalidate()
+            // Recreate DebounceTask each time to pick up interval changes from settings
             let interval = TimeInterval(parent.settings.autoSaveIntervalSeconds)
-            autoSaveTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    self?.performAutoSave()
-                }
+            autoSaveDebounce = DebounceTask(interval: interval) { [weak self] in
+                self?.performAutoSave()
             }
+            autoSaveDebounce?.schedule()
         }
 
         private func performAutoSave() {
@@ -251,12 +243,12 @@ struct WYSIWYGTextView: NSViewRepresentable {
 
         /// Lightweight re-highlight: reuses existing parsed blocks, only re-applies attributes.
         private func scheduleHighlightForCursorMove() {
-            highlightTimer?.invalidate()
-            highlightTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: false) { [weak self] _ in
-                MainActor.assumeIsolated {
+            if cursorHighlightDebounce == nil {
+                cursorHighlightDebounce = DebounceTask(interval: 0.02) { [weak self] in
                     self?.applyHighlightFromCache()
                 }
             }
+            cursorHighlightDebounce?.schedule()
         }
 
         /// Re-apply highlighting using cached blocks (no re-parse needed).

@@ -28,11 +28,12 @@ struct EditorView: View {
                 Divider()
 
                 HStack(spacing: 4) {
-                    Text("\(vm.wordCount) words")
+                    let stats = vm.statistics
+                    Text("\(stats.wordCount) words")
                     Text("·")
-                    Text("\(vm.characterCount) characters")
+                    Text("\(stats.characterCount) characters")
                     Text("·")
-                    Text("\(vm.lineCount) lines")
+                    Text("\(stats.lineCount) lines")
                     Spacer()
                 }
                 .font(.system(size: 11))

@@ -138,26 +138,32 @@
   "hotPaths": [
     {
       "path": "shoechoo/Editor/WYSIWYGTextView.swift",
-      "accessCount": 42,
-      "lastAccessed": 1775353907788,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/App/MarkdownDocument.swift",
-      "accessCount": 25,
-      "lastAccessed": 1775353961274,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Models/EditorViewModel.swift",
-      "accessCount": 24,
-      "lastAccessed": 1775353792684,
+      "accessCount": 51,
+      "lastAccessed": 1775356453224,
       "type": "file"
     },
     {
       "path": "",
-      "accessCount": 23,
-      "lastAccessed": 1775353846854,
+      "accessCount": 32,
+      "lastAccessed": 1775356423880,
+      "type": "directory"
+    },
+    {
+      "path": "shoechoo/App/MarkdownDocument.swift",
+      "accessCount": 31,
+      "lastAccessed": 1775356534922,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo/Models/EditorViewModel.swift",
+      "accessCount": 27,
+      "lastAccessed": 1775356509054,
+      "type": "file"
+    },
+    {
+      "path": "shoechoo",
+      "accessCount": 19,
+      "lastAccessed": 1775356413855,
       "type": "directory"
     },
     {
@@ -173,10 +179,10 @@
       "type": "file"
     },
     {
-      "path": "shoechoo",
+      "path": "shoechoo/Views/EditorView.swift",
       "accessCount": 13,
-      "lastAccessed": 1775353382489,
-      "type": "directory"
+      "lastAccessed": 1775356528978,
+      "type": "file"
     },
     {
       "path": "shoechoo/Models/EditorSettings.swift",
@@ -194,12 +200,6 @@
       "path": "shoechoo/Services/ImageService.swift",
       "accessCount": 11,
       "lastAccessed": 1775351241147,
-      "type": "file"
-    },
-    {
-      "path": "shoechoo/Views/EditorView.swift",
-      "accessCount": 10,
-      "lastAccessed": 1775351242023,
       "type": "file"
     },
     {

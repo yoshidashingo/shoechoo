@@ -251,10 +251,28 @@
       "status": "completed",
       "completed_at": "2026-04-05T01:51:29.288Z",
       "duration_ms": 95163
+    },
+    {
+      "agent_id": "a97ee7a8d608b0c6a",
+      "agent_type": "oh-my-claudecode:code-reviewer",
+      "started_at": "2026-04-05T02:32:33.440Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-04-05T02:34:52.515Z",
+      "duration_ms": 139075
+    },
+    {
+      "agent_id": "afafc0a069b6dc43c",
+      "agent_type": "codex:codex-rescue",
+      "started_at": "2026-04-05T02:32:40.546Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-04-05T02:33:58.181Z",
+      "duration_ms": 77635
     }
   ],
-  "total_spawned": 28,
-  "total_completed": 28,
+  "total_spawned": 30,
+  "total_completed": 30,
   "total_failed": 0,
-  "last_updated": "2026-04-05T01:51:41.055Z"
+  "last_updated": "2026-04-05T02:34:52.618Z"
 }

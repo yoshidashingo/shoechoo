@@ -17,8 +17,7 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [.markdown, .plainText] }
     static var writableContentTypes: [UTType] { [.markdown] }
 
-    private let lock = NSLock()
-    nonisolated(unsafe) private var _snapshotText: String = ""
+    private let snapshotStore = SnapshotStore()
 
     init() {
         // SwiftUI DocumentGroup always calls init on MainActor
@@ -30,7 +29,7 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
               let text = String(data: data, encoding: .utf8) else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        _snapshotText = text  // No lock needed during init — no concurrent access
+        snapshotStore.write(text)
         // SwiftUI DocumentGroup calls init(configuration:) on MainActor
         let vm = MainActor.assumeIsolated { EditorViewModel() }
         MainActor.assumeIsolated { vm.sourceText = text }
@@ -38,7 +37,7 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     }
 
     nonisolated func snapshot(contentType: UTType) throws -> String {
-        lock.withLock { _snapshotText }
+        snapshotStore.read()
     }
 
     nonisolated func fileWrapper(snapshot: String, configuration: WriteConfiguration) throws -> FileWrapper {
@@ -49,11 +48,13 @@ final class MarkdownDocument: ReferenceFileDocument, @unchecked Sendable {
     }
 
     nonisolated func updateSnapshotText(_ text: String) {
-        lock.withLock { _snapshotText = text }
+        snapshotStore.write(text)
     }
 
     // MARK: - File URL
 
+    // Set/read only from @MainActor context (EditorView, ShoechooTextView).
+    // nonisolated(unsafe) required because class is @unchecked Sendable.
     nonisolated(unsafe) var fileURL: URL?
 
     func setFileURL(_ url: URL?) {

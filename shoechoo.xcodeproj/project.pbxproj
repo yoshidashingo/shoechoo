@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07587E1741F2ECCE81AD8E6C /* DebounceTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD52CAA112AE7009322FB5F /* DebounceTask.swift */; };
 		077689B3A72389838566BA9C /* ShoechooApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76421064E68CB0D0FBA284BF /* ShoechooApp.swift */; };
+		13B09E821889CBE5D982E448 /* DocumentStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A9655FFFE93AE5BAE81563 /* DocumentStatistics.swift */; };
 		1657BDACC317990A3D521C21 /* ParseResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A569063F6AAD6A3452627F /* ParseResult.swift */; };
 		1B0DA75020EB74E92EF5A548 /* WYSIWYGVerificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2EA4B9C5B27DAB30571BB13 /* WYSIWYGVerificationTests.swift */; };
 		1D1FDE2FD3EC3FA4D32C9298 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 2F6DB8ADB22B86D627F8E42E /* AppIcon.icns */; };
@@ -36,11 +38,14 @@
 		A792B5036D8C985D4C96246C /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1966FCAF4A7AA805DB6ACE26 /* ExportService.swift */; };
 		A7D7FDB3B21374F55B2B7F61 /* EditorNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1FFAEE343FC90C900AEA5C /* EditorNodeTests.swift */; };
 		B6DBCF50C6C7BC806FDF86CC /* HTMLConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DE2380BF9D55E84ACC3537 /* HTMLConverterTests.swift */; };
+		BA18FC1A02BCBF31F882DAE5 /* DocumentStatisticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B14F44027BE4CF839910A9E5 /* DocumentStatisticsTests.swift */; };
 		BB492FCCDA97B2FDB7BB082C /* ShoechooTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */; };
 		C44A596026B9FD35D93D45C3 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B927C007304B710CF72A62CC /* MarkdownDocument.swift */; };
 		D5EFC03F7891A3FCF4CD2C3F /* EditorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */; };
 		D9EA47C95A44873CFD029DA1 /* WYSIWYGTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C5231565A66836003C4D34 /* WYSIWYGTextView.swift */; };
 		E2E60335A6BA076151B4D6FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AB4FF6DB7DC47DA67B8836D8 /* Assets.xcassets */; };
+		E5B7443EA76C723727BC0A82 /* MultiWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3903C4539590D24CE5F8D6 /* MultiWindowTests.swift */; };
+		FBD6EE96DBD4BE53DF1AE6CC /* SnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF2CA7F803E713EF2AB6884 /* SnapshotStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,16 +74,20 @@
 		4160E6C836A48D1519FA6696 /* MarkdownParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownParser.swift; sourceTree = "<group>"; };
 		457F988E79AFF00FF1BDF46E /* EditorCommandHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorCommandHandler.swift; sourceTree = "<group>"; };
 		4D3A6A96A012611C0FE0C265 /* OutlineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlineView.swift; sourceTree = "<group>"; };
+		4DD52CAA112AE7009322FB5F /* DebounceTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceTask.swift; sourceTree = "<group>"; };
 		5FB1091BBB45F1020AB27F08 /* EditorNodeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNodeModel.swift; sourceTree = "<group>"; };
 		6978C85C04F500CE568709B8 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		76421064E68CB0D0FBA284BF /* ShoechooApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooApp.swift; sourceTree = "<group>"; };
 		8B1FFAEE343FC90C900AEA5C /* EditorNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorNodeTests.swift; sourceTree = "<group>"; };
+		91A9655FFFE93AE5BAE81563 /* DocumentStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStatistics.swift; sourceTree = "<group>"; };
 		93A569063F6AAD6A3452627F /* ParseResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParseResult.swift; sourceTree = "<group>"; };
 		961EEF569A27FC490BE114A8 /* shoechoo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = shoechoo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F3903C4539590D24CE5F8D6 /* MultiWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiWindowTests.swift; sourceTree = "<group>"; };
 		A4ADA997C3135E2C51F089EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AB1B260A3C9A378EE3C7C2B3 /* ImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageService.swift; sourceTree = "<group>"; };
 		AB4FF6DB7DC47DA67B8836D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B0AAAF937F9A34C91C56FF87 /* ThemePresets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePresets.swift; sourceTree = "<group>"; };
+		B14F44027BE4CF839910A9E5 /* DocumentStatisticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStatisticsTests.swift; sourceTree = "<group>"; };
 		B927C007304B710CF72A62CC /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
 		BEF43DC42FD2ACB63CF324B4 /* shoechoo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = shoechoo.entitlements; sourceTree = "<group>"; };
 		BFDC5D5D3B8CBB1C19769BF4 /* EditorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorTheme.swift; sourceTree = "<group>"; };
@@ -88,6 +97,7 @@
 		D37E21639D40B6CE15866999 /* ThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTests.swift; sourceTree = "<group>"; };
 		D5C16C9C22F89126AE1647EE /* ThemeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeRegistry.swift; sourceTree = "<group>"; };
 		E9ADA19CA6ABCCD176AAB282 /* shoechooTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = shoechooTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBF2CA7F803E713EF2AB6884 /* SnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotStore.swift; sourceTree = "<group>"; };
 		F2EA4B9C5B27DAB30571BB13 /* WYSIWYGVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WYSIWYGVerificationTests.swift; sourceTree = "<group>"; };
 		FB5C5AF38AA60DCA2B27F5E4 /* ShoechooTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoechooTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -165,12 +175,15 @@
 		892BBB326DF1374FF42E83B8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4DD52CAA112AE7009322FB5F /* DebounceTask.swift */,
+				91A9655FFFE93AE5BAE81563 /* DocumentStatistics.swift */,
 				457F988E79AFF00FF1BDF46E /* EditorCommandHandler.swift */,
 				C4DC2B47DEA1636285FE0AB7 /* EditorNode.swift */,
 				5FB1091BBB45F1020AB27F08 /* EditorNodeModel.swift */,
 				061F83A2972FCE6620101EA6 /* EditorSettings.swift */,
 				3C3F6DE35963EF94CF714D18 /* EditorViewModel.swift */,
 				93A569063F6AAD6A3452627F /* ParseResult.swift */,
+				EBF2CA7F803E713EF2AB6884 /* SnapshotStore.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -197,11 +210,13 @@
 		E2D5DE4FE91DE5EA7D83786A /* shoechooTests */ = {
 			isa = PBXGroup;
 			children = (
+				B14F44027BE4CF839910A9E5 /* DocumentStatisticsTests.swift */,
 				0601F57BD9C09E9448FC8A86 /* EditorCommandHandlerTests.swift */,
 				0D265677848FA22ED359E998 /* EditorNodeModelTests.swift */,
 				8B1FFAEE343FC90C900AEA5C /* EditorNodeTests.swift */,
 				25DE2380BF9D55E84ACC3537 /* HTMLConverterTests.swift */,
 				153925F175F3248589356ABC /* MarkdownParserTests.swift */,
+				9F3903C4539590D24CE5F8D6 /* MultiWindowTests.swift */,
 				01756AEAD6E53132CDB55768 /* SyntaxHighlighterTests.swift */,
 				D37E21639D40B6CE15866999 /* ThemeTests.swift */,
 				F2EA4B9C5B27DAB30571BB13 /* WYSIWYGVerificationTests.swift */,
@@ -337,11 +352,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA18FC1A02BCBF31F882DAE5 /* DocumentStatisticsTests.swift in Sources */,
 				1E40EED9587DF96781FDCD79 /* EditorCommandHandlerTests.swift in Sources */,
 				2C14C4FE137002DFE6BFB56F /* EditorNodeModelTests.swift in Sources */,
 				A7D7FDB3B21374F55B2B7F61 /* EditorNodeTests.swift in Sources */,
 				B6DBCF50C6C7BC806FDF86CC /* HTMLConverterTests.swift in Sources */,
 				8D8D06292269BD1931C1B1AC /* MarkdownParserTests.swift in Sources */,
+				E5B7443EA76C723727BC0A82 /* MultiWindowTests.swift in Sources */,
 				6F4AA4EF2ED08D514F0999BA /* SyntaxHighlighterTests.swift in Sources */,
 				57330963820445BBDC92C7A4 /* ThemeTests.swift in Sources */,
 				1B0DA75020EB74E92EF5A548 /* WYSIWYGVerificationTests.swift in Sources */,
@@ -352,6 +369,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				07587E1741F2ECCE81AD8E6C /* DebounceTask.swift in Sources */,
+				13B09E821889CBE5D982E448 /* DocumentStatistics.swift in Sources */,
 				786749BAF5625541B10BD893 /* EditorCommandHandler.swift in Sources */,
 				D5EFC03F7891A3FCF4CD2C3F /* EditorNode.swift in Sources */,
 				A2DF6827BC0D004F41CF4185 /* EditorNodeModel.swift in Sources */,
@@ -370,6 +389,7 @@
 				077689B3A72389838566BA9C /* ShoechooApp.swift in Sources */,
 				BB492FCCDA97B2FDB7BB082C /* ShoechooTextView.swift in Sources */,
 				59AF35E9102FBAB97678E092 /* SidebarView.swift in Sources */,
+				FBD6EE96DBD4BE53DF1AE6CC /* SnapshotStore.swift in Sources */,
 				3B8E01B6BE9F9B689F7FA0B3 /* SyntaxHighlighter.swift in Sources */,
 				1DF5C425173034E82138A545 /* ThemePresets.swift in Sources */,
 				29AE29046ADC8771A84E4645 /* ThemeRegistry.swift in Sources */,
