@@ -12,6 +12,8 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    DEAD_CODE_STRIPPING: true
+    ENABLE_USER_SCRIPT_SANDBOXING: true
 
 packages:
   swift-markdown:
@@ -51,6 +53,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: shoechoo/Resources/shoechoo.entitlements
         ENABLE_HARDENED_RUNTIME: true
         CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_IDENTITY[sdk=macosx*]: "Apple Development"
+        DEVELOPMENT_TEAM[sdk=macosx*]: AA48YNT7YV
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.utilities"
     dependencies:
       - package: swift-markdown
         product: Markdown
